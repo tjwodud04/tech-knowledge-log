@@ -1,27 +1,46 @@
----
-layout: default
-title: Archive
----
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Archive - Tech Knowledge Log</title>
+  <meta name="description" content="All posts from Tech Knowledge Log">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
 
-<div class="archive-header">
-  <h1>Archive</h1>
-  <p class="archive-description">All {{ site.posts | size }} posts</p>
-</div>
+  <main class="container">
+    <div class="archive-header">
+      <h1>Archive</h1>
+      <p class="archive-description" id="archiveCount">Loading posts...</p>
+    </div>
 
-<div class="archive-search">
-  <input type="text" id="searchInput" placeholder="Search posts..." class="search-input">
-</div>
+    <div class="archive-search">
+      <input type="text" id="searchInput" placeholder="Search posts..." class="search-input">
+    </div>
 
-<ul class="archive-list" id="archiveList">
-  {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
-  {% for post in sorted_posts %}
-    <li class="archive-item fade-in" data-title="{{ post.title | downcase }}" data-date="{{ post.date | date: '%Y-%m-%d' }}">
-      <strong class="archive-date">{{ post.date | date: "%Y-%m-%d" }}</strong>
-      <a href="{{ post.url | relative_url }}" class="archive-link">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
+    <ul class="archive-list" id="archiveList">
+      <!-- Posts will be loaded dynamically -->
+    </ul>
 
-<div id="noResults" class="no-results" style="display: none;">
-  <p>No posts found matching your search.</p>
-</div>
+    <div id="noResults" class="no-results" style="display: none;">
+      <p>No posts found matching your search.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
