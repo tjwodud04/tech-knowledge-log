@@ -1,40 +1,25 @@
 # Tech Knowledge Log
 
-Curated AI/CS knowledge in bite-sized, 1-minute reads.
+Daily AI/CS insights in 1-minute reads.
 
-## Schedule
-- **Mon/Wed/Fri**: AI & CS fundamentals
-- **Tue/Thu/Sat**: Trending papers (Dialog Systems > Speech > NLP)
+**Schedule:** Mon/Wed/Fri (Fundamentals) | Tue/Thu/Sat (Papers)
 
-## GitHub Sync Instructions
+## Quick Start
 
-### Initial Setup
 ```bash
-# 1. Initialize git repository
+# 1. Clone and setup
 git init
-
-# 2. Add remote (replace with your GitHub repo URL)
 git remote add origin https://github.com/YOUR_USERNAME/tech-knowledge-log.git
-
-# 3. Initial commit
-git add .
-git commit -m "Initial commit"
-git branch -M main
 git push -u origin main
+
+# 2. Enable GitHub Pages
+# Settings → Pages → Source: main branch, / (root)
+
+# 3. Import n8n workflow
+# Upload: tech-knowledge-log-workflow.json
+# Configure: Claude API, GitHub Token, Slack Webhook
 ```
 
-### Enable GitHub Pages
-1. Go to repository Settings > Pages
-2. Source: Deploy from branch `main` / folder `/ (root)`
-3. Your site will be live at: `https://YOUR_USERNAME.github.io/tech-knowledge-log`
+**Site:** `https://YOUR_USERNAME.github.io/tech-knowledge-log`
 
-### Daily Sync (automated via n8n)
-```bash
-git pull origin main
-git add posts/
-git commit -m "Add new post: [TITLE]"
-git push origin main
-```
-
-## Archive
-All posts are tracked in [content-index.json](./content-index.json) to ensure uniqueness.
+**Docs:** See `SETUP_GUIDE.md` for details.

@@ -5,20 +5,13 @@ title: Home
 
 # Tech Knowledge Log
 
-> Quick, focused insights on AI, NLP, Speech, and CS fundamentals.
+Daily AI/CS insights in 1-minute reads.
 
 ## Latest Posts
 
 {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
 {% for post in sorted_posts limit:5 %}
-- **{{ post.date | date: "%Y-%m-%d" }}** — [{{ post.title }}]({{ post.url }})
-  <span style="color: #666; font-size: 0.9em;">{{ post.category }}</span>
+**{{ post.date | date: "%Y-%m-%d" }}** — [{{ post.title }}]({{ post.url }})
 {% endfor %}
 
-[→ View all posts](./archive.html)
-
----
-
-**Schedule:**
-- Mon/Wed/Fri: Fundamentals
-- Tue/Thu/Sat: Papers
+[View all →](./archive.html)
