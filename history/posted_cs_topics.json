@@ -10,5 +10,11 @@
     "topic": "Gradient Descent / 경량 하강법",
     "content": "# Gradient Descent / 경량 하강법\n\n## 내용 / Content\n경량 하강법은 머신러닝 모델의 비용 함수를 최소화하기 위해 사용되는 최적화 알고리즘입니다. 이 방법은 파라미터 공간에서 비용 함수의 기울기를 따라 내려가며, 점차적으로 모델의 파라미터를 업데이트하여 최적의 해를 찾습니다. 여러 변형들이 존재하는데, 예를 들어 배치 경량 하강법, 확률적 경량 하강법, 미니배치 경량 하강법 등이 있습니다.\n\n경량 하강법의 핵심 개념은 학습률(learning rate)입니다. 학습률이 너무 크면 최적점에 도달하기 전에 오히려 발산할 수 있고, 반대로 너무 작으면 수렴 속도가 느려질 수 있습니다. 이러한 이유로 적절한 학습률을 선택하는 것이 중요하며, 종종 하이퍼파라미터 튜닝의 일환으로 조정됩니다.\n\n## 활용 / Applications\n경량 하강법은 딥러닝, 회귀 분석 및 모든 종류의 머신러닝 알고리즘에서 광범위하게 사용됩니다. 최적화 문제 해결에 필수적인 역할을 합니다.\n\nGradient descent is widely used in deep learning, regression analysis, and all types of machine learning algorithms. It plays a vital role in solving optimization problems.",
     "timestamp": "2025-11-09T17:18:19.639Z"
+  },
+  {
+    "date": "2025-11-09",
+    "topic": "Gradient Descent",
+    "content": "# Gradient Descent\n\n## 내용 / Content\n그래디언트 강하법(Gradient Descent)은 최적화 알고리즘의 한 종류로, 손실 함수의 기울기를 따라 이동하여 모델의 매개변수를 조정하는 방법입니다. 이 방법은 초기 매개변수로부터 시작하여, 손실 함수의 최소값을 찾기 위해 반복적으로 기울기를 계산하고 그 방향으로 이동하게 됩니다. 주요 파라미터인 학습률(learning rate)은 기울기를 따라 얼마나 이동할지를 결정하며, 너무 큰 학습률은 과도한 변화를 초래할 수 있고 너무 작은 학습률은 수렴 속도를 늦출 수 있습니다.\n\nGradient descent is an optimization algorithm used to minimize the loss function by adjusting the model's parameters in the direction of the steepest descent. Starting from initial parameters, it iteratively calculates the gradient of the loss function and updates the parameters to minimize it. A critical hyperparameter in this process is the learning rate, which determines how far to move in the direction of the gradient. An overly large learning rate may lead to divergence, while a small learning rate can slow down convergence.\n\n## 활용 / Applications\n그래디언트 강하법은 개발 및 학습 과정에서 다양한 머신러닝 모델의 최적화에 사용됩니다. 특히 신경망을 훈련시키는 데 필수적인 기술입니다.\n\nGradient descent is widely utilized for optimizing various machine learning models during their training phases, particularly in training neural networks.",
+    "timestamp": "2025-11-09T17:18:56.389Z"
   }
 ]
