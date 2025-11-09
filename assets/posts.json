@@ -2,22 +2,27 @@
 layout: null
 permalink: /assets/posts.json
 ---
+
 {
   "generatedAt": "{{ site.time | date_to_xmlschema }}",
   "fundamentals": [
-    {%- assign fs = site.pages | where_exp: "p", "p.path contains 'cs-fundamentals/'" -%}
-    {%- for p in fs -%}
-    {%- if p.title and p.url -%}
-    { "title": {{ p.title | jsonify }}, "date": "{{ p.date | date: "%Y-%m-%d" }}", "url": "{{ p.url | relative_url }}", "collection": "cs-fundamentals" }{%- unless forloop.last -%},{%- endunless -%}
-    {%- endif -%}
+    {%- for p in site.fundamentals -%}
+    {
+      "title": {{ p.title | jsonify }},
+      "date": "{{ p.date | date: "%Y-%m-%d" }}",
+      "url": "{{ p.url | relative_url }}",
+      "collection": "fundamentals"
+    }{%- unless forloop.last -%},{%- endunless -%}
     {%- endfor -%}
   ],
   "papers": [
-    {%- assign ps = site.pages | where_exp: "p", "p.path contains 'papers/'" -%}
-    {%- for p in ps -%}
-    {%- if p.title and p.url -%}
-    { "title": {{ p.title | jsonify }}, "date": "{{ p.date | date: "%Y-%m-%d" }}", "url": "{{ p.url | relative_url }}", "collection": "papers" }{%- unless forloop.last -%},{%- endunless -%}
-    {%- endif -%}
+    {%- for p in site.papers -%}
+    {
+      "title": {{ p.title | jsonify }},
+      "date": "{{ p.date | date: "%Y-%m-%d" }}",
+      "url": "{{ p.url | relative_url }}",
+      "collection": "papers"
+    }{%- unless forloop.last -%},{%- endunless -%}
     {%- endfor -%}
   ]
 }
