@@ -1,0 +1,22 @@
+title: Tech Knowledge Log
+markdown: kramdown
+# GitHub Pages 허용 플러그인만 사용
+plugins:
+  - jekyll-paginate
+
+# posts/ 아래를 컬렉션으로 출력
+collections_dir: posts
+collections:
+  fundamentals:
+    output: true
+    permalink: /fundamentals/:name/
+  papers:
+    output: true
+    permalink: /papers/:name/
+
+# 기본 레이아웃/메타
+defaults:
+  - scope: { path: "posts/fundamentals", type: "fundamentals" }
+    values: { layout: post }
+  - scope: { path: "posts/papers", type: "papers" }
+    values: { layout: post }
