@@ -1,0 +1,261 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-11-09",
+  "categories": {
+    "algorithms": [
+      {
+        "title": "Binary Search Trees",
+        "topic": "Data Structures",
+        "keywords": ["BST", "tree", "search", "insertion"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Depth-First Search Explained",
+        "topic": "Algorithms",
+        "keywords": ["DFS", "graph", "traversal", "recursion"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Dynamic Programming Fundamentals",
+        "topic": "Algorithms",
+        "keywords": ["DP", "memoization", "optimization"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Quicksort Algorithm",
+        "topic": "Algorithms",
+        "keywords": ["sorting", "divide-conquer", "quicksort"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Hash Tables and Collision Handling",
+        "topic": "Data Structures",
+        "keywords": ["hashing", "collision", "O(1)", "lookup"],
+        "difficulty": "intermediate"
+      }
+    ],
+    "ml_basics": [
+      {
+        "title": "Gradient Descent Explained",
+        "topic": "ML Basics",
+        "keywords": ["optimization", "gradient", "learning-rate"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Backpropagation in Neural Networks",
+        "topic": "ML Basics",
+        "keywords": ["backprop", "neural-network", "chain-rule"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Overfitting and Regularization",
+        "topic": "ML Basics",
+        "keywords": ["overfitting", "L1", "L2", "dropout"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Activation Functions Compared",
+        "topic": "ML Basics",
+        "keywords": ["ReLU", "sigmoid", "tanh", "activation"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Batch vs Stochastic Gradient Descent",
+        "topic": "ML Basics",
+        "keywords": ["SGD", "batch", "mini-batch", "optimization"],
+        "difficulty": "beginner"
+      }
+    ],
+    "deep_learning": [
+      {
+        "title": "Attention Mechanism Basics",
+        "topic": "Deep Learning",
+        "keywords": ["attention", "transformer", "neural-networks"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Convolutional Neural Networks",
+        "topic": "Deep Learning",
+        "keywords": ["CNN", "convolution", "computer-vision"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Recurrent Neural Networks",
+        "topic": "Deep Learning",
+        "keywords": ["RNN", "sequence", "LSTM", "GRU"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Transformer Architecture",
+        "topic": "Deep Learning",
+        "keywords": ["transformer", "self-attention", "encoder-decoder"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Residual Connections (ResNet)",
+        "topic": "Deep Learning",
+        "keywords": ["residual", "skip-connection", "ResNet"],
+        "difficulty": "intermediate"
+      }
+    ],
+    "nlp_fundamentals": [
+      {
+        "title": "Tokenization Methods",
+        "topic": "NLP",
+        "keywords": ["tokenization", "BPE", "WordPiece", "subword"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Word Embeddings: Word2Vec",
+        "topic": "NLP",
+        "keywords": ["embeddings", "Word2Vec", "CBOW", "Skip-gram"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Positional Encoding in Transformers",
+        "topic": "NLP",
+        "keywords": ["positional-encoding", "transformer", "sequence"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Named Entity Recognition",
+        "topic": "NLP",
+        "keywords": ["NER", "entity", "tagging", "CRF"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Beam Search Decoding",
+        "topic": "NLP",
+        "keywords": ["beam-search", "decoding", "generation"],
+        "difficulty": "intermediate"
+      }
+    ],
+    "cs_concepts": [
+      {
+        "title": "Big-O Notation Explained",
+        "topic": "CS Fundamentals",
+        "keywords": ["big-O", "complexity", "time", "space"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Stack vs Heap Memory",
+        "topic": "CS Fundamentals",
+        "keywords": ["stack", "heap", "memory", "allocation"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Recursion Fundamentals",
+        "topic": "CS Fundamentals",
+        "keywords": ["recursion", "base-case", "call-stack"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Cache Memory Hierarchy",
+        "topic": "CS Fundamentals",
+        "keywords": ["cache", "L1", "L2", "L3", "CPU"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Concurrency vs Parallelism",
+        "topic": "CS Fundamentals",
+        "keywords": ["concurrency", "parallelism", "threading"],
+        "difficulty": "intermediate"
+      }
+    ],
+    "system_design": [
+      {
+        "title": "Load Balancing Strategies",
+        "topic": "System Design",
+        "keywords": ["load-balancer", "round-robin", "distributed"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Database Sharding",
+        "topic": "System Design",
+        "keywords": ["sharding", "partitioning", "database"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "CAP Theorem",
+        "topic": "System Design",
+        "keywords": ["CAP", "consistency", "availability", "partition"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Microservices Architecture",
+        "topic": "System Design",
+        "keywords": ["microservices", "API", "distributed"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Rate Limiting Techniques",
+        "topic": "System Design",
+        "keywords": ["rate-limit", "throttling", "token-bucket"],
+        "difficulty": "intermediate"
+      }
+    ],
+    "ai_advanced": [
+      {
+        "title": "Self-Attention Mechanism",
+        "topic": "AI Advanced",
+        "keywords": ["self-attention", "query", "key", "value"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Contrastive Learning",
+        "topic": "AI Advanced",
+        "keywords": ["contrastive", "SimCLR", "self-supervised"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Few-Shot Learning",
+        "topic": "AI Advanced",
+        "keywords": ["few-shot", "meta-learning", "prompting"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Mixture of Experts (MoE)",
+        "topic": "AI Advanced",
+        "keywords": ["MoE", "gating", "sparse-activation"],
+        "difficulty": "advanced"
+      },
+      {
+        "title": "Retrieval-Augmented Generation",
+        "topic": "AI Advanced",
+        "keywords": ["RAG", "retrieval", "generation", "knowledge"],
+        "difficulty": "advanced"
+      }
+    ],
+    "speech_audio": [
+      {
+        "title": "Mel-Frequency Cepstral Coefficients",
+        "topic": "Speech Processing",
+        "keywords": ["MFCC", "audio", "feature", "speech"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Speech Recognition Fundamentals",
+        "topic": "Speech Processing",
+        "keywords": ["ASR", "recognition", "acoustic-model"],
+        "difficulty": "beginner"
+      },
+      {
+        "title": "Text-to-Speech Synthesis",
+        "topic": "Speech Processing",
+        "keywords": ["TTS", "synthesis", "vocoder"],
+        "difficulty": "intermediate"
+      },
+      {
+        "title": "Voice Activity Detection",
+        "topic": "Speech Processing",
+        "keywords": ["VAD", "silence-detection", "audio"],
+        "difficulty": "beginner"
+      }
+    ]
+  },
+  "metadata": {
+    "total_topics": 50,
+    "categories_count": 8,
+    "difficulty_levels": ["beginner", "intermediate", "advanced"]
+  }
+}

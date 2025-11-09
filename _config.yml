@@ -1,0 +1,23 @@
+title: Tech Knowledge Log
+description: Daily AI/CS insights in 1-minute reads
+theme: minima
+baseurl: ""
+url: ""
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:collection/:year/:month/:day/:title
+
+# Exclude from build
+exclude:
+  - README.md
+  - content-index.json
+  - .github/

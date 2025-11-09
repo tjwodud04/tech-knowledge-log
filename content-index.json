@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "last_updated": "2025-11-09",
+    "total_posts": 0,
+    "version": "1.0.0"
+  },
+  "fundamentals": [],
+  "papers": [],
+  "tags": {
+    "topics": [],
+    "keywords": []
+  },
+  "schema": {
+    "fundamental_entry": {
+      "id": "string (YYYYMMDD-sequence)",
+      "date": "string (YYYY-MM-DD)",
+      "title": "string",
+      "topic": "string (AI/ML/CS/Algorithm/DataStructure/etc)",
+      "keywords": ["array of strings"],
+      "file_path": "string",
+      "hash": "string (content hash for uniqueness check)"
+    },
+    "paper_entry": {
+      "id": "string (YYYYMMDD-sequence)",
+      "date": "string (YYYY-MM-DD)",
+      "title": "string",
+      "arxiv_id": "string (if available)",
+      "category": "string (dialog/speech/nlp)",
+      "keywords": ["array of strings"],
+      "file_path": "string",
+      "hash": "string (content hash for uniqueness check)"
+    }
+  }
+}
