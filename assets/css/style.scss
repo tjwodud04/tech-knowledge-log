@@ -258,10 +258,201 @@ h4 { font-size: 1.25rem; }
   font-size: 0.875rem;
 }
 
+// Hero section
+.hero-section {
+  text-align: center;
+  padding: 4rem 0 2rem;
+  background: linear-gradient(135deg, $bg-secondary 0%, rgba($primary-color, 0.05) 100%);
+  border-radius: 16px;
+  margin-bottom: 3rem;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  color: $text-secondary;
+  margin: 0;
+}
+
+// Section header
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+}
+
+.view-all-link {
+  font-weight: 600;
+  font-size: 1rem;
+  color: $primary-color;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    color: $primary-dark;
+  }
+}
+
+// Archive page specific styles
+.archive-header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.archive-description {
+  color: $text-muted;
+  font-size: 1rem;
+}
+
+.archive-search {
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid $border-color;
+  border-radius: 12px;
+  background: $bg-card;
+  color: $text-primary;
+  transition: all 0.3s ease;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+.archive-item {
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.archive-date {
+  font-family: 'Courier New', monospace;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: $text-muted;
+
+  p {
+    font-size: 1.125rem;
+  }
+}
+
+// Highlight for search results
+.highlight {
+  background: rgba($primary-color, 0.2);
+  color: $primary-dark;
+  font-weight: 600;
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+}
+
+// Scroll effects
+.site-header.scrolled {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.fade-in.is-visible,
+.fade-in-up.is-visible {
+  opacity: 1;
+}
+
+// Loading state
+body:not(.loaded) .post-item {
+  opacity: 0;
+}
+
+body.loaded .post-item {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
 // Responsive design
 @media screen and (max-width: 768px) {
   .site-title {
     font-size: 1.25rem;
+  }
+
+  .hero-section {
+    padding: 3rem 0 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
   .post-list {
@@ -287,6 +478,10 @@ h4 { font-size: 1.25rem; }
 }
 
 @media screen and (max-width: 480px) {
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
   .post-item {
     padding: 1.25rem;
   }
@@ -298,5 +493,9 @@ h4 { font-size: 1.25rem; }
   .archive-list strong {
     display: block;
     margin-bottom: 0.25rem;
+  }
+
+  .archive-date {
+    font-size: 0.8125rem;
   }
 }

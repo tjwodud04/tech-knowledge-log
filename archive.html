@@ -1,0 +1,27 @@
+---
+layout: default
+title: Archive
+---
+
+<div class="archive-header">
+  <h1>Archive</h1>
+  <p class="archive-description">All {{ site.posts | size }} posts</p>
+</div>
+
+<div class="archive-search">
+  <input type="text" id="searchInput" placeholder="Search posts..." class="search-input">
+</div>
+
+<ul class="archive-list" id="archiveList">
+  {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
+  {% for post in sorted_posts %}
+    <li class="archive-item fade-in" data-title="{{ post.title | downcase }}" data-date="{{ post.date | date: '%Y-%m-%d' }}">
+      <strong class="archive-date">{{ post.date | date: "%Y-%m-%d" }}</strong>
+      <a href="{{ post.url | relative_url }}" class="archive-link">{{ post.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
+<div id="noResults" class="no-results" style="display: none;">
+  <p>No posts found matching your search.</p>
+</div>

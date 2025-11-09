@@ -3,7 +3,7 @@ description: Daily AI/CS insights in 1-minute reads
 theme: minima
 baseurl: ""
 url: ""
-css_version: 2
+css_version: 3
 
 # Build settings
 markdown: kramdown

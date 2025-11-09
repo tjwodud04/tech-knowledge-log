@@ -1,0 +1,39 @@
+---
+layout: default
+title: Home
+---
+
+<div class="hero-section">
+  <h1 class="hero-title">Tech Knowledge Log</h1>
+  <p class="hero-description">Daily AI/CS insights in 1-minute reads</p>
+</div>
+
+<section class="posts-section">
+  <div class="section-header">
+    <h2>Latest Posts</h2>
+    <a href="./archive.html" class="view-all-link">View all →</a>
+  </div>
+
+  <ul class="post-list">
+    {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
+    {% for post in sorted_posts limit:6 %}
+      <li class="fade-in-up" style="animation-delay: {{ forloop.index | times: 0.1 }}s;">
+        <article class="post-item">
+          <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title }}
+          </a>
+          <div class="post-meta">
+            <time datetime="{{ post.date | date_to_xmlschema }}">
+              {{ post.date | date: "%Y-%m-%d" }}
+            </time>
+          </div>
+          {% if post.excerpt %}
+          <p class="post-excerpt">
+            {{ post.excerpt | strip_html | truncatewords: 30 }}
+          </p>
+          {% endif %}
+        </article>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
