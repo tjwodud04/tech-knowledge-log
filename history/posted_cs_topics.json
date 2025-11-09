@@ -28,5 +28,11 @@
     "topic": "Gradient Descent",
     "content": "# Gradient Descent\n\n## 내용\n그래디언트 강하(Gradient Descent)는 기계 학습에서 최적화 알고리즘으로, 손실 함수의 값을 최소화하기 위해 사용됩니다. 모델의 매개변수(가중치)를 조정하기 위해 손실 함수의 기울기를 계산하고, 이 기울기를 따라 매개변수를 업데이트합니다. 이렇게 반복적으로 가는 방향을 결정함으로써 최소값에 수렴하게 됩니다.\n\n그래디언트 강하는 여러 변형이 있으며, 가장 일반적으로 사용되는 방법은 배치(Batch), 확률(Stochastic), 미니 배치(Mini-batch) 그래디언트 강하입니다. 이들 각각은 데이터 샘플을 사용하는 방법에서 차이가 있으며, 이는 학습 속도와 수렴 속도에 영향을 미칩니다.\n\n## 활용\n그래디언트 강하는 신경망 훈련, 회귀 분석 등 여러 기계 학습 모델의 학습 과정에서 필수적으로 사용됩니다. 따라서 최적화와 모델 성능 향상을 위해 중요한 기술입니다.\n\n## Applications\nGradient descent is essential in training neural networks, regression analysis, and various machine learning models. Optimizing model performance relies heavily on this technique.",
     "timestamp": "2025-11-09T17:29:50.335Z"
+  },
+  {
+    "date": "2025-11-09",
+    "topic": "Gradient Descent",
+    "content": "# Gradient Descent\n\n## 내용 / Content\n경사 하강법(Gradient Descent)은 최적화 알고리즘으로, 모델의 비용 함수를 최소화하기 위해 사용됩니다. 이 방법은 현재 위치에서 함수의 기울기(gradient)를 계산하고, 기울기가 가리키는 방향으로 매개변수(parameter)를 업데이트하여 더 낮은 비용으로 이동하는 과정을 반복합니다. 이 과정을 통해 최적의 매개변수를 찾을 수 있습니다. \n\n경사 하강법에는 여러 변형이 있으며, 대표적으로 배치 경사 하강법(Batch Gradient Descent), 확률적 경사 하강법(Stochastic Gradient Descent, SGD), 미니배치 경사 하강법(Mini-batch Gradient Descent)이 있습니다. 각각은 데이터의 사용 방식이 다르므로, 상황에 맞게 선택해야 합니다.\n\n## 활용 / Applications\n경사 하강법은 신경망 훈련, 회귀 분석 및 다양한 머신러닝 모델의 최적화에 필수적입니다. 모델의 성능을 개선하고 효율적인 학습을 위해 광범위하게 사용됩니다.\n\n---\n\n# Gradient Descent\n\n## Content\nGradient Descent is an optimization algorithm used to minimize the cost function of a model. It works by calculating the gradient (or slope) of the function at the current position and updating the parameters in the direction indicated by the gradient to move towards a lower cost. This process is repeated until the optimal parameters are found.\n\nThere are several variations of gradient descent, including Batch Gradient Descent, Stochastic Gradient Descent (SGD), and Mini-batch Gradient Descent. Each has a different approach to using data, so it's important to choose the right variant based on the situation.\n\n## Applications\nGradient Descent is essential for training neural networks, regression analysis, and optimizing various machine learning models. It is widely used to improve model performance and ensure efficient learning.",
+    "timestamp": "2025-11-09T17:40:21.843Z"
   }
 ]
