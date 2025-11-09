@@ -38,7 +38,3 @@ git push origin main
 
 ## Archive
 All posts are tracked in [content-index.json](./content-index.json) to ensure uniqueness.
-
----
-
-Last updated: 2025-11-09
