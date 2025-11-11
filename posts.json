@@ -6,6 +6,13 @@
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2025-11-10-cs-topic.html",
       "excerpt": "NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술입니다. 이 기술은 문서나 텍스트 데이터에서 중요한 정보를 추출하는 데 매우 유용합니다. 예를 들어, '삼성은 2021년에 새로운 스마트폰을 출시했다'라는 문장에서 '삼성'과 '"
+    },
+    {
+      "title": "Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications",
+      "date": "2025-11-10",
+      "category": "papers",
+      "url": "posts/papers/202511/2511.02979.html",
+      "excerpt": "arXiv digest: Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications"
     }
   ]
 }
