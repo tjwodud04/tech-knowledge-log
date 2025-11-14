@@ -1,0 +1,35 @@
+name: Generate posts.json
+
+on:
+  push:
+    branches:
+      - main # 기본 브랜치 이름이 다르면 여기 변경 (ex: master, gh-pages)
+
+permissions:
+  contents: write # git-auto-commit-action이 커밋/푸시할 수 있도록 권한 부여
+
+jobs:
+  generate-posts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # 적당한 버전 (18~22 아무거나 OK)
+
+      # 필요하다면 npm install 단계 추가
+      # - name: Install dependencies
+      #   run: npm ci
+
+      - name: Generate posts.json
+        run: node generate-posts.js
+
+      - name: Commit and push posts.json if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update posts.json"
+          file_pattern: posts.json
