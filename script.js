@@ -168,7 +168,7 @@
 // Fetch posts index
 async function loadPostsIndex() {
   try {
-    const res = await fetch('posts.json', { cache: 'no-store' });
+    const res = await fetch('/tech-knowledge-log/posts.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch posts.json');
     const data = await res.json();
     return { all: data.posts || [] };
