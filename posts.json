@@ -1,25 +1,25 @@
 {
   "posts": [
     {
-      "title": "Tokenization / 토크나이제이션",
+      "title": "Tokenization",
       "date": "2025-11-14",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2025-11-14-cs-topic.html",
-      "excerpt": "텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정입니다. 토큰화 방식은 언어와 목적에 따라 단어 단위, 서브워드(BPE, WordPiece), 문자 단위 등으로 나뉘며, OOV(어휘 외) 문제와 어휘 크기/메모리 절충을 고려해 선택합니다."
+      "excerpt": "텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정"
     },
     {
-      "title": "Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications",
+      "title": "Systematizing LLM Persona Design",
       "date": "2025-11-11",
       "category": "papers",
       "url": "posts/papers/2025-11-11-paper.html",
       "excerpt": "arXiv digest: Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications"
     },
     {
-      "title": "NLP: Named Entity Recognition (NER)",
+      "title": "NER (Named Entity Recognition)",
       "date": "2025-11-10",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2025-11-10-cs-topic.html",
-      "excerpt": "NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술입니다. 이 기술은 문서나 텍스트 데이터에서 중요한 정보를 추출하는 데 매우 유용합니다. 예를 들어, '삼성은 2021년에 새로운 스마트폰을 출시했다'라는 문장에서 '삼성'과 '"
+      "excerpt": "NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술"
     }
   ]
 }
