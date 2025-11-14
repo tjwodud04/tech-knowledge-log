@@ -26,7 +26,7 @@ jobs:
       #   run: npm ci
 
       - name: Generate posts.json
-        run: node generate-posts.js
+        run: node generate-posts-index.js
 
       - name: Commit and push posts.json if changed
         uses: stefanzweifel/git-auto-commit-action@v5
