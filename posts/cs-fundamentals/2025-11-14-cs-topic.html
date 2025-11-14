@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title id="pageTitle">Loading...</title>
+  <meta name="description" content="Tech Knowledge Log Post">
+  <link rel="stylesheet" href="../../style.css?v=4">
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="../../index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="../../archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <div id="postContent">Loading...</div>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="../../script.js?v=4"></script>
+  <script>
+    // Load markdown and render
+    async function loadPost() {
+      try {
+        const mdPath = window.location.pathname.replace('.html', '.md');
+        const response = await fetch(mdPath);
+
+        if (!response.ok) throw new Error('Post not found');
+
+        const markdown = await response.text();
+        const html = marked.parse(markdown);
+
+        document.getElementById('postContent').innerHTML = html;
+
+        // Extract title from first h1
+        const titleMatch = markdown.match(/^#\s+(.+)$/m);
+        if (titleMatch) {
+          document.getElementById('pageTitle').textContent = titleMatch[1] + ' - Tech Knowledge Log';
+        }
+
+        document.body.classList.add('loaded');
+      } catch (error) {
+        document.getElementById('postContent').innerHTML =
+          '<h1>Post Not Found</h1><p>The requested post could not be loaded.</p>';
+      }
+    }
+
+    loadPost();
+  </script>
+</body>
+</html>
