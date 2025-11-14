@@ -1,13 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title id="pageTitle">Loading...</title>
-  <meta name="description" content="Tech Knowledge Log Post">
+  <meta charset="utf-8">
+  <title>Tokenization / 토크나이제이션</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정">
   <link rel="stylesheet" href="../../style.css?v=4">
-  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+  </style>
 </head>
 <body>
   <header>
@@ -21,7 +26,31 @@
 
   <main class="container">
     <article class="post-content">
-      <div id="postContent">Loading...</div>
+      <h1>Tokenization / 토크나이제이션</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Beginner</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-14</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용 (Korean)</h2>
+        <p>텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정입니다. 토큰화 방식은 언어와 목적에 따라 단어 단위, 서브워드(BPE, WordPiece), 문자 단위 등으로 나뉘며, OOV(어휘 외) 문제와 어휘 크기/메모리 절충을 고려해 선택합니다.</p>
+
+        <p>실무에서는 전처리(소문자화, 정규화)와 함께 토크나이저의 일관성이 중요합니다. 예를 들어 파이프라인에서 학습 시 사용한 토크나이저와 서비스 시 토크나이저가 다르면 성능 저하가 발생합니다.</p>
+
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <p>검색, 분류, NER 등 텍스트 입력을 받는 모든 NLP 파이프라인에서 필수적입니다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content (English)</h2>
+        <p>Tokenization splits text into the smallest units (tokens) that models can process. Approaches vary by language and use case—word-level, subword (BPE, WordPiece), or character-level—each trading off vocabulary size, handling of OOV (out-of-vocabulary) words, and model complexity.</p>
+
+        <p>In practice, tokenizer consistency and preprocessing (lowercasing, normalization) matter. Using a different tokenizer in training vs production can cause significant performance drops.</p>
+
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <p>Essential for any NLP pipeline accepting text input—search, classification, NER, etc.</p>
+      </section>
     </article>
   </main>
 
@@ -30,34 +59,5 @@
   </footer>
 
   <script src="../../script.js?v=4"></script>
-  <script>
-    // Load markdown and render
-    async function loadPost() {
-      try {
-        const mdPath = window.location.pathname.replace('.html', '.md');
-        const response = await fetch(mdPath);
-
-        if (!response.ok) throw new Error('Post not found');
-
-        const markdown = await response.text();
-        const html = marked.parse(markdown);
-
-        document.getElementById('postContent').innerHTML = html;
-
-        // Extract title from first h1
-        const titleMatch = markdown.match(/^#\s+(.+)$/m);
-        if (titleMatch) {
-          document.getElementById('pageTitle').textContent = titleMatch[1] + ' - Tech Knowledge Log';
-        }
-
-        document.body.classList.add('loaded');
-      } catch (error) {
-        document.getElementById('postContent').innerHTML =
-          '<h1>Post Not Found</h1><p>The requested post could not be loaded.</p>';
-      }
-    }
-
-    loadPost();
-  </script>
 </body>
 </html>

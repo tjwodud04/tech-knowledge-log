@@ -1,13 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title id="pageTitle">Loading...</title>
-  <meta name="description" content="Tech Knowledge Log Post">
+  <meta charset="utf-8">
+  <title>NLP: Named Entity Recognition (NER)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술">
   <link rel="stylesheet" href="../../style.css?v=4">
-  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+  </style>
 </head>
 <body>
   <header>
@@ -21,7 +26,27 @@
 
   <main class="container">
     <article class="post-content">
-      <div id="postContent">Loading...</div>
+      <h1>NLP: Named Entity Recognition (NER)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-10</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용 (Korean)</h2>
+        <p>NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술입니다. 이 기술은 문서나 텍스트 데이터에서 중요한 정보를 추출하는 데 매우 유용합니다. 예를 들어, '삼성은 2021년에 새로운 스마트폰을 출시했다'라는 문장에서 '삼성'과 '2021년'을 인식하는 것이 NER의 역할입니다.</p>
+
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <p>NER은 정보 검색, 고객 지원 챗봇 및 소셜 미디어 분석 등 다양한 분야에서 사용됩니다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content (English)</h2>
+        <p>NER stands for Named Entity Recognition, a technique in natural language processing that identifies proper nouns like names, locations, and dates in text. It's highly useful for extracting important information from documents or text data. For instance, in the sentence 'Samsung released a new smartphone in 2021', the job of NER is to recognize 'Samsung' and '2021'.</p>
+
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <p>NER is used in various fields such as information retrieval, customer support chatbots, and social media analytics.</p>
+      </section>
     </article>
   </main>
 
@@ -30,34 +55,5 @@
   </footer>
 
   <script src="../../script.js?v=4"></script>
-  <script>
-    // Load markdown and render
-    async function loadPost() {
-      try {
-        const mdPath = window.location.pathname.replace('.html', '.md');
-        const response = await fetch(mdPath);
-
-        if (!response.ok) throw new Error('Post not found');
-
-        const markdown = await response.text();
-        const html = marked.parse(markdown);
-
-        document.getElementById('postContent').innerHTML = html;
-
-        // Extract title from first h1
-        const titleMatch = markdown.match(/^#\s+(.+)$/m);
-        if (titleMatch) {
-          document.getElementById('pageTitle').textContent = titleMatch[1] + ' - Tech Knowledge Log';
-        }
-
-        document.body.classList.add('loaded');
-      } catch (error) {
-        document.getElementById('postContent').innerHTML =
-          '<h1>Post Not Found</h1><p>The requested post could not be loaded.</p>';
-      }
-    }
-
-    loadPost();
-  </script>
 </body>
 </html>
