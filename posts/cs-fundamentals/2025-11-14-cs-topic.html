@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>Tokenization / 토크나이제이션</title>
+  <title>Tokenization</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정">
   <link rel="stylesheet" href="../../style.css?v=4">
@@ -33,7 +33,7 @@
       </div>
 
       <section class="topic-section">
-        <h2>내용 (Korean)</h2>
+        <h2>내용</h2>
         <p>텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정입니다. 토큰화 방식은 언어와 목적에 따라 단어 단위, 서브워드(BPE, WordPiece), 문자 단위 등으로 나뉘며, OOV(어휘 외) 문제와 어휘 크기/메모리 절충을 고려해 선택합니다.</p>
 
         <p>실무에서는 전처리(소문자화, 정규화)와 함께 토크나이저의 일관성이 중요합니다. 예를 들어 파이프라인에서 학습 시 사용한 토크나이저와 서비스 시 토크나이저가 다르면 성능 저하가 발생합니다.</p>
@@ -43,7 +43,7 @@
       </section>
 
       <section class="topic-section">
-        <h2>Content (English)</h2>
+        <h2>Content</h2>
         <p>Tokenization splits text into the smallest units (tokens) that models can process. Approaches vary by language and use case—word-level, subword (BPE, WordPiece), or character-level—each trading off vocabulary size, handling of OOV (out-of-vocabulary) words, and model complexity.</p>
 
         <p>In practice, tokenizer consistency and preprocessing (lowercasing, normalization) matter. Using a different tokenizer in training vs production can cause significant performance drops.</p>
