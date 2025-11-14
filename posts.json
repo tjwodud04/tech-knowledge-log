@@ -1,24 +1,31 @@
 {
   "posts": [
     {
+      "title": "CAP Theorem (Consistency, Availability, Partition tolerance)",
+      "date": "2025-11-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-15-cap-theorem.html",
+      "excerpt": "분산 시스템에서 일관성(C), 가용성(A), 파티션 허용성(P)의 상호 트레이드오프를 규정한 이론."
+    },
+    {
       "title": "Tokenization",
       "date": "2025-11-14",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2025-11-14-cs-topic.html",
+      "url": "posts/cs-fundamentals/2511/2025-11-14-cs-topic.html",
       "excerpt": "텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정"
     },
     {
-      "title": "Systematizing LLM Persona Design",
+      "title": "Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications",
       "date": "2025-11-11",
       "category": "papers",
-      "url": "posts/papers/2025-11-11-paper.html",
+      "url": "posts/papers/2511/2025-11-11-paper.html",
       "excerpt": "arXiv digest: Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications"
     },
     {
       "title": "NER (Named Entity Recognition)",
       "date": "2025-11-10",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2025-11-10-cs-topic.html",
+      "url": "posts/cs-fundamentals/2511/2025-11-10-cs-topic.html",
       "excerpt": "NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술"
     }
   ]
