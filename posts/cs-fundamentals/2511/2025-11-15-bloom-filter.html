@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Bloom Filter — Approximate Membership in Production Systems</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bloom Filter는 메모리 효율적 확률적 집합 검사 구조로, 대규모 시스템에서 디스크/네트워크 I/O를 줄여 성능을 개선합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Bloom Filter — Approximate Membership in Production Systems</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-15</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Bloom Filter는 메모리 효율적 확률적 집합 검사 구조로, 대규모 시스템에서 디스크/네트워크 I/O를 줄여 성능을 개선합니다.</p>
+        <p>작동 원리: k개의 해시 함수와 m비트 비트맵을 사용해 n개의 원소를 삽입/검사합니다. 삽입 시 k비트에 1을 세트하고, 조회는 모든 k비트가 1이면 '있을 가능성 있음' (False Positive 존재), 하나라도 0이면 확실히 없음. 수식으로 최적 해시 수 k = (m/n) ln2, 기대 오차율 f ≈ (1 - e^{-kn/m})^k로 튜닝합니다. 확장/삭제가 필요하면 Counting Bloom이나 Scalable Bloom(동적 확장)을 사용합니다.
+
+생산환경 적용: 실제 시스템은 Bloom 필터를 캐시/스토리지 필터링에 씁니다. 예: HBase/Cassandra의 SSTable 레벨 필터는 디스크 조회를 피해 레이턴시를 낮추고, RedisBloom 모듈은 메모리 기반 빠른 체크를 제공합니다. 엔지니어는 예상 삽입수(expectedInsertions)와 목표 허용 오차(falsePositiveProbability)를 명시해 메모리-정확도 트레이드오프를 관리합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <p>실제 사용 사례:
+- 사례: HBase/Hadoop 에코시스템에서 SSTable 필터링
+  출처: HBase 2.x 코드베이스
+  코드:
+  ```java
+  ColumnFamilyDescriptor cfd = ColumnFamilyDescriptorBuilder
+    .newBuilder(Bytes.toBytes("cf"))
+    .setBloomFilterType(BloomType.ROW)
+    .build();
+  ```
+  실무 패턴: BloomType.ROW는 row key 기준 필터링으로 디스크 I/O 절감(읽기 집약적 테이블에 유리).
+
+- 사례: Guava BloomFilter (많은 자바 서비스에서 사용)
+  코드:
+  ```java
+  BloomFilter<String> bf = BloomFilter.create(
+    Funnels.stringFunnel(StandardCharsets.UTF_8), 1_000_000, 0.01);
+  bf.put("user:123");
+  if (!bf.mightContain("user:456")) { // skip DB
+    // avoid DB hit
+  }
+  ```
+  버전: Guava 31.x 이상 권장
+
+- 사례: RedisBloom 모듈로 네트워크/캐시 필터링
+  코드 (Redis module 2.2+, Redis 6+):
+  ```bash
+  BF.RESERVE bf1 0.01 1000000
+  BF.ADD bf1 "bad:url"
+  BF.EXISTS bf1 "maybe:url"
+  ```
+  실무 패턴: 작은 FPR(1%)로 캐시 미스/디스크 조회를 크게 줄임.
+
+베스트 프랙티스: 예상 항목 수를 과소 설정하지 말고(과소 설정 시 FPR 급증), 삭제 필요하면 Counting Bloom 사용, 멀티노드 환경은 필터를 직렬화하여 서비스 시작 시 로딩하거나 레이어드 필터(메모리+디스크) 적용.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A Bloom Filter is a memory‑efficient probabilistic membership structure that reduces disk/network I/O in large systems by rejecting non-members cheaply.</p>
+        <p>How it works: A Bloom Filter uses k hash functions and an m-bit bitmap to insert/check n items. Insert sets k bits; lookup returns 'possibly present' if all k bits are 1 (false positives possible) and 'definitely absent' if any bit is 0. Key formulas: optimal k = (m/n) ln2, false positive rate f ≈ (1 - e^{-kn/m})^k. For deletions or dynamic growth use Counting Bloom or Scalable Bloom filters.
+
+Systems use: Production systems apply Bloom filters as a fast pre-check before expensive operations. HBase/Cassandra place Bloom filters per SSTable to avoid unnecessary disk seeks; RedisBloom offers memory-backed filters for low-latency checks. Engineers tune expectedInsertions and falsePositiveProbability to balance RAM vs accuracy.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <p>Real-world use case:
+- Case: HBase (SSTable/HFile level filtering)
+  Source: HBase 2.x API
+  Code:
+  ```java
+  ColumnFamilyDescriptor cfd = ColumnFamilyDescriptorBuilder
+    .newBuilder(Bytes.toBytes("cf"))
+    .setBloomFilterType(BloomType.ROW)
+    .build();
+  ```
+  Production patterns: BloomType.ROW reduces disk seeks for read-heavy workloads by filtering row-key non-matches.
+
+- Case: Guava BloomFilter used in Java services
+  Code (Guava 31.x+):
+  ```java
+  BloomFilter<String> bf = BloomFilter.create(
+    Funnels.stringFunnel(StandardCharsets.UTF_8), 1_000_000, 0.01);
+  bf.put("user:123");
+  if (!bf.mightContain("user:456")) { /* skip DB */ }
+  ```
+
+- Case: RedisBloom module (Redis 6+, RedisBloom 2.2+)
+  Code:
+  ```bash
+  BF.RESERVE bf1 0.01 1000000
+  BF.ADD bf1 "bad:url"
+  BF.EXISTS bf1 "maybe:url"
+  ```
+  Production patterns: choose target FPR (e.g., 1%) and expected cardinality; persist/replicate filters or rebuild on startup. Use Counting Bloom when deletions required; use layered filters (in-memory + on-disk) to balance memory and false-positive costs.
+
+Notes: Bloom filters were widely adopted in systems like Chrome Safe Browsing (URL checks) and in wide-column stores (Cassandra/HBase) to avoid I/O.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+</body>
+</html>
