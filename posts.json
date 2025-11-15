@@ -15,13 +15,6 @@
       "excerpt": "텍스트를 모델이 처리할 수 있는 최소 단위(토큰)로 분할하는 과정"
     },
     {
-      "title": "Untitled",
-      "date": "2025-11-13",
-      "category": "papers",
-      "url": "posts/papers/2511/2025-11-13-paper.html",
-      "excerpt": ""
-    },
-    {
       "title": "Systematizing LLM Persona Design: A Four-Quadrant Technical Taxonomy for AI Companion Applications",
       "date": "2025-11-11",
       "category": "papers",
