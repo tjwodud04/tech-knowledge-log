@@ -29,7 +29,7 @@
       <h1>CAP Theorem (Consistency, Availability, Partition tolerance)</h1>
       <div class="topic-meta">
         <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
-        <div><strong>날짜 / Date:</strong> 2025-11-15</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-14</div>
       </div>
 
       <section class="topic-section">
@@ -37,9 +37,10 @@
         <p>분산 시스템에서 일관성(C), 가용성(A), 파티션 허용성(P)의 상호 트레이드오프를 규정한 이론.</p>
         <p>CAP 정리는 네트워크 분할이 발생할 가능성이 있는 분산 시스템에서 동시에 일관성(모든 노드가 같은 데이터를 보장)과 가용성(모든 요청에 응답)을 완벽하게 만족할 수 없다고 말한다. 즉, 파티션이 발생할 때 설계자는 일관성(C)을 택해 응답을 지연시키거나 가용성(A)을 택해 일시적 불일치를 허용해야 한다. 현실 세계에서는 '강한 일관성'과 '최종적 일관성' 같은 다양한 수준의 일관성을 도입해 요구사항에 맞춘 절충을 한다. 예를 들어 은행 트랜잭션 시스템은 강한 일관성을, 소셜 피드나 캐시 시스템은 최종적 일관성을 선호한다.
 
-인터뷰에서 CAP을 설명할 때는 단순 암기 대신 사례 기반 논리가 중요하다. 파티션이란 네트워크 단절이나 지연을 의미하며, 노드 간 통신 실패 상황을 가정해 어떤 속성을 희생할지 판단해야 한다. 또한 CAP은 절대적 법칙이 아니라 설계 가이드이며, 퀘럼 읽기/쓰기, 리더-팔로워 복제, 멀티리전아키텍처 등으로 현실적인 타협을 구현할 수 있다.</p>
+        파티션이란 네트워크 단절이나 지연을 의미하며, 노드 간 통신 실패 상황을 가정해 어떤 속성을 희생할지 판단해야 한다. 또한 CAP은 절대적 법칙이 아니라 설계 가이드이며, 퀘럼 읽기/쓰기, 리더-팔로워 복제, 멀티리전아키텍처 등으로 현실적인 타협을 구현할 수 있다.</p>
+
         <h2 style="margin-top:1.5rem;">활용</h2>
-        <p>실무에서는 요구사항(강한 일관성 vs 낮은 응답지연)을 기준으로 DB나 아키텍처를 선택한다. 예: HBase, Spanner는 일관성(C) 중심; Cassandra, Dynamo는 가용성(AP) 중심 설계에 가깝다. 인터뷰 답변 팁: 서비스 시나리오를 제시하고(예: 결제 vs 뉴스피드), 파티션 상황에서의 구체적 동작(거부, 지연, 오프라인 큐잉), 그리고 퀘럼/리더선출/리플리케이션 방식으로 문제를 완화하는 방법을 설명하면 높은 점수를 받는다.</p>
+        <p>요구사항(강한 일관성 vs 낮은 응답지연)을 기준으로 DB나 아키텍처를 선택한다. 예: HBase, Spanner는 일관성(C) 중심; Cassandra, Dynamo는 가용성(AP) 중심 설계에 가깝다.</p>
       </section>
 
       <section class="topic-section">
@@ -47,9 +48,10 @@
         <p>A theorem describing the trade-off among Consistency (C), Availability (A), and Partition tolerance (P) in distributed systems.</p>
         <p>CAP states that in the presence of a network partition, a distributed system cannot simultaneously provide both strong consistency (all nodes see the same data) and full availability (every request receives a response). When partitions occur, designers must choose to sacrifice either consistency or availability. In practice, systems adopt nuanced consistency models—strong, causal, eventual—to fit application needs. For instance, financial ledgers demand strong consistency, whereas social feeds or caches often accept eventual consistency for lower latency.
 
-In interviews, explain CAP with concrete failure scenarios: what happens when a datacenter link is cut? Emphasize that CAP is a design guideline rather than an immovable law. Real-world mitigations include quorum-based reads/writes, leader election, multi-region replication, and hybrid approaches (e.g., tunable consistency). Demonstrating how a system behaves under partition wins more credit than reciting definitions.</p>
+        What happens when a datacenter link is cut? Emphasize that CAP is a design guideline rather than an immovable law. Real-world mitigations include quorum-based reads/writes, leader election, multi-region replication, and hybrid approaches (e.g., tunable consistency). Demonstrating how a system behaves under partition wins more credit than reciting definitions.</p>
+
         <h2 style="margin-top:1.5rem;">Applications</h2>
-        <p>Practically, choose architecture based on requirements: prioritize C for transactional systems (Spanner, HBase), prioritize A for highly available services (Cassandra, Dynamo-like). Interview strategy: give a service example (payments vs newsfeed), state which CAP axis you would favor under partition, and outline concrete techniques—reject requests, delay writes, queue offline updates, use read/write quorums, or employ conflict resolution—to justify your choice.</p>
+        <p>Practically, choose architecture based on requirements: prioritize C for transactional systems (Spanner, HBase), prioritize A for highly available services (Cassandra, Dynamo-like). Give a service example (payments vs newsfeed), state which CAP axis you would favor under partition, and outline concrete techniques—reject requests, delay writes, queue offline updates, use read/write quorums, or employ conflict resolution—to justify your choice.</p>
       </section>
     </article>
   </main>
