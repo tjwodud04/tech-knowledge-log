@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Evaluating Prompting Strategies with MedGemma for Medical Order Extraction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Evaluating Prompting Strategies with MedGemma for Medical Order Extraction">
+  <link rel="stylesheet" href="../../style.css?v=5">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="../../index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="../../archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Evaluating Prompting Strategies with MedGemma for Medical Order Extraction</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Abhinand Balachandran, Bavana Durgapraveen, Gowsikkan Sikkan Sudhagar, Vidhya Varshany J S, Sriram Rajkumar</div>
+        <div><strong>발행일 / Published:</strong> 2025-11-13</div>
+        <div><strong>Arxiv ID:</strong> 2511.10583</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>초록(번역)<br>의사-환자 대화에서 의료 지시(orders)를 정확히 추출하는 것은 임상 문서화 부담을 줄이고 환자 안전을 확보하는 데 중요하다. 본 논문은 MEDIQA-OE-2025 공유 태스크(MEDIQA-OE-2025 Shared Task)에 대한 우리 팀의 제출물을 상세히 설명한다. 우리는 구조화된 지시 추출을 위해 도메인 특화 오픈소스 언어모델인 MedGemma(MedGemma)를 조사했다. 단일 예시(one-shot)의 단순 프롬프트, 추론 중심의 ReAct(ReAct) 프레임워크, 다단계 에이전트 워크플로우의 세 가지 프롬프트 패러다임을 체계적으로 평가했다. 실험 결과, ReAct이나 에이전트 흐름 같은 복잡한 프레임워크가 강력할 수 있지만, 공식 검증 세트에서는 더 단순한 원샷 프롬프트 방식이 가장 높은 성능을 보였다. 수작업으로 주석된 대본에서는 복잡한 추론 체인이 '과잉추론(overthinking)'을 야기해 노이즈를 더할 수 있으므로 직접적인 접근이 더 견고하고 효율적이라고 본다. 본 연구는 다양한 데이터 조건에서 임상 정보 추출을 위한 적절한 프롬프트 전략 선택에 대한 유용한 통찰을 제공한다.</p>
+        <p>핵심 내용<br>이 연구는 의료 주문(orders) 추출이라는 구체적 과제에 대해 도메인 특화 언어모델 MedGemma를 적용하고, 프롬프트 설계가 결과에 미치는 영향을 비교한 실증적 연구다. 평가한 프롬프트는 세 가지로, 하나의 예시만 보여주는 원샷(one-shot), 인간-기계 추론을 결합한 ReAct, 그리고 여러 단계의 에이전트(agentic) 워크플로우이다. 실험 결과는 복잡한 추론 체인이 항상 성능을 높이지는 않음을 보여준다. 특히 수동으로 주석된(annotated) 대화문에서는 복잡한 과정이 불필요한 추론을 추가해 오히려 성능을 떨어뜨릴 수 있었고, 공식 검증 세트에서는 단순한 원샷이 가장 높은 성능을 기록했다(논문 초록에는 구체적 수치 미기재). 연구는 프롬프트 복잡도와 데이터 품질(특히 수작업 주석 여부) 사이의 상호작용이 모델 성능에 중요한 영향을 준다는 점을 강조한다.</p>
+        <p>활용<br>임상 문서화 자동화 시스템이나 전자의무기록(EHR, Electronic Health Record) 보조 도구에서, 이 연구는 간단하고 직접적인 프롬프트를 우선적으로 시험해볼 것을 제안한다. 특히 사람이 수작업으로 정제한 대화록을 입력으로 사용할 때는 복잡한 추론 흐름보다 원샷 방식이 더 안정적이며 계산 비용도 낮아 실무 적용에 유리하다. 반대로 노이즈가 많거나 비정형 데이터에서는 복합 프레임워크가 유용할 수 있으므로, 실제 배포 전 데이터 특성에 따른 프롬프트 전략 선택을 권장한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The accurate extraction of medical orders from doctor-patient conversations is a critical task for reducing clinical documentation burdens and ensuring patient safety. This paper details our team submission to the MEDIQA-OE-2025 Shared Task. We investigate the performance of MedGemma, a new domain-specific open-source language model, for structured order extraction. We systematically evaluate three distinct prompting paradigms: a straightforward one-Shot approach, a reasoning-focused ReAct framework, and a multi-step agentic workflow. Our experiments reveal that while more complex frameworks like ReAct and agentic flows are powerful, the simpler one-shot prompting method achieved the highest performance on the official validation set. We posit that on manually annotated transcripts, complex reasoning chains can lead to "overthinking" and introduce noise, making a direct approach more robust and efficient. Our work provides valuable insights into selecting appropriate prompting strategies for clinical information extraction in varied data conditions.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.10583" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv →</a>
+          <a href="https://arxiv.org/pdf/2511.10583.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF ↓</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="../../script.js?v=6"></script>
+</body>
+</html>
