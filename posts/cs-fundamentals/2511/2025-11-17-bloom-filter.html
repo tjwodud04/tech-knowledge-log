@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Bloom Filter — Probabilistic Set Membership for High-Throughput Systems</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bloom Filter는 메모리 효율적인 확률적 집합 검사 자료구조로, 대용량 시스템에서 캐시/디스크 접근을 줄이고 지연을 낮추기 위해 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Bloom Filter — Probabilistic Set Membership for High-Throughput Systems</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-17</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Bloom Filter는 메모리 효율적인 확률적 집합 검사 자료구조로, 대용량 시스템에서 캐시/디스크 접근을 줄이고 지연을 낮추기 위해 널리 사용됩니다.</p>
+        <p>작동 원리: Bloom Filter는 m비트 배열과 k개의 해시 함수를 사용합니다. 항목을 추가하면 k개의 해시 위치를 1로 설정하고, 조회 시 k위치가 모두 1이면 '있을 가능성 있음'(거짓양성 존재), 하나라도 0이면 확실히 없음입니다. 거짓 양성 확률은 p ≈ (1 - e^{-kn/m})^k이며, 최적의 k는 k = (m/n) ln2 입니다. 변형으로는 삭제를 지원하는 Counting Bloom(카운터 배열), 파티셔닝된 Bloom, 그리고 낮은 거짓양성 및 삭제를 지원하는 Cuckoo Filter가 있습니다.<br><br>성능과 활용: Bloom은 디스크/네트워크 I/O를 줄여 레이턴시를 개선합니다. 해시 함수로는 MurmurHash 계열을 병렬로 사용하거나 double-hashing으로 k 해시를 생성(두 해시값으로 k개 생상)해 성능과 해시 독립성 균형을 맞춥니다. 실무에서는 메모리/정확도 trade-off를 설정하고, 동적 성장(Scaling Bloom) 또는 파티셔닝으로 샤딩 환경에 맞춥니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Chrome Safe Browsing (바탕 논문, 2008) — 악성 URL 필터링에 Bloom 응용<br>코드: Guava Java 예시 (버전: guava 31+)<br><pre><code class="language-java">import com.google.common.hash.BloomFilter;<br>import com.google.common.hash.Funnels;<br>BloomFilter&lt;CharSequence&gt; bf = BloomFilter.create(Funnels.stringFunnel(java.nio.charset.StandardCharsets.UTF_8), 1_000_000, 0.01);<br>bf.put("bad.com/malware");<br>if (bf.mightContain(url)) { // 추가 검사(네트워크 or DB)<br>  // 검사 로직<br>}</code></pre><br>사례: RocksDB (Facebook, production) — BlockBasedTableOptions에 Bloom 적용 (C++):<br><pre><code class="language-cpp">rocksdb::BlockBasedTableOptions table_opts;<br>table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10));<br>rocksdb::Options opts;<br>opts.table_factory.reset(rocksdb::NewBlockBasedTableFactory(table_opts));<br>rocksdb::DB::Open(opts, path, &amp;db);</code></pre><br>사례: RedisBloom 모듈 (RedisBloom 2.0) — 명령:<br>BF.RESERVE mybf 0.01 100000<br>BF.ADD mybf key<br>BF.EXISTS mybf key<br><br>실무 패턴: 초기 용량과 p(허용 오차)를 설계에 명시, double-hash로 CPU 절감, 삭제가 필요하면 Counting Bloom 또는 Cuckoo Filter 고려, Bloom으로 1차 필터 후 정확 검사(레디스/DB 호출)를 하는 패턴이 표준입니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A Bloom Filter is a memory-efficient probabilistic set-membership structure used in production systems to reduce disk/network I/O and latency by filtering negative lookups cheaply.</p>
+        <p>How it works: A Bloom Filter uses an m-bit array and k hash functions. To add an element set bits at k hash positions; to test, check that all k positions are 1. If any is 0 the item is definitely absent; if all are 1 it's probably present (false positives allowed). False-positive rate p ≈ (1 - e^{-kn/m})^k and optimal k = (m/n) ln2. Variants include Counting Bloom (supports deletion), Partitioned Bloom, Scalable/Stable Bloom, and alternatives like Cuckoo Filters which offer deletions with lower FP in some regimes.<br><br>Operational notes: Use fast non-cryptographic hashes (MurmurHash3, xxHash) and double-hashing to generate k indices from two hashes for CPU efficiency. Choose m (bits) and k based on expected n and acceptable p. In distributed/storage systems you often shard/partition filters and maintain per-sstable or per-block filters to limit working set.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Chrome Safe Browsing (2008 paper) — malicious URL filtering using Bloom-like techniques<br>Code: Guava (com.google.guava:guava:31+) example in Java:<br><pre><code class="language-java">BloomFilter&lt;CharSequence&gt; bf = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8), 1_000_000, 0.01);<br>bf.put("bad.com");<br>if (bf.mightContain(url)) { /* extra verification */ }</code></pre><br>Case: RocksDB (used at Facebook) — enable Bloom per SSTable (C++ API):<br><pre><code class="language-cpp">auto table_opts = rocksdb::BlockBasedTableOptions();<br>table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10));<br>opts.table_factory.reset(rocksdb::NewBlockBasedTableFactory(table_opts));<br>rocksdb::DB::Open(opts, path, &amp;db);</code></pre><br>Case: RedisBloom module (RedisBloom 2.0) — commands:<br>BF.RESERVE mybf 0.01 100000<br>BF.ADD mybf key<br>BF.EXISTS mybf key<br><br>Production patterns: use Bloom as a cheap negative filter before expensive checks, provision capacity and p up front, prefer double-hash for k index generation, and choose Counting/Scalable variants if deletions or growth are required.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
