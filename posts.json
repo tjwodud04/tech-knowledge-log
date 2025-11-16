@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Bloom Filter — Probabilistic Set Membership for High-Throughput Systems",
+      "date": "2025-11-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-17-bloom-filter.html",
+      "excerpt": "Bloom Filter는 메모리 효율적인 확률적 집합 검사 자료구조로, 대용량 시스템에서 캐시/디스크 접근을 줄이고 지연을 낮추기 위해 널리 사용됩니다."
+    },
+    {
       "title": "Bloom Filter (멤버십 검사용 확률적 자료구조)",
       "date": "2025-11-16",
       "category": "cs-fundamentals",
