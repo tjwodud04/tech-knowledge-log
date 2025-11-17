@@ -15,13 +15,6 @@
       "excerpt": "Bloom Filter는 메모리/디스크를 적게 쓰면서 '멤버십(집합 포함 여부)'을 빠르게 검사하는 확률적 자료구조입니다. 대규모 분산 시스템에서 캐시 미스, 중복 제거, 네트워크 필터링 등에 자주 쓰입니다."
     },
     {
-      "title": "Bloom Filter — Approximate Membership in Production Systems",
-      "date": "2025-11-15",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2511/2025-11-15-bloom-filter.html",
-      "excerpt": "Bloom Filter는 메모리 효율적 확률적 집합 검사 구조로, 대규모 시스템에서 디스크/네트워크 I/O를 줄여 성능을 개선합니다."
-    },
-    {
       "title": "CAP Theorem (Consistency, Availability, Partition tolerance)",
       "date": "2025-11-14",
       "category": "cs-fundamentals",
