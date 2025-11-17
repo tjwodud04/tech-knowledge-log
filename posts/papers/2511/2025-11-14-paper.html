@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>DocLens : A Tool-Augmented Multi-Agent Framework for Long Visual Document Understanding</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DocLens : A Tool-Augmented Multi-Agent Framework for Long Visual Document Understanding">
+  <link rel="stylesheet" href="../../style.css?v=5">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="../../index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="../../archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>DocLens : A Tool-Augmented Multi-Agent Framework for Long Visual Document Understanding</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Dawei Zhu, Rui Meng, Jiefeng Chen, Sujian Li, Tomas Pfister, Jinsung Yoon</div>
+        <div><strong>발행일 / Published:</strong> 2025-11-14</div>
+        <div><strong>Arxiv ID:</strong> 2511.11552</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>핵심 내용<br>이 연구는 긴 시각 문서(long visual document)에서 정보가 여러 페이지와 시각 요소에 흩어져 있을 때 발생하는 근본적 문제, 즉 증거 국지화(evidence localization)를 해결하기 위해 도구 보강 다중 에이전트 프레임워크(tool-augmented multi-agent framework)인 DocLens를 제안한다. 기존의 시각언어모델(Vison-Language Models, VLMs)은 관련 페이지를 찾아내거나 시각 요소 내부의 미세한 세부 정보를 포착하는 데 취약해 잘못된 답변(모델 환각)을 내는 경향이 있다. DocLens는 렌즈처럼(“zoom in”) 전체 문서에서 관련 페이지로 이동한 뒤, 해당 페이지 내 특정 시각 요소로 다시 좁혀 들어가면서 핵심 증거를 정확히 찾아낸다.</p>
+        <p>구체적으로 DocLens는 두 단계로 작동한다. 먼저 문서 전체에서 관련 페이지와 시각 요소로 탐색(navigation)하고, 그 다음 샘플링-중재(sampling-adjudication) 메커니즘을 통해 여러 후보 응답을 생성·비교하여 단일 신뢰 가능한 답변을 산출한다. 도구 보강(tool-augmented)이라는 설계는 외부 도구나 모듈을 활용해 증거 검색과 세부 분석을 보조하며, 이를 Gemini-2.5-Pro와 결합해 MMLongBench-Doc 및 FinRAGBench-V 벤치마크에서 최첨단 성능을 기록했다고 보고한다. 특히 시각 중심(vision-centric) 질의와 답변 불가능(unanswerable) 질의에서 탁월한 성능 향상이 관찰되었고, 보고된 결과는 인간 전문가 수준을 능가하는 것으로 제시된다.</p>
+        <p>활용<br>DocLens는 법률 문서, 재무 보고서, 기술 매뉴얼 등 페이지가 많고 텍스트와 도표·이미지가 혼합된 긴 문서를 자동으로 분석해야 하는 실무 환경에 적용할 수 있다. 증거의 위치를 정확히 찾아내고 세부 시각 정보를 검증하는 특성으로 인해 문서 기반 질의응답, 감사(audit), 사실 확인(fact-checking), 금융 리포트 요약 등에서 모델 환각을 줄이며 신뢰도를 높이는 데 유용하다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Comprehending long visual documents, where information is distributed across extensive pages of text and visual elements, is a critical but challenging task for modern Vision-Language Models (VLMs). Existing approaches falter on a fundamental challenge: evidence localization. They struggle to retrieve relevant pages and overlook fine-grained details within visual elements, leading to limited performance and model hallucination. To address this, we propose DocLens, a tool-augmented multi-agent framework that effectively ``zooms in'' on evidence like a lens. It first navigates from the full document to specific visual elements on relevant pages, then employs a sampling-adjudication mechanism to generate a single, reliable answer. Paired with Gemini-2.5-Pro, DocLens achieves state-of-the-art performance on MMLongBench-Doc and FinRAGBench-V, surpassing even human experts. The framework's superiority is particularly evident on vision-centric and unanswerable queries, demonstrating the power of its enhanced localization capabilities.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.11552" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv →</a>
+          <a href="https://arxiv.org/pdf/2511.11552.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF ↓</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="../../script.js?v=6"></script>
+</body>
+</html>
