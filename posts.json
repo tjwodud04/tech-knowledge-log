@@ -15,6 +15,13 @@
       "excerpt": "분산 시스템에서 일관성(C), 가용성(A), 파티션 허용성(P)의 상호 트레이드오프를 규정한 이론."
     },
     {
+      "title": "DocLens : A Tool-Augmented Multi-Agent Framework for Long Visual Document Understanding",
+      "date": "2025-11-14",
+      "category": "papers",
+      "url": "posts/papers/2511/2025-11-14-paper.html",
+      "excerpt": "DocLens : A Tool-Augmented Multi-Agent Framework for Long Visual Document Understanding"
+    },
+    {
       "title": "Evaluating Prompting Strategies with MedGemma for Medical Order Extraction",
       "date": "2025-11-13",
       "category": "papers",
