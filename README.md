@@ -1,8 +1,6 @@
 # Tech Knowledge Log
 
-Daily AI/CS insights in 1-minute reads.
-
-**Schedule:** Mon/Wed/Fri (Fundamentals) | Tue/Thu/Sat (Papers)
+**Schedule:** Mon/Wed/Fri (Fundamentals) | Tue/Thu (Papers)
 
 ## Quick Start
 
