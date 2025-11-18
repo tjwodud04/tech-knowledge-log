@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Consistent Hashing (Ring & Rendezvous)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="일관성 해싱은 분산 캐시/저장소에서 노드 증감 시 재배치되는 키 수를 최소화해 가용성과 확장성을 확보하는 해시 전략입니다. 대규모 서비스에서 캐시 히트율과 재분배 비용을 낮추는 데 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Consistent Hashing (Ring & Rendezvous)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-19</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>일관성 해싱은 분산 캐시/저장소에서 노드 증감 시 재배치되는 키 수를 최소화해 가용성과 확장성을 확보하는 해시 전략입니다. 대규모 서비스에서 캐시 히트율과 재분배 비용을 낮추는 데 핵심적입니다.</p>
+        <p>핵심 아이디어는 키와 노드를 동일한 해시 공간(원형 링)에 매핑해, 키가 가리키는 위치에서 시계방향으로 첫 번째 노드를 해당 키의 담당자로 선택하는 것입니다. 노드 추가/제거 시 영향을 받는 키는 링상에서 인접한 구간에 한정되므로 전체 재배치 비용이 O(k/N) 수준으로 줄어듭니다. 실제 구현에서는 MD5나 MurmurHash 같은 안정적 해시를 사용하고, 균형을 맞추기 위해 각 물리 노드에 다수의 가상노드(vnodes/replicas)를 둡니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Amazon Dynamo (2007 논문), Memcached 클라이언트 libketama, Facebook의 Mcrouter, Cassandra의 vnodes<br>코드:<br><pre><code class="language-python">import hashlib, bisect<br>class Ring:<br>  def __init__(s): s.r=[]; s.nodes={}<br>  def _h(s,key): return int(hashlib.md5(key.encode()).hexdigest(),16)<br>  def add(s,node,rep=100):<br>    for i in range(rep):<br>      h=s._h(f"{node}:{i}"); bisect.insort(s.r,h); s.nodes[h]=node<br>  def remove(s,node):<br>    for k in list(s.r):<br>      if s.nodes[k]==node: s.r.remove(k); del s.nodes[k]<br>  def get(s,key):<br>    if not s.r: return None<br>    h=s._h(key); i=bisect.bisect(s.r,h)%len(s.r); return s.nodes[s.r[i]]</code></pre><br>실무 패턴: vnodes 수(예: Cassandra num_tokens=256)로 균형 조정, Murmur3 사용(성능 우수), 장애/재배포 시 점진적 리밸런싱, 재현 가능한 해시 시드 고정. 운영 환경에서는 키 분포 모니터링(히트맵)과 노드별 QPS/메모리 검사로 vnode 수/placement 조정 권장.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Consistent hashing minimizes key remapping when nodes join/leave, making it essential for scalable caches, storage, and sharding in production systems.</p>
+        <p>The basic mechanism maps both keys and nodes into a hash space (a ring). A key is assigned to the first node encountered clockwise from the key's hash. When a node is added or removed, only keys in the adjacent segment move, dramatically reducing churn compared to modulo-based sharding. Implementations use stable hash functions (MD5, MurmurHash3) and virtual nodes to smooth distribution across physical machines.<br><br>Alternative: Rendezvous (highest-weight) hashing computes hash(key,node) and picks the node with the max score — simpler to implement for dynamic weights and avoids maintaining a sorted ring. Complexity: ring lookup is O(log N) with binary search; rendezvous is O(N) per lookup unless optimized, but works well when N is modest or cached.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Amazon Dynamo paper (2007), libketama (memcached client), Facebook Mcrouter, Apache Cassandra (vnodes)<br>Code:<br><pre><code class="language-python"># simple ring (Python)<br>import hashlib,bisect<br>class Ring:<br>  def __init__(s): s.r=[]; s.nodes={}<br>  def _h(s,k): return int(hashlib.md5(k.encode()).hexdigest(),16)<br>  def add(s,node,rep=100):<br>    for i in range(rep): h=s._h(f"{node}:{i}"); bisect.insort(s.r,h); s.nodes[h]=node<br>  def get(s,key):<br>    if not s.r: return None<br>    h=s._h(key); i=bisect.bisect(s.r,h)%len(s.r); return s.nodes[s.r[i]]</code></pre><br>Production patterns: use Murmur3 (e.g., Cassandra/Murmur3Partitioner), tune vnode count (Cassandra num_tokens default 256 in older 3.x configs), monitor key skew, use consistent hashing for memcached pooling (libketama) and for request routing (Mcrouter). For dynamic weight changes prefer rendezvous hashing (used in some CDN and proxy implementations).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
