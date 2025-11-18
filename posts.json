@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Consistent Hashing (Ring & Rendezvous)",
+      "date": "2025-11-19",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-19-consistent-hashing.html",
+      "excerpt": "일관성 해싱은 분산 캐시/저장소에서 노드 증감 시 재배치되는 키 수를 최소화해 가용성과 확장성을 확보하는 해시 전략입니다. 대규모 서비스에서 캐시 히트율과 재분배 비용을 낮추는 데 핵심적입니다."
+    },
+    {
       "title": "Bloom Filter — Probabilistic Set Membership for High-Throughput Systems",
       "date": "2025-11-17",
       "category": "cs-fundamentals",
