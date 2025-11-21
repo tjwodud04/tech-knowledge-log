@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Bloom Filter (확률적 집합 검사용 데이터 구조)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bloom Filter는 공간 효율적인 확률적 집합 멤버십 검사 구조로, 빠른 존재 여부 판정과 낮은 메모리 사용이 중요한 시스템에서 널리 사용됩니다. 실무에서는 캐시 미스 전 필터링, SSTable/블록 레벨의 불필요 I/O 회피, 악성 URL 후보 필터링 등에 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Bloom Filter (확률적 집합 검사용 데이터 구조)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-21</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Bloom Filter는 공간 효율적인 확률적 집합 멤버십 검사 구조로, 빠른 존재 여부 판정과 낮은 메모리 사용이 중요한 시스템에서 널리 사용됩니다. 실무에서는 캐시 미스 전 필터링, SSTable/블록 레벨의 불필요 I/O 회피, 악성 URL 후보 필터링 등에 쓰입니다.</p>
+        <p>작동 원리: 비트 배열(m 비트)과 k개의 해시 함수로 구성됩니다. 요소 삽입 시 k개의 해시 위치를 1로 세트하고, 질의 시 모든 해당 비트가 1이면 '존재 가능' (false positive 가능성 있음), 하나라도 0이면 '존재하지 않음' (false negative 없음)이라 판정합니다. 이론적으로 거짓 양성 확률 p ≈ (1 - e^{-kn/m})^k 이고 최적 k ≈ (m/n) ln 2 입니다. 운영 시스템에서는 n(추정 요소 수), 허용 false positive율 p, 메모리 예산에 따라 m과 k를 설계합니다.<br><br>확장/변형: 삭제를 지원하려면 Counting Bloom Filter(카운터 배열)를 사용하며, 동적 성장에는 Scalable Bloom Filter를 씁니다. 대규모 분산 시스템은 파티셔닝(샤딩) 혹은 SSTable 단위로 필터를 유지해 재구성 오버헤드를 낮춥니다. 성능 관점에서 해시 함수는 CPU 캐시 친화적이고 SIMD/벡터화 가능한 MurmurHash3/XXHash 계열을 채택하는 사례가 많습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Chrome Safe Browsing (Google) — 악성 URL 후보를 빠르게 필터링(역사적/연구 자료에서 Bloom 계열 사용 언급)<br>  코드:<br>  <pre><code class="language-bash"># RedisBloom (Redis Stack, RedisBloom 2.0+)<br>  # 모듈 설치된 Redis에서<br>  BF.RESERVE urls 0.001 1000000<br>  BF.ADD urls "http://bad.example/"<br>  BF.EXISTS urls "http://maybe.example/"</code></pre><br>- 사례: Apache Cassandra / HBase — SSTable마다 Bloom Filter를 유지해 디스크 I/O를 줄임 (Cassandra 소스, SSTableReader에서 사용)<br>  코드(파이썬 예시):<br>  <pre><code class="language-python"># pybloom-live (개발/프로토타입)<br>  pip install pybloom-live<br>  from pybloom_live import BloomFilter<br>  bf = BloomFilter(capacity=1000000, error_rate=0.001)<br>  bf.add('user:1234')<br>  'user:1234' in bf  # True/False</code></pre><br>프로덕션 패턴:<br>- SSTable/블록 단위 필터 유지(재컴팩트 시 재생성)<br>- 삭제가 필요하면 Counting BF/TTL+rebuild 사용<br>- k, m는 예상 요소 수와 목표 p로 미리 계산해 프로비저닝<br>참고: Bloom 원논문(1970), Broder & Mitzenmacher(2004) 개론</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A Bloom Filter is a space-efficient probabilistic data structure for set membership tests; it answers 'definitely not' or 'possibly yes' with no false negatives. It's used in production to reduce I/O, filter candidates, and accelerate lookups.</p>
+        <p>How it works: a bit array of length m and k hash functions. Insertion sets k bit positions to 1; query checks if all k bits are 1. False positive probability p ≈ (1 - e^{-kn/m})^k and the optimal number of hashes k ≈ (m/n) ln 2. In production you choose m and k from estimated n (expected elements) and allowed p. Hash selection favors fast, cache-friendly hashes (MurmurHash3/XXHash), and implementations often derive multiple hashes from two base hashes to reduce overhead.<br><br>Variants: Counting Bloom Filters use small counters per slot to support deletions; Scalable Bloom Filters grow by adding new filters to maintain target error rates. Large systems shard filters by partition/SSTable to avoid global rebuilds; compaction or rebalancing triggers filter reconstruction. Vectorized hashing and memory-aligned bit arrays are performance best practices in high-throughput services.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Chrome Safe Browsing / Google — Bloom-like filters used historically to prefilter malicious URL candidates (discussed in Google research)<br>  Code:<br>  <pre><code class="language-bash"># RedisBloom (part of Redis Stack, RedisBloom 2.0+)<br>  BF.RESERVE urls 0.001 1000000<br>  BF.ADD urls "http://bad.example/"<br>  BF.EXISTS urls "http://maybe.example/"</code></pre><br>- Case: Apache Cassandra / HBase — per-SSTable Bloom Filters to avoid unnecessary disk seeks (see Cassandra SSTableReader implementation)<br>  Code (Python prototype):<br>  <pre><code class="language-python"># pybloom-live<br>  pip install pybloom-live<br>  from pybloom_live import BloomFilter<br>  bf = BloomFilter(capacity=1000000, error_rate=0.001)<br>  bf.add('user:1234')<br>  'user:1234' in bf</code></pre><br>Production patterns:<br>- Keep filters per-file/partition; rebuild on compaction<br>- Use Counting BF for deletions or Scalable BF for growing sets<br>- Tune m,k from target false-positive rate and expected cardinality<br>References: Bloom (1970); Broder & Mitzenmacher survey (2004); RedisBloom (Redis Stack).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
