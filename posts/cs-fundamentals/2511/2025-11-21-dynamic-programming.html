@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Dynamic Programming (DP)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="동적계획법(DP)은 중복되는 하위문제를 저장해 계산을 줄이는 기법으로, 최적화·시퀀스 추론·정렬·정렬 기반 알고리즘 등 프로덕션 시스템에서 성능 향상과 정확성 보장을 위해 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Dynamic Programming (DP)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-21</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>동적계획법(DP)은 중복되는 하위문제를 저장해 계산을 줄이는 기법으로, 최적화·시퀀스 추론·정렬·정렬 기반 알고리즘 등 프로덕션 시스템에서 성능 향상과 정확성 보장을 위해 널리 쓰입니다.</p>
+        <p>핵심은 중복되는 부분문제(overlapping subproblems)와 최적 부분구조(optimal substructure)를 식별해, 메모이제이션(재귀+캐시)이나 타뷸레이션(순차적 표 작성)으로 계산을 재사용하는 것입니다. 시간복잡도는 상태 수 × 상태 전이 비용으로 모델화하고, 메모리 트레이드오프(예: 상태 압축, rolling array)를 통해 실제 시스템 메모리 제약을 맞춥니다. 경로 최적화(Viterbi), 표적 정렬(Smith–Waterman), 확률적 시퀀스 라벨링(Forward–Backward for CRF) 등 다양한 알고리즘이 DP 기반입니다.<br><br>실무에서는 상태 공간이 커질 때 상태 집약(state aggregation), 히프리스(hypothesis pruning), 또는 외부 메모리(스트리밍/바이너리 파일)로 확장합니다. GPU/TPU 환경에서는 루프 펼치기(loop unrolling), 배치화, 메모리 접근 패턴 최적화로 메모이제이션 구조를 효율화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: 음성인식(자료구조/프로덕션)<br>  출처: Kaldi(오픈소스 ASR)에서 Viterbi 디코딩에 DP를 사용합니다.<br>  코드:<br>  <pre><code class="language-bash"># Kaldi 예: decode 단계 (egs/wsj)<br>  steps/decode.sh --nj 20 exp/tri3/graph data/test exp/tri3/decode</code></pre><br>  실무 패턴: 빔 서치(pruned Viterbi)로 상태 폭을 제한하여 실시간 지연을 줄임. (Kaldi 최신 릴리스, e.g., 5.x)<br><br>- 사례: 서열 정렬<br>  출처: FASTA/SSEARCH(FASTA 패키지)와 일부 BLAST 구현에서 Smith–Waterman 기반 로컬 정렬을 사용합니다.<br>  코드:<br>  <pre><code class="language-bash">ssearch36 query.fasta db.fasta -m 8 -o sw.out</code></pre><br>  실무 패턴: 대규모 DB는 히트 확률 필터링(heuristic)로 사전 필터 후 DP 실행.<br><br>- 사례: 시퀀스 라벨링<br>  출처: CRFsuite/CRF++는 Forward–Backward(메모이제이션)로 학습합니다.<br>  코드:<br>  <pre><code class="language-bash">crfsuite learn -m model.crfs train.txt</code></pre><br>  실무 패턴: 정규화 상실 방지 위해 로그-합-지수(log-sum-exp) 안정화, 배치 처리로 GPU/멀티코어 활용.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dynamic Programming (DP) reuses solutions to overlapping subproblems by memoization or tabulation; it's essential for production problems like sequence alignment, decoding, and structured prediction to reduce latency and ensure correctness.</p>
+        <p>The core idea is to identify overlapping subproblems and optimal substructure, then store intermediate results either with memoization (recursive + cache) or bottom-up tabulation (explicit tables). Complexity is modeled as number_of_states × transition_cost; practical systems reduce memory via state compression (rolling arrays), pruning (beam search), and external/streaming storage when state space explodes. DP also appears in probabilistic tasks: Viterbi for MAP decoding, Forward–Backward for marginalization, Smith–Waterman for local alignment.<br><br>In production, DP implementations optimize memory access patterns for cache/GPU, fuse loops, and use numerically stable transforms (log-sum-exp) in probabilistic DP. They also combine heuristics (indexing, seed-and-extend) to avoid full DP over huge datasets.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Speech recognition (production)<br>  Source: Kaldi (open-source ASR toolkit) uses Viterbi/DP in decoding.<br>  Code:<br>  <pre><code class="language-bash"># Kaldi decode example (egs/wsj)<br>  steps/decode.sh --nj 20 exp/tri3/graph data/test exp/tri3/decode</code></pre><br>  Production patterns: beam-pruned Viterbi to limit hypothesis explosion and reduce latency (Kaldi releases ~5.x+).<br><br>- Case: Sequence alignment<br>  Source: FASTA/SSEARCH and some pipelines use Smith–Waterman DP for local alignments.<br>  Code:<br>  <pre><code class="language-bash">ssearch36 query.fasta db.fasta -m 8 -o sw.out</code></pre><br>  Production patterns: seed-and-extend heuristics prefilter candidate regions to avoid quadratic DP over whole DB.<br><br>- Case: Structured prediction<br>  Source: CRFsuite/CRF++ use Forward–Backward and Viterbi for training/inference.<br>  Code:<br>  <pre><code class="language-bash">crfsuite learn -m model.crfs train.txt</code></pre><br>  Production patterns: use log-sum-exp for stability, minibatching and feature hashing to scale training.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
