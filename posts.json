@@ -1,13 +1,6 @@
 {
   "posts": [
     {
-      "title": "Bloom Filter: Probabilistic Set Membership for High-Throughput Systems",
-      "date": "2025-11-21",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2511/2025-11-21-bloom-filter.html",
-      "excerpt": "Bloom Filter는 메모리 효율적인 확률적 집합 검사 자료구조로, 디스크/네트워크 I/O를 줄여 대규모 시스템에서 성능과 비용을 절감합니다."
-    },
-    {
       "title": "Consistent Hashing (Ring & Rendezvous)",
       "date": "2025-11-19",
       "category": "cs-fundamentals",
