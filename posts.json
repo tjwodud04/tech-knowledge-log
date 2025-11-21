@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Bloom Filter (확률적 집합 검사용 데이터 구조)",
+      "date": "2025-11-21",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-21-bloom-filter.html",
+      "excerpt": "Bloom Filter는 공간 효율적인 확률적 집합 멤버십 검사 구조로, 빠른 존재 여부 판정과 낮은 메모리 사용이 중요한 시스템에서 널리 사용됩니다. 실무에서는 캐시 미스 전 필터링, SSTable/블록 레벨의 불필요 I/O 회피, 악성 URL 후보 필터링 등에 쓰입"
+    },
+    {
       "title": "Consistent Hashing (Ring & Rendezvous)",
       "date": "2025-11-19",
       "category": "cs-fundamentals",
