@@ -8,6 +8,13 @@
       "excerpt": "Bloom Filter는 공간 효율적인 확률적 집합 멤버십 검사 구조로, 빠른 존재 여부 판정과 낮은 메모리 사용이 중요한 시스템에서 널리 사용됩니다. 실무에서는 캐시 미스 전 필터링, SSTable/블록 레벨의 불필요 I/O 회피, 악성 URL 후보 필터링 등에 쓰입"
     },
     {
+      "title": "Dynamic Programming (DP)",
+      "date": "2025-11-21",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-21-dynamic-programming.html",
+      "excerpt": "동적계획법(DP)은 중복되는 하위문제를 저장해 계산을 줄이는 기법으로, 최적화·시퀀스 추론·정렬·정렬 기반 알고리즘 등 프로덕션 시스템에서 성능 향상과 정확성 보장을 위해 널리 쓰입니다."
+    },
+    {
       "title": "Consistent Hashing (Ring & Rendezvous)",
       "date": "2025-11-19",
       "category": "cs-fundamentals",
