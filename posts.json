@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Breadth-First Search (BFS)",
+      "date": "2025-11-24",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-24-breadth-first-search.html",
+      "excerpt": "BFS는 그래프를 레벨 단위로 탐색해 최단 경로(간선 수 기준)나 연결성 확인에 적합한 기본 알고리즘으로, 대규모 시스템에서는 레벨 동기화(frontier), 양방향 탐색, 병렬화가 핵심입니다."
+    },
+    {
       "title": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning",
       "date": "2025-11-23",
       "category": "papers",
