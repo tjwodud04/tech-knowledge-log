@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning">
+  <link rel="stylesheet" href="./tech-knowledge-log/style.css?v=8">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Peng Xia, Kaide Zeng, Jiaqi Liu, Can Qin, Fang Wu, Yiyang Zhou, Caiming Xiong, Huaxiu Yao</div>
+        <div><strong>발행일 / Published:</strong> undefined-undefined-undefined</div>
+        <div><strong>Arxiv ID:</strong> 2511.16043</div>
+        <div><strong>Affiliation:</strong> University of North Carolina at Chapel Hill</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>기존 LLM 에이전트들은 인간이 선별한 데이터에 의존해 확장성이 떨어지고, 자가진화 방식도 모델 능력과 단회성 상호작용 제약으로 도구 사용이나 동적 추론을 포함한 복잡한 커리큘럼 개발이 어려웠다. Agent0는 외부 데이터 없이도 완전 자율적으로 에이전트를 진화시키는 다단계 공동진화 프레임워크로, 동일한 기반 LLM에서 출발한 두 에이전트(점점 어려운 과제를 제시하는 커리큘럼 에이전트와 이를 해결하는 실행 에이전트)를 상호 경쟁시키며 발전시킨다. 실행 에이전트에 외부 도구를 통합해 문제 해결 능력을 향상시키면 커리큘럼 에이전트는 더 복잡한 도구 인지 과제를 만들어내는 선순환이 형성된다. 실험 결과 Agent0는 Qwen3-8B-Base의 수학적 추론을 18%, 일반 추론을 24% 향상시켰다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Large Language Model (LLM) Agents, often trained with Reinforcement Learning (RL), are constrained by a dependency on human-curated data, limiting scalability and tethering AI to human knowledge. Existing self-evolution frameworks offer an alternative but are typically restricted by the model's inherent capabilities and single-round interactions, hindering the development of complex curricula involving tool use or dynamic reasoning. We introduce Agent0, a fully autonomous framework that evolves high-performing agents without external data through multi-step co-evolution and seamless tool integration. Agent0 establishes a symbiotic competition between two agents initialized from the same base LLM: a curriculum agent that proposes increasingly challenging frontier tasks, and an executor agent that learns to solve them. We integrate external tools to enhance the executor's problem-solving capacity; this improvement, in turn, pressures the curriculum agent to construct more complex, tool-aware tasks. Through this iterative process, Agent0 establishes a self-reinforcing cycle that continuously produces high-quality curricula. Empirically, Agent0 substantially boosts reasoning capabilities, improving the Qwen3-8B-Base model by 18% on mathematical reasoning and 24% on general reasoning benchmarks. Code is available at https://github.com/aiming-lab/Agent0.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.16043" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2511.16043" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=9"></script>
+</body>
+</html>
