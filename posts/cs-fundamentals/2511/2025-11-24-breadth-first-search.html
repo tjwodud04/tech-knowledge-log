@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Breadth-First Search (BFS)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BFS는 그래프를 레벨 단위로 탐색해 최단 경로(간선 수 기준)나 연결성 확인에 적합한 기본 알고리즘으로, 대규모 시스템에서는 레벨 동기화(frontier), 양방향 탐색, 병렬화가 핵심입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Breadth-First Search (BFS)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-24</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BFS는 그래프를 레벨 단위로 탐색해 최단 경로(간선 수 기준)나 연결성 확인에 적합한 기본 알고리즘으로, 대규모 시스템에서는 레벨 동기화(frontier), 양방향 탐색, 병렬화가 핵심입니다.</p>
+        <p>작동 원리: 시작 정점에서 큐(혹은 frontier)를 사용해 인접 정점을 방문하고 방문 플래그를 세워 중복을 막으며 레벨 단위로 확장합니다. 시간복잡도는 O(V+E), 메모리는 방문 비트맵 + frontier 크기입니다. 실무에선 단일-스레드 구현 대신 레벨 동기 구조(level-synchronous BFS)를 사용해 SIMD/GPU(예: Gunrock)나 분산 프레임워크(Pregel/Giraph, GraphX)에서 frontier를 병렬로 처리합니다.<br><br>엔지니어링 포인트: 대규모 소셜 그래프(수십억 엣지)에서는 양방향 BFS로 탐색 폭을 반감시키고, frontier 압축(bitmaps/CSR slices)과 캐시 친화적 메모리 레이아웃으로 메모리 대역폭을 최적화합니다. 또한 목적지 발견 시 즉시 탈출해 불필요한 레벨 확장을 줄이는 것이 실무적입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Neo4j(그래프 DB)와 NetworkX, GPU/분산 연구 구현에서 사용<br>코드:<br><pre><code class="language-cypher">// Neo4j (4.x): unweighted shortest path uses BFS internally<br>MATCH (a:User {id:1}), (b:User {id:42})<br>MATCH p=shortestPath((a)-[*]-(b))<br>RETURN p</code></pre><br><pre><code class="language-python"># NetworkX (v2.8+): BFS tree / edges<br>import networkx as nx<br>G=nx.read_edgelist('edges.txt', nodetype=int)<br>for u,v in nx.bfs_edges(G, source=0):<br>    process(u,v)</code></pre><br>실무 패턴:<br>- 대규모 그래프: Gunrock (GPU) bfs 실행: <code>./bin/bfs market graph.mtx --src=0 --undirected</code> (Gunrock, UC Davis 논문, v1.0+)<br>- 분산: Pregel/Pregel-유사 Apache Giraph(1.3)나 Spark GraphX(3.0)에서 frontier 메시지 전달 방식으로 확장<br>- Best practice: 양방향 BFS, depth limits(웹 크롤러), 방문 비트맵 압축으로 메모리/대역폭 최적화<br>참고: Gunrock(2015), Pregel 논문(2009), Neo4j GDS/shortestPath 기능 사용</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>BFS explores a graph level-by-level, ideal for unweighted shortest paths and connectivity checks; in production, scaling requires frontier management, bidirectional search, and parallel implementations.</p>
+        <p>How it works: BFS starts from a source, uses a queue or frontier bitmap to enumerate neighbors level-by-level, marking visited nodes to avoid repeats. Complexity is O(V+E) and memory is dominated by visited state plus current frontier. In practice, single-thread BFS is replaced by level-synchronous parallel BFS for GPUs (e.g., Gunrock) or distributed systems (Pregel/Giraph, GraphX) where the frontier is processed in parallel.<br><br>Engineering concerns: For billion-edge social graphs, bidirectional BFS halves explored levels for point-to-point queries; frontier compression (bitmaps/CSR slices) and cache-friendly layouts reduce memory bandwidth. Early exit on target discovery and limiting depth for crawlers are common production optimizations.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Used in Neo4j, NetworkX, Gunrock (GPU), Pregel/Giraph<br>Code:<br><pre><code class="language-cypher">// Neo4j (4.x): built-in shortestPath uses BFS semantics for unweighted paths<br>MATCH (a:User {id:1}), (b:User {id:42})<br>MATCH p=shortestPath((a)-[*]-(b))<br>RETURN p</code></pre><br><pre><code class="language-python"># NetworkX (v2.8+): bfs_edges<br>import networkx as nx<br>G = nx.read_edgelist('edges.txt', nodetype=int)<br>for u,v in nx.bfs_edges(G, source=0):<br>    handle_edge(u,v)</code></pre><br>Production patterns:<br>- GPU: Gunrock (<code>./bin/bfs market graph.mtx --src=0 --undirected</code>) used in research (Gunrock, UC Davis, 2015)<br>- Distributed: Pregel-style message-passing in Apache Giraph (1.3) or Spark GraphX (3.0) for large graphs<br>- Best practices: use bidirectional BFS for point queries, compress visited bitmaps, prefer frontier-level parallelism and early exit to minimize work</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
