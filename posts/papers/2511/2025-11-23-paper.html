@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    /* Post-specific overrides only */
+    .post-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      color: #111827;
+    }
+    
+    .topic-meta {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .topic-meta strong {
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .topic-meta > div {
+      margin: 0.5rem 0;
+    }
+    
+    .topic-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 1.75rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    
+    .topic-section h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    .topic-section p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.75;
+    }
+    
+    .arxiv-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .arxiv-link,
+    .hf-link {
+      display: inline-block;
+      padding: 0.65rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      color: white !important;
+    }
+    
+    .arxiv-link {
+      background: #3b82f6;
+    }
+    
+    .arxiv-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .hf-link {
+      background: #ffb400;
+    }
+    
+    .hf-link:hover {
+      background: #e69a00;
+      transform: translateY(-1px);
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .post-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .post-content h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topic-section {
+        padding: 1.25rem;
+      }
+      
+      .topic-section h2 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Peng Xia, Kaide Zeng, Jiaqi Liu, Can Qin, Fang Wu, Yiyang Zhou, Caiming Xiong, Huaxiu Yao</div>
+        <div><strong>발행일 / Published:</strong> 2025-11-23</div>
+        <div><strong>Arxiv ID:</strong> 2511.16043</div>
+        <div><strong>Affiliation:</strong> University of North Carolina at Chapel Hill</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>이 논문은 외부 데이터 없이 자체 진화로 고성능 에이전트를 만들어내는 완전 자율 프레임워크 Agent0을 제안한다. 동일한 베이스 LLM에서 초기화된 두 에이전트(점차 어려운 과제를 생성하는 커리큘럼 에이전트와 이를 해결하는 실행 에이전트)가 다단계로 상호 발전하는 경쟁 구조를 통해 점점 더 복잡한 과제를 만들어내고 해결능력을 향상시킨다. 실행 에이전트에 외부 도구를 통합해 문제해결 능력을 확장하면 커리큘럼 에이전트는 도구 활용을 반영한 더 어려운 과제를 생성하게 되어 자기강화 순환이 형성된다. 실험에서 Agent0은 Qwen3-8B-Base의 수리추론 성능을 18%, 일반추론을 24% 향상시켰다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Large Language Model (LLM) Agents, often trained with Reinforcement Learning (RL), are constrained by a dependency on human-curated data, limiting scalability and tethering AI to human knowledge. Existing self-evolution frameworks offer an alternative but are typically restricted by the model's inherent capabilities and single-round interactions, hindering the development of complex curricula involving tool use or dynamic reasoning. We introduce Agent0, a fully autonomous framework that evolves high-performing agents without external data through multi-step co-evolution and seamless tool integration. Agent0 establishes a symbiotic competition between two agents initialized from the same base LLM: a curriculum agent that proposes increasingly challenging frontier tasks, and an executor agent that learns to solve them. We integrate external tools to enhance the executor's problem-solving capacity; this improvement, in turn, pressures the curriculum agent to construct more complex, tool-aware tasks. Through this iterative process, Agent0 establishes a self-reinforcing cycle that continuously produces high-quality curricula. Empirically, Agent0 substantially boosts reasoning capabilities, improving the Qwen3-8B-Base model by 18% on mathematical reasoning and 24% on general reasoning benchmarks. Code is available at https://github.com/aiming-lab/Agent0.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.16043" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2511.16043" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
