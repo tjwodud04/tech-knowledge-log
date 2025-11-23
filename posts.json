@@ -1,13 +1,6 @@
 {
   "posts": [
     {
-      "title": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning",
-      "date": "2025-11-23",
-      "category": "papers",
-      "url": "posts/papers/2511/2025-11-23-paper.html",
-      "excerpt": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning"
-    },
-    {
       "title": "Dynamic Programming (DP)",
       "date": "2025-11-21",
       "category": "cs-fundamentals",
