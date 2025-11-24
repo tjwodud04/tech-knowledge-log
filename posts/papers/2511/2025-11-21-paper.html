@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition">
+  <link rel="stylesheet" href="./tech-knowledge-log/style.css?v=8">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Ayhan Kucukmanisa, Derya Gelmez, Sukru Selim Calik, Zeynep Hilal Kilimci</div>
+        <div><strong>발행일 / Published:</strong> 2025-11-21</div>
+        <div><strong>Arxiv ID:</strong> 2511.17477</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>핵심 내용<br>이 연구는 꾸란 낭송(Quranic recitation)에서 발생하는 미세한 음성 차이가 의미를 바꿀 수 있는 문제를 해결하기 위해 아랍어 음소(phoneme) 오발음 검출을 목표로 한 트랜스포머(transformer) 기반 멀티모달 딥러닝( multimodal deep learning ) 프레임워크를 제안한다. 음향 신호에서 추출한 UniSpeech 유도 음향 임베딩(acoustic embeddings)과 Whisper 전사에서 얻은 BERT 기반 텍스트 임베딩(textual embeddings)을 결합해 음성의 음운적 세부와 문맥적 정보를 동시에 반영하는 통합 표현을 만든다. 조기(early), 중간(intermediate), 후기(late) 융합(fusion) 등 서로 다른 통합 전략을 구현·비교하여 어떤 방식이 음소 수준의 오발음 검출에 더 효과적인지 평가했다.</p>
+        <p>평가에는 29개 아랍어 음소(이 중 하피즈(Hafiz) 소리 8개 포함)를 포함한 두 개의 데이터셋이 사용되었고, 11명의 원어민 발화자가 참여했다. 데이터 다양성과 일반화 성능을 높이기 위해 공개된 유튜브(YouTube) 녹음에서 추가 음성 샘플도 포함했다. 모델 성능은 정확도(accuracy), 정밀도(precision), 재현율(recall), F1-score 같은 표준 지표로 비교 평가되었으며, 실험 결과 UniSpeech-BERT 멀티모달 구성은 우수한 결과를 보였고 융합 기반 트랜스포머 아키텍처가 음소 수준 오발음 검출에 효과적임을 확인했다.</p>
+        <p>활용<br>제안된 접근법은 화자 독립적(speaker-independent)이고 음운적·문맥적 정보를 동시에 활용하므로, 꾸란 발음 교육을 포함한 컴퓨터 보조 언어 학습(Computer-Aided Language Learning, CALL) 시스템에 적용할 수 있다. 실무에서는 발음 교정 피드백, 자동 채점, 학습자 맞춤형 발음 연습 도구 등에 통합되어 교육 효율을 높이고 비전문가도 정확한 낭송을 연습하도록 도울 수 있다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Recent advances in multimodal deep learning have greatly enhanced the capability of systems for speech analysis and pronunciation assessment. Accurate pronunciation detection remains a key challenge in Arabic, particularly in the context of Quranic recitation, where subtle phonetic differences can alter meaning. Addressing this challenge, the present study proposes a transformer-based multimodal framework for Arabic phoneme mispronunciation detection that combines acoustic and textual representations to achieve higher precision and robustness. The framework integrates UniSpeech-derived acoustic embeddings with BERT-based textual embeddings extracted from Whisper transcriptions, creating a unified representation that captures both phonetic detail and linguistic context. To determine the most effective integration strategy, early, intermediate, and late fusion methods were implemented and evaluated on two datasets containing 29 Arabic phonemes, including eight hafiz sounds, articulated by 11 native speakers. Additional speech samples collected from publicly available YouTube recordings were incorporated to enhance data diversity and generalization. Model performance was assessed using standard evaluation metrics: accuracy, precision, recall, and F1-score, allowing a detailed comparison of the fusion strategies. Experimental findings show that the UniSpeech-BERT multimodal configuration provides strong results and that fusion-based transformer architectures are effective for phoneme-level mispronunciation detection. The study contributes to the development of intelligent, speaker-independent, and multimodal Computer-Aided Language Learning (CALL) systems, offering a practical step toward technology-supported Quranic pronunciation training and broader speech-based educational applications.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.17477" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2511.17477.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="./tech-knowledge-log/script.js?v=8"></script>
+</body>
+</html>
