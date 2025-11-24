@@ -22,6 +22,13 @@
       "excerpt": "동적계획법(DP)은 중복되는 하위문제를 저장해 계산을 줄이는 기법으로, 최적화·시퀀스 추론·정렬·정렬 기반 알고리즘 등 프로덕션 시스템에서 성능 향상과 정확성 보장을 위해 널리 쓰입니다."
     },
     {
+      "title": "Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition",
+      "date": "2025-11-21",
+      "category": "papers",
+      "url": "posts/papers/2511/2025-11-21-paper.html",
+      "excerpt": "Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition"
+    },
+    {
       "title": "Consistent Hashing (Ring & Rendezvous)",
       "date": "2025-11-19",
       "category": "cs-fundamentals",
