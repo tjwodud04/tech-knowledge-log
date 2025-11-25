@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Binary Search — Core Idea and Production Uses</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="이진 탐색은 정렬된 순서에서 목표값의 위치를 O(log n) 시간에 찾아내는 알고리즘으로, 대규모 프로덕션 시스템에서 인덱스 조회, SSTable/블록 검색, 정렬된 포스팅 리스트 접근 등에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Binary Search — Core Idea and Production Uses</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-26</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>이진 탐색은 정렬된 순서에서 목표값의 위치를 O(log n) 시간에 찾아내는 알고리즘으로, 대규모 프로덕션 시스템에서 인덱스 조회, SSTable/블록 검색, 정렬된 포스팅 리스트 접근 등에 필수적입니다.</p>
+        <p>작동 원리: 이진 탐색은 검색 공간을 중간점(mid) 기준으로 반으로 나누며 목표가 중간값보다 작으면 왼쪽 절반만, 크면 오른쪽 절반만 계속 탐색합니다. 구현상 주의점은 인덱스 오버플로우(low + high -> use low + (high - low)/2), 루프 종료 조건(예: low <= high vs low < high)과 lower_bound/upper_bound의 차이입니다. 성능을 높일 때는 분기(branch) 발생을 줄이는 branchless binary search, 캐시 친화적 블록 단위 검색, 또는 초반 지수 탐색(galloping/exponential search)과 결합하는 패턴이 자주 쓰입니다.<br><br>시스템 적용: 대형 스토리지/검색 시스템은 메모리·디스크 계층에서 정렬된 키에 대해 이진 탐색을 활용합니다. 예: LevelDB/RocksDB의 SSTable 블록 내부에서 restart 포인트나 인덱스 엔트리에 대해 이진 탐색을 수행해 블록 오프셋을 찾고, OpenJDK의 Arrays.binarySearch/ C++ std::lower_bound는 표준 라이브러리에서 널리 사용됩니다. 학술 연구는 분기 회피(branch avoidance)와 SIMD를 활용한 배치 검색으로 캐시·분기 비용을 줄이는 방법을 제안합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: LevelDB / RocksDB에서 사용<br>  코드:<br>  <pre><code class="language-cpp">// 단순화된 lower_bound 스타일: SSTable 블록 내 restart 포인트 검색<br>  int lo = 0, hi = restarts-1;<br>  while (lo &lt; hi) {<br>    int mid = lo + ((hi - lo) &gt;&gt; 1);<br>    if (key_at(mid) &lt; target) lo = mid + 1; else hi = mid;<br>  }<br>  // lo가 블록 오프셋을 가리킴</code></pre><br>  출처: LevelDB(구현 관점), RocksDB v6.x에서 유사한 블록 인덱스 탐색 패턴 사용<br><br>- 사례: OpenJDK Arrays.binarySearch (Java 11)<br>  코드:<br>  <pre><code class="language-java">int idx = Arrays.binarySearch(sortedArray, key);<br>  if (idx &gt;= 0) // found</code></pre><br>  출처: OpenJDK 11 Arrays.java<br><br>실무 패턴/베스트프랙티스:<br>- 항상 mid 계산에서 오버플로우 방지 (low + (high-low)/2)<br>- 위치(삽입점)가 필요하면 lower_bound/upper_bound를 사용<br>- 디스크 기반 SSTable에서는 블록 프리페치 + bloom filter로 불필요한 이진 탐색 회피<br>- 긴 앞부분이 유사한 경우 지수 탐색 후 이진 탐색(galloping)으로 비용 절감<br>참고: 분기 회피/벡터화 관련 연구(Branchless binary search, SIMD-enhanced search)들이 실무 성능 향상에 기여</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Binary search finds a target in a sorted sequence in O(log n) time; it's a foundational building block in production systems for indexes, SSTables, sorted posting lists and many library routines.</p>
+        <p>How it works: Binary search splits the search range by a midpoint and discards half each step. Key implementation details include safe mid computation (use mid = low + (high - low)/2 to avoid overflow), loop invariants (low <= high vs low < high), and the distinction between searching for existence vs insertion point (lower_bound/upper_bound). For production performance, engineers combine binary search with prefetching, branchless variants to reduce misprediction, and exponential (galloping) search to handle long runs efficiently.<br><br>Systems usage: Storage engines and search stacks use binary search over in-memory arrays and on-disk block indexes: e.g., LevelDB and RocksDB perform binary lookups inside SSTable blocks and restart tables to map keys to offsets; OpenJDK's Arrays.binarySearch and C++ std::lower_bound are used widely in runtime libraries. Research on branch-free and SIMD-accelerated binary search demonstrates measurable latency improvements in hot paths.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: LevelDB / RocksDB block index lookup<br>  Code:<br>  <pre><code class="language-cpp">// simplified lower_bound used to find restart offset<br>  int lo = 0, hi = restarts - 1;<br>  while (lo &lt; hi) {<br>    int mid = lo + ((hi - lo) &gt;&gt; 1);<br>    if (key_at(mid) &lt; target) lo = mid + 1; else hi = mid;<br>  }<br>  // lo -&gt; block offset</code></pre><br>  Where used: LevelDB (Google origin) and RocksDB (Facebook) use this pattern in SSTable block/restart lookup (RocksDB v6+ implementations)<br><br>- Case: OpenJDK Arrays.binarySearch (Java 11+)<br>  Code:<br>  <pre><code class="language-java">int idx = Arrays.binarySearch(sortedArray, key);<br>  if (idx &gt;= 0) { /* found */ }</code></pre><br>  Where used: Java standard library code paths and many frameworks relying on JDK utilities<br><br>Production patterns:<br>- Always avoid mid overflow; prefer explicit lower_bound when you need insertion index<br>- Combine bloom filters/prefix indexes to skip binary search on disk<br>- Use exponential search before binary search for skewed distributions<br>- Consider branchless or SIMD implementations on CPU-hot code paths (research-backed)<br>References: OpenJDK Arrays, LevelDB source; literature on branchless/SIMD binary search for low-latency systems.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
