@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Binary Search — Core Idea and Production Uses",
+      "date": "2025-11-26",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-11-26-binary-search.html",
+      "excerpt": "이진 탐색은 정렬된 순서에서 목표값의 위치를 O(log n) 시간에 찾아내는 알고리즘으로, 대규모 프로덕션 시스템에서 인덱스 조회, SSTable/블록 검색, 정렬된 포스팅 리스트 접근 등에 필수적입니다."
+    },
+    {
       "title": "Breadth-First Search (BFS)",
       "date": "2025-11-24",
       "category": "cs-fundamentals",
