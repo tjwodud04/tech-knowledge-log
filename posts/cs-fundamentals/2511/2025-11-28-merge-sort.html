@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Merge Sort (병합 정렬)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="병합 정렬은 분할 정복 기반의 안정 정렬로, 메모리 제약이 있는 대용량 데이터 정렬 및 병합 단계에서 실무적으로 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Merge Sort (병합 정렬)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-11-28</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>병합 정렬은 분할 정복 기반의 안정 정렬로, 메모리 제약이 있는 대용량 데이터 정렬 및 병합 단계에서 실무적으로 중요합니다.</p>
+        <p>작동 원리: 배열을 반으로 쪼갠 뒤 각각을 재귀적으로 정렬하고(분할), 두 정렬된 부분을 선형 시간에 병합합니다. 비교 기반 정렬이라 비교 횟수는 O(n log n), 추가 메모리는 일반적으로 O(n)이나 외부 정렬(디스크 기반)은 다수의 정렬된 러닝(run)을 디스크에 쓰고 k-way 병합으로 I/O를 최소화합니다.<br>실무 세부: 실제 시스템에서는 2-way 병합 대신 다중 병합(k-way)을 쓰고 우선순위 큐(미니 힙)를 이용해 메모리-디스크 트레이드오프를 조절합니다. 또한 안정성(stability)이 필요할 때 유리하고, 내부 정렬에서는 작은 블록에 대해 insertion sort로 전환하는 하이브리드(예: Timsort)가 성능 이점을 줍니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: CPython의 정렬(탐색 최적화) — Timsort (Python 3.8+)는 병합 정렬과 삽입 정렬 하이브리드<br>  코드:<br>  import heapq<br>  with open('a.sorted') as fa, open('b.sorted') as fb:<br>      merged = heapq.merge(fa, fb)<br>      for line in merged:<br>          process(line)<br>  사용처: Python 표준 라이브러리(heapq.merge는 스트리밍 k-way 병합에 사용)<br>  실무 패턴: 외부 정렬 파이프라인에서 메모리 버퍼로 부분 정렬 후 병합(스트리밍으로 메모리 고정)<br>- 사례: PostgreSQL 외부 정렬 구현(src/backend/utils/sort/tuplesort.c, PostgreSQL 14)<br>  코드/명령:<br>  SET work_mem = '64MB';<br>  EXPLAIN ANALYZE SELECT * FROM big_table ORDER BY key;<br>  실무 패턴: work_mem 크기로 in-memory sort 여부 결정, 초과 시 디스크 기반 multi-way merge 발생<br>- 사례: Hadoop MapReduce shuffle/merge (Map 출력의 spill/merge 단계) — 대규모 분산 정렬/병합<br>  실무 패턴: 스파크/하둡은 메모리 버퍼와 병합 단계에서 k-way merge를 사용해 네트워크/디스크 I/O 최적화</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Merge sort is a divide-and-conquer, stable sorting algorithm; in production it's foundational for external sorting and merge phases in distributed systems.</p>
+        <p>How it works: split the sequence recursively until small chunks, sort each chunk, then merge sorted chunks pairwise. Comparison complexity is O(n log n); native implementations use O(n) extra space for merging. For datasets larger than RAM, external merge sort writes sorted runs to disk and performs multi-way (k-way) merges to reduce I/O passes.<br>Practical details: production systems replace naive 2-way merging with k-way merging using a min-heap to select the next smallest item, balancing RAM and number of disk seeks. Hybrid approaches (Timsort) switch to insertion sort for small runs to exploit natural runs in real data; stability is preserved which matters for compound-key sorts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: CPython / Timsort (Python 3.8+), Java Arrays.sort for Objects (Java 8+) — practical merge-based hybrid<br>  Code:<br>  import heapq<br>  with open('a.sorted') as A, open('b.sorted') as B:<br>      for line in heapq.merge(A, B):<br>          process(line)<br>  Where: Python stdlib heapq.merge used for streaming k-way merges in ETL/external-sort scripts<br>  Production patterns: produce sorted runs in-memory, flush to disk, then k-way merge streams to final file<br>- Case: PostgreSQL external sort (src/backend/utils/sort/tuplesort.c, e.g., PostgreSQL 14)<br>  Command:<br>  SET work_mem = '64MB';<br>  EXPLAIN ANALYZE SELECT * FROM big_table ORDER BY key;<br>  Where: DB engine chooses in-memory or disk-based merge; tune work_mem to reduce spills<br>- Case: Hadoop/Spark shuffle & merge (Map output spill/merge phases)<br>  Where: MapReduce/Spark use multi-way merging during shuffle to combine sorted partitions, reducing network/disk I/O<br>  Production patterns: tune buffer sizes and number of merge streams (spill thresholds) to minimize passes and I/O.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
