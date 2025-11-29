@@ -47,7 +47,7 @@ flowchart LR
   I --> J[Upload to GitHub<br/>Tech Knowledge Log 포스트]
   I --> K[Send to Slack<br/>논문 정보 & 링크 알림]
 ```
-CS Knowledge Workflow
+- CS Knowledge Workflow
 ```mermaid
 flowchart LR
   A[Schedule Trigger<br/>Mon/Wed/Fri 08:27 KST] --> B[Check Folder Exists<br/>posts/cs-fundamentals/2511]
