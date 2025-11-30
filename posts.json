@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Heap (Data Structure)",
+      "date": "2025-12-01",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-12-01-heap-data-structure.html",
+      "excerpt": "힙은 우선순위 큐를 효율적으로 구현하는 완전이진트리 기반의 자료구조로, 스케줄링·루트 검색·그리디 알고리즘에서 성능과 안정성을 보장합니다."
+    },
+    {
       "title": "Merge Sort (병합 정렬)",
       "date": "2025-11-28",
       "category": "cs-fundamentals",
