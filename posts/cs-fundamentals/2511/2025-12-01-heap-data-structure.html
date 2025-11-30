@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Heap (Data Structure)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="힙은 우선순위 큐를 효율적으로 구현하는 완전이진트리 기반의 자료구조로, 스케줄링·루트 검색·그리디 알고리즘에서 성능과 안정성을 보장합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Heap (Data Structure)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-01</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>힙은 우선순위 큐를 효율적으로 구현하는 완전이진트리 기반의 자료구조로, 스케줄링·루트 검색·그리디 알고리즘에서 성능과 안정성을 보장합니다.</p>
+        <p>작동 원리: 바이너리 힙(최소/최대)은 배열 기반의 완전이진트리로 부모-자식 관계는 인덱스로 계산합니다. 삽입은 맨 끝에 추가 후 부모와 교환(상향 힙화, O(log n)), 삭제(특히 최솟값/최댓값)는 루트와 마지막 원소 교체 후 하향 힙화(O(log n))로 구현됩니다. 감소키(decrease-key) 또는 임의 삭제가 빈번한 워크로드에서는 단순 binary heap 대신 인덱스 힙(원소→인덱 맵)이나 pairing/fibonacci heap 같은 대체구조를 고려합니다. <br><br>실무 팁: 멀티스레드 환경에서는 힙 자체를 락으로 보호하거나 lock-free 큐/skiplist를 대안으로 씁니다. 대규모 스케줄러(예: 타이머 관리)에서는 lazy deletion(삭제 마킹 후 실제 제거 지연)을 사용해 삭제 비용을 줄입니다. 알고리즘 관점에서 Dijkstra나 A*는 힙을 이용한 우선순위 큐가 핵심이며, 생산 시스템에서는 언어별 표준 구현(OpenJDK, C++ STL, Go container/heap, Python heapq)을 그대로 사용하면서 인덱스 관리만 커스터마이즈하는 패턴이 흔합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: OpenJDK PriorityQueue (OpenJDK 17 기준)<br>코드:<br><pre><code class="language-java">PriorityQueue&lt;Integer&gt; pq = new PriorityQueue&lt;&gt;();<br>pq.add(10); pq.add(3); pq.add(7);<br>int smallest = pq.poll(); // 3</code></pre><br>출처: OpenJDK source (java.util.PriorityQueue)<br><br>- 사례: Kubernetes 스케줄러/타이머(Go 생태계)에서의 힙 활용 (예: Go의 container/heap)<br>코드:<br><pre><code class="language-go">type IntHeap []int<br>func (h IntHeap) Len() int { return len(h) }<br>func (h IntHeap) Less(i,j int) bool { return h[i] &lt; h[j] }<br>// Push/Pop 구현 후 heap.Push(&amp;h, x)</code></pre><br>출처: Go standard library (container/heap), Kubernetes 스케줄러 구현에서 유사 패턴 활용 (k8s v1.27 검색)<br><br>실무 패턴:<br>- decrease-key가 필요하면 인덱스 맵 유지(원소->인덱) 또는 lazy-update 사용<br>- 대량 삭제/갱신에는 lazy deletion으로 amortized 비용 절감<br>- 멀티스레드: 분할 힙(sharded heap) 또는 외부 동기화<br>참고 논문/실행: Dijkstra(1959) 및 다수의 그래프 알고리즘 구현에서 기본 우선순위 큐로 사용</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A heap is an array-backed complete binary tree used to implement priority queues efficiently; it's central to schedulers, shortest-path algorithms, and real-time timers in production systems.</p>
+        <p>How it works: A binary heap (min or max) stores elements in an array; parent/child indices are computed (parent(i) = (i-1)/2). Insert places the new element at the end and bubbles it up (heapify-up, O(log n)). Removing the root swaps with the last element and heapifies down (heapify-down, O(log n)). If you need decrease-key or arbitrary removals often, a plain binary heap suffers—production systems use an indexed heap (element→index map), lazy deletion, or alternative heap types (pairing/fibonacci) depending on workload.<br><br>Operational notes: In multithreaded or distributed systems, protect the heap with locks or use lock-free priority queues. For timer wheels and schedulers, lazy deletion and sharding (multiple heaps) are common to reduce contention. Algorithms like Dijkstra or A* rely on efficient heap implementations; most teams reuse language-standard heaps (OpenJDK PriorityQueue, C++ std::priority_queue, Go container/heap, Python heapq) and implement index tracking when mutable priorities are required.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: OpenJDK PriorityQueue (OpenJDK 17)<br>Code:<br><pre><code class="language-java">PriorityQueue&lt;Integer&gt; pq = new PriorityQueue&lt;&gt;();<br>pq.add(10); pq.add(3); pq.add(7);<br>int smallest = pq.poll(); // returns 3</code></pre><br>Source: OpenJDK source (java.util.PriorityQueue in OpenJDK 17)<br><br>- Case: Go's container/heap used in Kubernetes scheduler internals (K8s v1.27 and similar projects)<br>Code:<br><pre><code class="language-go">type IntHeap []int<br>func (h IntHeap) Len() int { return len(h) }<br>func (h IntHeap) Less(i,j int) bool { return h[i] &lt; h[j] }<br>// implement Push/Pop then: heap.Push(&amp;h, x)</code></pre><br>Source: Go standard library (container/heap); similar patterns appear in Kubernetes scheduler code<br><br>Production patterns/best practices:<br>- Maintain an index map for efficient decrease-key or arbitrary removal<br>- Use lazy deletion when removals are frequent to amortize cost<br>- Shard heaps or use concurrent priority queue implementations to reduce lock contention<br>References: Dijkstra's shortest-path (uses priority queues), OpenJDK and Go stdlib sources for concrete implementations</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
