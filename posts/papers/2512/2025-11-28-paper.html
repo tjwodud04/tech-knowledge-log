@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>LFM2 Technical Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LFM2 Technical Report">
+  <link rel="stylesheet" href="./tech-knowledge-log/style.css?v=8">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>LFM2 Technical Report</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Alexander Amini, Anna Banaszak, Harold Benoit, Arthur Böök, Tarek Dakhran, Song Duong, Alfred Eng, Fernando Fernandes, Marc Härkönen, Anne Harrington, Ramin Hasani, Saniya Karwa, Yuri Khrustalev, Maxime Labonne, Mathias Lechner, Valentine Lechner, Simon Lee, Zetian Li, Noel Loo, Jacob Marks, Edoardo Mosca, Samuel J. Paech, Paul Pak, Rom N. Parnichkun, Alex Quach, Ryan Rogers, Daniela Rus, Nayan Saxena, Bettina Schlager, Tim Seyde, Jimmy T. H. Smith, Aditya Tadimeti, Neehal Tumma</div>
+        <div><strong>발행일 / Published:</strong> 2025-11-28</div>
+        <div><strong>Arxiv ID:</strong> 2511.23404</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>핵심 내용<br>LFM2는 모바일·엣지 환경에서 효율적으로 동작하면서도 높은 작업 성능을 내도록 설계된 Liquid Foundation Models(LFM2) 계열입니다. 하드웨어-인더-루프(hardware-in-the-loop) 아키텍처 탐색을 통해 엣지의 지연(latency) 및 메모리 제약을 만족하는 콤팩트한 하이브리드 백본을 확보했습니다. 이 백본은 게이트드 쇼트 컨볼루션(gated short convolutions)과 소수의 그룹드 쿼리 어텐션(grouped query attention) 블록을 결합해, 유사 크기 모델보다 CPU에서 프리필(prefill) 및 디코드 속도가 최대 2배 빠릅니다. 모델 계열은 3.5억~83억(350M–8.3B) 매개변수를 포함하며, 밀집(dense) 모델(350M, 700M, 1.2B, 2.6B)과 Mixture-of-Experts(MoE) 변형(총 8.3B, 활성 1.5B)을 제공하고 모두 32K 컨텍스트 길이를 지원합니다.</p>
+        <p>학습 파이프라인은 실용적 최적화를 적용했습니다. 서포트 불일치(support mismatch)를 피하기 위한 템퍼링된(tempered), 분리된 Top-K 지식 증류(Top-K knowledge distillation) 목적함수, 난이도 순으로 정렬한 커리큘럼 러닝(curriculum learning), 그리고 사후학습(post-training) 3단계(감독 미세조정 supervised fine-tuning, 길이 정규화된 선호도 최적화 length-normalized preference optimization, 모델 병합 model merging)를 포함합니다. 약 10–12조 토큰으로 사전학습(pretraining)했으며, LFM2-2.6B는 IFEval에서 79.56%, GSM8K에서 82.41%를 기록하는 등 다양한 벤치마크에서 경쟁력 있는 성능을 보였습니다.</p>
+        <p>활용<br>LFM2는 비전-언어(LFM2-VL), 오디오(LFM2-Audio), 검색 엔진용 인코더(LFM2-ColBERT) 등 다중모달 및 검색 변형을 제공해 실제 응용에 바로 활용할 수 있습니다. LFM2-VL은 토큰 효율적 시각 처리로 정확도·지연 간 조정이 가능하고, LFM2-Audio는 입력·출력 경로를 분리해 실시간 음성-대응(음성-음성) 상호작용에서 파라미터가 3배 큰 모델과 견줄만한 성능을 냅니다. LFM2-ColBERT는 다국어 고성능 검색을 위한 저지연 인코더를 제공하며, 모든 모델을 오픈 웨이트와 ExecuTorch, llama.cpp, vLLM 배포 패키지로 배포해 엣지에서 빠르고 메모리 효율적인 추론이 필요한 실제 시스템의 기반으로 활용하기 적합합니다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>We present LFM2, a family of Liquid Foundation Models designed for efficient on-device deployment and strong task capabilities. Using hardware-in-the-loop architecture search under edge latency and memory constraints, we obtain a compact hybrid backbone that combines gated short convolutions with a small number of grouped query attention blocks, delivering up to 2x faster prefill and decode on CPUs compared to similarly sized models. The LFM2 family covers 350M-8.3B parameters, including dense models (350M, 700M, 1.2B, 2.6B) and a mixture-of-experts variant (8.3B total, 1.5B active), all with 32K context length. LFM2's training pipeline includes a tempered, decoupled Top-K knowledge distillation objective that avoids support mismatch; curriculum learning with difficulty-ordered data; and a three-stage post-training recipe of supervised fine-tuning, length-normalized preference optimization, and model merging. Pre-trained on 10-12T tokens, LFM2 models achieve strong results across diverse benchmarks; for example, LFM2-2.6B reaches 79.56% on IFEval and 82.41% on GSM8K. We further build multimodal and retrieval variants: LFM2-VL for vision-language tasks, LFM2-Audio for speech, and LFM2-ColBERT for retrieval. LFM2-VL supports tunable accuracy-latency tradeoffs via token-efficient visual processing, while LFM2-Audio separates audio input and output pathways to enable real-time speech-to-speech interaction competitive with models 3x larger. LFM2-ColBERT provides a low-latency encoder for queries and documents, enabling high-performance retrieval across multiple languages. All models are released with open weights and deployment packages for ExecuTorch, llama.cpp, and vLLM, making LFM2 a practical base for edge applications that need fast, memory-efficient inference and strong task capabilities.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2511.23404" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2511.23404.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="./tech-knowledge-log/script.js?v=8"></script>
+</body>
+</html>
