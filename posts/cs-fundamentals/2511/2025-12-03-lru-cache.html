@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>LRU Cache (Least Recently Used)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LRU(Least Recently Used)는 캐시에서 가장 오래 사용되지 않은 항목을 제거하는 간단하고 실무에서 널리 쓰이는 교체 정책입니다. 응답성 개선과 메모리 제약이 있는 서비스에서 비용 대비 성능을 맞추는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>LRU Cache (Least Recently Used)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-03</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LRU(Least Recently Used)는 캐시에서 가장 오래 사용되지 않은 항목을 제거하는 간단하고 실무에서 널리 쓰이는 교체 정책입니다. 응답성 개선과 메모리 제약이 있는 서비스에서 비용 대비 성능을 맞추는 데 중요합니다.</p>
+        <p>작동 원리: LRU는 시간 순서를 기반으로 '최근 사용' 정보를 유지하여, 공간이 부족할 때 가장 오래 참조되지 않은 항목을 제거합니다. 구현 기법으로는 이중 연결리스트 + 해시맵(정확한 O(1) 제거/갱신), 또는 대용량 시스템에서 사용되는 근사 LRU(예: CLOCK, CLOCK-Pro) 등이 있습니다. 대규모 시스템은 strict LRU의 오버헤드(메모리, 동시성)를 줄이기 위해 slab-aware LRU(메모리 할당 단위별 LRU), 샤딩(sharding) 및 통계 기반 적응형(ARC 같은) 기법을 사용합니다.<br><br>운영 고려사항: 동시성 환경에서는 락 비용을 줄이기 위해 세분화된 락/lock-free 구조 또는 per-thread sharding을 사용합니다. 디스크-메모리 계층에선 eviction과 persistence(예: write-back)를 조율해야 하며, TTL과 크기 기반 정책을 혼합하는 것이 일반적입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Redis (configurable eviction)<br>  코드:<br>  <pre><code class="language-bash"># Redis 6.x/7.x에서 메모리 기반 LRU 사용 설정<br>  CONFIG SET maxmemory 1gb<br>  CONFIG SET maxmemory-policy allkeys-lru</code></pre><br>  사용처: 세션 스토어, 캐싱 레이어(클라우드 환경에서 수천 TPS)<br><br>- 사례: memcached (기본 LRU slab allocator)<br>  코드:<br>  <pre><code class="language-bash">memcached -m 2048 -p 11211 -c 1024</code></pre><br>  사용처: Facebook/Live 서비스의 오브젝트 캐시(오리지널 memcached 디자인 배경 포함)<br><br>- 사례: Node.js lru-cache (npm lru-cache v6+)<br>  코드:<br>  <pre><code class="language-js">const LRU = require('lru-cache');<br>  const cache = new LRU({ max: 500, ttl: 1000 * 60 });<br>  cache.set('k', 'v');</code></pre><br>  사용처: 서버사이드 렌더링 캐시, Express 미들웨어<br><br>실무 패턴: 샤딩으로 락 경합 완화, 온-힙 vs off-heap 분리, TTL+LRU 혼합으로 스파이크에 강하게 구성. 연구/대규모 사례로는 ARC(Adaptive Replacement Cache)와 CLOCK 기반 근사 LRU가 IBM/OS 및 스토리지 시스템에서 채택됩니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LRU (Least Recently Used) evicts the least recently accessed items and is a simple, practical cache replacement policy used widely to improve latency and control memory in production systems.</p>
+        <p>How it works: LRU maintains recency order so that when capacity is reached the oldest-used entry is evicted. Typical exact implementation uses a hash map + doubly-linked list to provide O(1) get/set/evict. At scale, strict LRU is costly (pointer overhead, locks), so systems use approximations: CLOCK (second-chance), CLOCK-Pro, slab-aware LRU, or sharded LRU. Adaptive algorithms (e.g., ARC) combine recency and frequency to outperform naive LRU under certain workloads.<br><br>Operational notes: In concurrent servers use sharded caches or lock-free variants to reduce contention. For multi-tier storage coordinate eviction with persistence (write-back) and mix TTL with LRU to control stale data and prevent cache stampedes.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Redis (6.x/7.x) – configurable LRU eviction<br>  Code:<br>  <pre><code class="language-bash"># enable LRU eviction<br>  CONFIG SET maxmemory 1gb<br>  CONFIG SET maxmemory-policy allkeys-lru</code></pre><br>  Used for session stores, application caches at high TPS.<br><br>- Case: memcached (slab allocator with LRU)<br>  Code:<br>  <pre><code class="language-bash">memcached -m 2048 -p 11211 -c 1024</code></pre><br>  memcached is used by many large services as object cache; slabs reduce fragmentation while per-slab LRU manages eviction.<br><br>- Case: Node.js 'lru-cache' (npm, e.g., v6+)<br>  Code:<br>  <pre><code class="language-js">const LRU = require('lru-cache');<br>  const cache = new LRU({ max: 500, ttl: 1000 * 60 });<br>  cache.set('key', 'value');</code></pre><br>  Used in server-side rendering, middleware caches.<br><br>Production patterns: shard to avoid lock contention, combine TTL with LRU, prefer approximate LRU (CLOCK) in kernel/storage (Linux page cache uses CLOCK), and consider ARC/CLOCK-Pro from academic literature when workloads have mixed recency/frequency.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
