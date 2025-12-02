@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "LRU Cache (Least Recently Used)",
+      "date": "2025-12-03",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2511/2025-12-03-lru-cache.html",
+      "excerpt": "LRU(Least Recently Used)는 캐시에서 가장 오래 사용되지 않은 항목을 제거하는 간단하고 실무에서 널리 쓰이는 교체 정책입니다. 응답성 개선과 메모리 제약이 있는 서비스에서 비용 대비 성능을 맞추는 데 중요합니다."
+    },
+    {
       "title": "Heap (Data Structure)",
       "date": "2025-12-01",
       "category": "cs-fundamentals",
