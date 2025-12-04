@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Hash Table (해시 테이블)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="해시 테이블은 키-값 매핑에서 상수 평균 시간 조회를 제공하는 핵심 자료구조로, 캐시, 데이터베이스 인덱스, 메모리 키-값 저장소 등 실무 시스템에서 성능 병목을 줄이는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Hash Table (해시 테이블)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-05</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>해시 테이블은 키-값 매핑에서 상수 평균 시간 조회를 제공하는 핵심 자료구조로, 캐시, 데이터베이스 인덱스, 메모리 키-값 저장소 등 실무 시스템에서 성능 병목을 줄이는 데 중요합니다.</p>
+        <p>작동 원리: 키를 해시 함수로 정수 인덱스로 변환한 뒤 버킷에 저장합니다. 충돌 해결은 체이닝(버킷에 연결 리스트 또는 벡터)과 오픈 어드레싱(선형/2차 탐사, 쿡부 해싱 등)이 주로 사용됩니다. 성능 관점에서는 평균 O(1)이지만 로드 팩터, 해시 품질, 리사이징 정책이 실제 처리량과 지연시간에 큰 영향을 미칩니다.<br>고급 기법: 프로덕션 환경에서는 캐시 지역성(cache locality)과 낮은 메모리 오버헤드를 위해 SwissTable/robin-hood, cuckoo hashing, hopscotch 같은 기법을 채택합니다. 예: Java 8 HashMap은 긴 체이닝 버킷을 트리(레드-블랙)로 전환(treeify)하여 최악 O(log n)을 보장합니다. Redis는 chaining 기반의 dict.c로 빠른 평균 성능과 점진적 리해싱을 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Redis (메모리 키-값 저장소)<br>  코드: redis-cli 사용 예<br>  <pre><code class="language-bash">SET user:42 '{"name":"alice"}'<br>  GET user:42</code></pre><br>  출처: Redis 소스 src/dict.c, Redis 7.x<br>  실무 패턴: 점진적(rehash)과 낮은 물리적 메모리 오버헤드를 유지하기 위해 load-factor를 모니터링하고, 큰 리사이징은 백그라운드로 수행<br><br>- 사례: OpenJDK HashMap (Java 8+)<br>  코드: Java 사용 예<br>  <pre><code class="language-java">Map&lt;String,Integer&gt; m = new HashMap&lt;&gt;();<br>  m.put("k", 1);<br>  int v = m.getOrDefault("k", 0);</code></pre><br>  출처: OpenJDK 8+ src/java.base/share/classes/java/util/HashMap.java (treeify threshold = 8)<br>  실무 패턴: 대량 삽입 전 미리 초기 용량(capacity)을 설정해 리사이징 비용 회피<br><br>- 사례: Linux Kernel hashtable<br>  코드: include/linux/hashtable.h<br>  <pre><code class="language-c">DEFINE_HASHTABLE(table, 10);<br>  hash_add(table, &amp;node-&gt;list, key_hash);</code></pre><br>  출처: Linux kernel v5.x<br>  실무 패턴: 해시 매크로로 lock-stripe/RCU와 결합해 동시성 확보<br><br>- 사례(연구/라이브러리): absl::flat_hash_map, Facebook Folly F14<br>  코드: C++ 사용 예<br>  <pre><code class="language-cpp">absl::flat_hash_map&lt;std::string,int&gt; m;<br>  m["k"] = 1;</code></pre><br>  출처: Abseil (flat_hash_map), Folly F14 — SwissTable/Robin Hood 기반으로 높은 캐시 효율 제공<br>  참고 논문: Pagh & Rodler, "Cuckoo Hashing" (2001)</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Hash tables map keys to values with near-constant average-time lookup, making them essential for caches, DB indexes, and in-memory key-value systems in production.</p>
+        <p>How it works: A hash function transforms a key into an index; collisions are handled by chaining (lists/vectors per bucket) or open addressing (linear/quadratic probing, cuckoo). Practical performance depends on load factor, hash quality, resize policy, and cache locality. Resizing (rehash) is an expensive operation that production systems mitigate with incremental or preallocated resizing.<br>Advanced techniques: For high-throughput low-latency systems, implementations use robin-hood hashing, cuckoo hashing, SwissTable-like metadata layouts, or bucket treeification. Example: Java 8 HashMap treeifies long chains into red-black trees (threshold=8) to avoid O(n) worst-case. Redis uses a chaining-based dict with incremental rehash to keep operations fast while resizing in the background.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Redis (in-memory key-value store)<br>  Code (runtime):<br>  <pre><code class="language-bash">SET user:42 '{"name":"alice"}'<br>  GET user:42</code></pre><br>  Source: Redis source src/dict.c, Redis 7.x<br>  Production patterns: monitor load factor, use incremental rehash to avoid stop-the-world resizing<br><br>- Case: OpenJDK HashMap (Java 8+)<br>  Code:<br>  <pre><code class="language-java">Map&lt;String,Integer&gt; m = new HashMap&lt;&gt;();<br>  m.put("k", 1);<br>  int v = m.getOrDefault("k", 0);</code></pre><br>  Source: OpenJDK HashMap.java (treeify threshold = 8)<br>  Production patterns: pre-size maps for bulk loads to avoid repeated rehashing<br><br>- Case: Linux kernel hashtable<br>  Code (kernel macro):<br>  <pre><code class="language-c">DEFINE_HASHTABLE(table, 10);<br>  hash_add(table, &amp;node-&gt;list, key_hash);</code></pre><br>  Source: include/linux/hashtable.h (Linux kernel v5.x)<br>  Production patterns: combine hashtable with locking/RCU for concurrency<br><br>- Case: Abseil absl::flat_hash_map / Facebook Folly F14<br>  Code (C++):<br>  <pre><code class="language-cpp">absl::flat_hash_map&lt;std::string,int&gt; m;<br>  m["k"] = 1;</code></pre><br>  Source: Abseil (flat_hash_map), Folly F14 — implementations use SwissTable/Robin Hood approaches for cache efficiency<br>  Research: Pagh & Rodler, "Cuckoo Hashing" (2001)</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
