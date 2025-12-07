@@ -4,7 +4,7 @@
       "title": "Hash Table (해시 테이블)",
       "date": "2025-12-05",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2511/2025-12-05-hash-table.html",
+      "url": "posts/cs-fundamentals/2512/2025-12-05-hash-table.html",
       "excerpt": "해시 테이블은 키-값 매핑에서 상수 평균 시간 조회를 제공하는 핵심 자료구조로, 캐시, 데이터베이스 인덱스, 메모리 키-값 저장소 등 실무 시스템에서 성능 병목을 줄이는 데 중요합니다."
     },
     {
@@ -18,14 +18,21 @@
       "title": "LRU Cache (Least Recently Used)",
       "date": "2025-12-03",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2511/2025-12-03-lru-cache.html",
+      "url": "posts/cs-fundamentals/2512/2025-12-03-lru-cache.html",
       "excerpt": "LRU(Least Recently Used)는 캐시에서 가장 오래 사용되지 않은 항목을 제거하는 간단하고 실무에서 널리 쓰이는 교체 정책입니다. 응답성 개선과 메모리 제약이 있는 서비스에서 비용 대비 성능을 맞추는 데 중요합니다."
+    },
+    {
+      "title": "LFM2 Technical Report",
+      "date": "2025-12-02",
+      "category": "papers",
+      "url": "posts/papers/2512/2025-12-02-paper.html",
+      "excerpt": "LFM2 Technical Report"
     },
     {
       "title": "Heap (Data Structure)",
       "date": "2025-12-01",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2511/2025-12-01-heap-data-structure.html",
+      "url": "posts/cs-fundamentals/2512/2025-12-01-heap-data-structure.html",
       "excerpt": "힙은 우선순위 큐를 효율적으로 구현하는 완전이진트리 기반의 자료구조로, 스케줄링·루트 검색·그리디 알고리즘에서 성능과 안정성을 보장합니다."
     },
     {
@@ -34,13 +41,6 @@
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2511/2025-11-28-merge-sort.html",
       "excerpt": "병합 정렬은 분할 정복 기반의 안정 정렬로, 메모리 제약이 있는 대용량 데이터 정렬 및 병합 단계에서 실무적으로 중요합니다."
-    },
-    {
-      "title": "LFM2 Technical Report",
-      "date": "2025-11-28",
-      "category": "papers",
-      "url": "posts/papers/2512/2025-11-28-paper.html",
-      "excerpt": "LFM2 Technical Report"
     },
     {
       "title": "GigaEvo: An Open Source Optimization Framework Powered By LLMs And Evolution Algorithms",
@@ -57,18 +57,18 @@
       "excerpt": "이진 탐색은 정렬된 순서에서 목표값의 위치를 O(log n) 시간에 찾아내는 알고리즘으로, 대규모 프로덕션 시스템에서 인덱스 조회, SSTable/블록 검색, 정렬된 포스팅 리스트 접근 등에 필수적입니다."
     },
     {
+      "title": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning",
+      "date": "2025-11-25",
+      "category": "papers",
+      "url": "posts/papers/2511/2025-11-25-paper.html",
+      "excerpt": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning"
+    },
+    {
       "title": "Breadth-First Search (BFS)",
       "date": "2025-11-24",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2511/2025-11-24-breadth-first-search.html",
       "excerpt": "BFS는 그래프를 레벨 단위로 탐색해 최단 경로(간선 수 기준)나 연결성 확인에 적합한 기본 알고리즘으로, 대규모 시스템에서는 레벨 동기화(frontier), 양방향 탐색, 병렬화가 핵심입니다."
-    },
-    {
-      "title": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning",
-      "date": "2025-11-23",
-      "category": "papers",
-      "url": "posts/papers/2511/2025-11-23-paper.html",
-      "excerpt": "Agent0: Unleashing Self-Evolving Agents from Zero Data via Tool-Integrated Reasoning"
     },
     {
       "title": "Dynamic Programming (DP)",
@@ -79,9 +79,9 @@
     },
     {
       "title": "Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition",
-      "date": "2025-11-21",
+      "date": "2025-11-20",
       "category": "papers",
-      "url": "posts/papers/2511/2025-11-21-paper.html",
+      "url": "posts/papers/2511/2025-11-20-paper.html",
       "excerpt": "Enhancing Quranic Learning: A Multimodal Deep Learning Approach for Arabic Phoneme Recognition"
     },
     {
