@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Dynamic Programming (DP) — practical systems view</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="동적계획법(DP)은 중복 부분문제를 재사용해 최적해를 구하는 기법으로, 음성인식·생물정보·그래프 알고리즘 등 프로덕션 시스템에서 성능과 안정성을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Dynamic Programming (DP) — practical systems view</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-08</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>동적계획법(DP)은 중복 부분문제를 재사용해 최적해를 구하는 기법으로, 음성인식·생물정보·그래프 알고리즘 등 프로덕션 시스템에서 성능과 안정성을 좌우합니다.</p>
+        <p>작동 원리: DP는 문제를 작은 하위문제로 분해하고, 메모이제이션(탐색 중 저장) 또는 타뷸레이션(하향/상향 테이블)으로 중복 계산을 제거합니다. 확률적 모델에서는 forward–backward(배열 형태의 누적 합), Viterbi(최대 경로) 같은 알고리즘이 DP 기반입니다. 최적화 관점에서 상태공간과 전이(cost) 정의가 설계 핵심입니다.<br><br>기술적 디테일: 구현 시 상태 차원과 전이 수에 따라 시간·공간 복잡도가 결정됩니다. 생산 환경에서는 O(n*m) 표가 큰 경우 메모리 최적화(롤링 배열, 외부 메모리 분할)나 병렬화(SIMD, GPU)로 처리합니다. 예: CTC 손실(tf.nn.ctc_loss)은 라벨-프레임 정렬을 forward-backward로 계산하고, Kaldi의 Viterbi 디코더는 음성 프레임에서 최적 상태 경로를 DP로 찾습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: TensorFlow(CTC loss)에서 사용<br>  코드:<br>  <pre><code class="language-python">import tensorflow as tf<br>  loss = tf.nn.ctc_loss(labels=labels, logits=logits, label_length=label_len, logit_length=logit_len, logits_time_major=False)</code></pre><br>  사용처: TensorFlow 2.x 음성/ASR 모델 학습(CTC 기반 파이프라인).<br><br>- 사례: Kaldi(ASR) Viterbi 디코더<br>  코드(명령):<br>  <pre><code class="language-bash"># Kaldi: gmm-latgen-faster 또는 nnet3-latgen-faster 디코더에서 내부적으로 Viterbi 사용<br>  gmm-latgen-faster --acoustic-scale=0.1 final.mdl HCLG.fst 'ark:gunzip -c feat.ark.gz |'</code></pre><br>  사용처: Kaldi(오픈소스 ASR) 기반 음성인식 프로덕션 파이프라인.<br><br>- 사례: 생물정보(Needleman–Wunsch / parasail 라이브러리)<br>  코드(파이썬 간단 구현):<br>  <pre><code class="language-python"># Needleman-Wunsch DP (간략)<br>  for i in range(1,n+1):<br>    for j in range(1,m+1):<br>      dp[i][j]=max(dp[i-1][j-1]+match(a[i],b[j]), dp[i-1][j]-gap, dp[i][j-1]-gap)</code></pre><br>  사용처: Parasail(C 라이브러리)이나 Biopython 파이프라인에서 염기/단백질 정렬에 사용.<br><br>실무 패턴: 메모리-시간 트레이드오프(롤링/블로킹), GPU/SIMD 가속, 수치 안정성(로그-도메인 누적) 적용.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dynamic Programming (DP) decomposes problems into overlapping subproblems and reuses solutions; it’s critical in production for sequence models, alignment, and routing where both correctness and performance matter.</p>
+        <p>How it works: DP defines states and transitions, then computes optimal values via memoization (top-down) or tabulation (bottom-up). In probabilistic models you’ll see DP as forward–backward for marginals or Viterbi for MAP paths. Design choices—state representation, transition graph, and cost accumulation—determine time/space complexity.<br><br>Technical details: Real systems optimize DP by reducing memory (rolling arrays, checkpointing), exploiting parallelism (SIMD, multi-thread, GPU kernels), and applying log-domain accumulation for numerical stability. For very large state spaces, practitioners use beam pruning, chunking, or external-memory algorithms to keep latency and throughput acceptable in production.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: TensorFlow (CTC loss)<br>  Code:<br>  <pre><code class="language-python">import tensorflow as tf<br>  loss = tf.nn.ctc_loss(labels=labels, logits=logits, label_length=label_len, logit_length=logit_len, logits_time_major=False)</code></pre><br>  Used in: TensorFlow 2.x ASR training pipelines; CTC uses forward–backward DP to compute probabilities.<br><br>- Case: Kaldi (Viterbi decoding)<br>  Command:<br>  <pre><code class="language-bash"># Kaldi decoders implement Viterbi under the hood<br>  gmm-latgen-faster --acoustic-scale=0.1 final.mdl HCLG.fst 'ark:gunzip -c feat.ark.gz |'</code></pre><br>  Used in: Kaldi (open-source ASR toolkit) deployed by many speech systems.<br><br>- Case: Bioinformatics (Needleman–Wunsch / Parasail)<br>  Code snippet:<br>  <pre><code class="language-python">for i in range(1,n+1):<br>    for j in range(1,m+1):<br>      dp[i][j]=max(dp[i-1][j-1]+score, dp[i-1][j]-gap, dp[i][j-1]-gap)</code></pre><br>  Used in: Parasail (C library), Biopython pipelines for sequence alignment.<br><br>Production patterns: memory-time tradeoffs (rolling arrays), log-domain sums for probability DP, pruning/beam search for large state spaces, and hardware-aware kernels (SIMD/GPU) for throughput.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
