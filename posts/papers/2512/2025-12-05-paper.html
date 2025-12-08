@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Francesco Granata, Francesco Poggi, Misael Mongiovì</div>
+        <div><strong>발행일 / Published:</strong> 2025-12-05</div>
+        <div><strong>Arxiv ID:</strong> 2512.05967</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대형 언어 모델(LLM)의 시대에, 지식 기반에 근거한 언어 생성 능력으로 Retrieval-Augmented Generation(RAG) 아키텍처가 큰 주목을 받고 있다. 그러나 의미적 유사도에만 의존하는 RAG 시스템은 용어 중의성으로 인해 검색 관련성이 떨어질 수 있는 전문 분야에서는 사실적 정확성을 보장하지 못하는 경우가 많다. 본 연구는 엔터티 링크(Entity Linking)에서 파생된 사실적 신호를 통합하여 이탈리아어 교육용 질의응답 시스템의 정확도를 향상시키는 개선된 RAG 아키텍처를 제안한다. 제안 시스템은 위키데이터 기반의 엔터티 링크 모듈을 포함하며, 의미 기반 정보와 엔터티 기반 정보를 결합하기 위해 세 가지 재순위화(re-ranking) 전략을 구현한다: 하이브리드 점수 가중 모델, reciprocal rank fusion, 그리고 크로스-인코더 재순위기. 실험은 맞춤형 학술 데이터셋과 표준 SQuAD-it 데이터셋 두 곳에서 수행되었다. 결과는 도메인 특정 맥락에서 reciprocal rank fusion 기반의 하이브리드 스키마가 베이스라인과 크로스-인코더 접근법을 크게 능가하는 반면, 크로스-인코더는 일반 도메인 데이터셋에서 최고 성능을 달성함을 보여준다. 이 결과는 도메인 불일치 효과의 존재를 확인하며, 사실성 정밀도와 신뢰성을 향상시키기 위해 도메인 적응과 하이브리드 순위 전략의 중요성을 강조한다. 또한 엔터티 인식 RAG 시스템이 교육 환경에서 적응형이고 신뢰할 수 있는 AI 기반 튜터링 도구로 활용될 가능성을 시사한다.</p>
+        <p>요약:<br>이 연구는 엔터티 링크를 결합한 RAG 아키텍처를 제안하여 이탈리아어 교육용 QA 시스템의 사실 정확도를 개선한다. 위키데이터 기반 엔터티 링크와 세 가지 재순위화 전략(하이브리드 점수, reciprocal rank fusion, 크로스-인코더)을 도입해 맞춤형 학술 데이터와 SQuAD-it에서 실험한 결과, 도메인 특화 환경에서는 reciprocal rank fusion 기반 하이브리드 방법이 우수했고, 일반 도메인에서는 크로스-인코더가 더 나은 성능을 보였다. 연구는 도메인 적응과 하이브리드 랭킹의 중요성을 강조하며 교육용 엔터티 인식 RAG의 가능성을 제시한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>In the era of Large Language Models (LLMs), Retrieval-Augmented Generation (RAG) architectures are gaining significant attention for their ability to ground language generation in reliable knowledge sources. Despite their impressive effectiveness in many areas, RAG systems based solely on semantic similarity often fail to ensure factual accuracy in specialized domains, where terminological ambiguity can affect retrieval relevance. This study proposes an enhanced RAG architecture that integrates a factual signal derived from Entity Linking to improve the accuracy of educational question-answering systems in Italian. The system includes a Wikidata-based Entity Linking module and implements three re-ranking strategies to combine semantic and entity-based information: a hybrid score weighting model, reciprocal rank fusion, and a cross-encoder re-ranker. Experiments were conducted on two benchmarks: a custom academic dataset and the standard SQuAD-it dataset. Results show that, in domain-specific contexts, the hybrid schema based on reciprocal rank fusion significantly outperforms both the baseline and the cross-encoder approach, while the cross-encoder achieves the best results on the general-domain dataset. These findings confirm the presence of an effect of domain mismatch and highlight the importance of domain adaptation and hybrid ranking strategies to enhance factual precision and reliability in retrieval-augmented generation. They also demonstrate the potential of entity-aware RAG systems in educational environments, fostering adaptive and reliable AI-based tutoring tools.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2512.05967" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2512.05967.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
