@@ -1,11 +1,11 @@
 {
   "posts": [
     {
-      "title": "Dynamic Programming (DP) — Practical Patterns in Production",
+      "title": "Dynamic Programming (DP) — practical systems view",
       "date": "2025-12-08",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2512/2025-12-08-dynamic-programming.html",
-      "excerpt": "동적 계획법(DP)은 중복 부분 문제와 최적 부분 구조를 이용해 복잡도를 줄이는 기법으로, 서열 정렬·정렬 확장·최단 경로·편집 거리 등 실제 시스템에서 핵심 성능 요소로 사용됩니다."
+      "excerpt": "동적계획법(DP)은 중복 부분문제를 재사용해 최적해를 구하는 기법으로, 음성인식·생물정보·그래프 알고리즘 등 프로덕션 시스템에서 성능과 안정성을 좌우합니다."
     },
     {
       "title": "Hash Table (해시 테이블)",
