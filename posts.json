@@ -15,6 +15,13 @@
       "excerpt": "해시 테이블은 키-값 매핑에서 상수 평균 시간 조회를 제공하는 핵심 자료구조로, 캐시, 데이터베이스 인덱스, 메모리 키-값 저장소 등 실무 시스템에서 성능 병목을 줄이는 데 중요합니다."
     },
     {
+      "title": "Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms",
+      "date": "2025-12-05",
+      "category": "papers",
+      "url": "posts/papers/2512/2025-12-05-paper.html",
+      "excerpt": "Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms"
+    },
+    {
       "title": "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models",
       "date": "2025-12-04",
       "category": "papers",
