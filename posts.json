@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Merge Sort (병합 정렬)",
+      "date": "2025-12-10",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-10-merge-sort.html",
+      "excerpt": "병합 정렬은 분할 정복 기반의 안정 정렬로, 메모리 한계를 넘는 대용량 데이터 정렬(외부 정렬)과 안정성이 필요한 시스템에서 중요합니다."
+    },
+    {
       "title": "Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms",
       "date": "2025-12-09",
       "category": "papers",
