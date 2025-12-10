@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Wan-Move: Motion-controllable Video Generation via Latent Trajectory Guidance",
+      "date": "2025-12-11",
+      "category": "papers",
+      "url": "posts/papers/2512/2025-12-11-paper.html",
+      "excerpt": "Wan-Move: Motion-controllable Video Generation via Latent Trajectory Guidance"
+    },
+    {
       "title": "Merge Sort (병합 정렬)",
       "date": "2025-12-10",
       "category": "cs-fundamentals",
