@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Mutex Lock (뮤텍스 락)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="뮤텍스는 상호배제를 위한 기본 동기화 프리미티브로, 멀티스레드/멀티코어 환경에서 공유 자원 일관성을 보장합니다. 성능과 공정성 문제는 실제 프로덕션 시스템 설계의 핵심 제약입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Mutex Lock (뮤텍스 락)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-12</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>뮤텍스는 상호배제를 위한 기본 동기화 프리미티브로, 멀티스레드/멀티코어 환경에서 공유 자원 일관성을 보장합니다. 성능과 공정성 문제는 실제 프로덕션 시스템 설계의 핵심 제약입니다.</p>
+        <p>작동 원리: 뮤텍스는 내부적으로 소유자(holding thread)와 대기 큐를 관리해 한 번에 하나의 스레드만 크리티컬 섹션에 진입하도록 합니다. 유저스페이스 스레드 라이브러리(pthread)나 언어 런타임(예: Go)은 먼저 원자적 CAS로 빠른 경합 없는 경로를 시도하고, 실패하면 커널의 futex(또는 런타임의 parking) 호출로 스레드를 대기시켜 컨텍스트 스위치를 최소화합니다. <br>스케일링: 단일 글로벌 뮤텍스로는 스레드 수가 늘어날수록 성능이 급격히 떨어지므로, 생산 시스템은 파인-그레인드 락, 셀프-등줄기 큐(MCS) 락, ticket lock, 또는 read-write 락을 사용해 읽기 우선/공정성 요구를 맞춥니다. Linux 커널은 qspinlock/ticket spinlock과 futex를 조합해 짧은 대기엔 스핀, 긴 대기엔 블록하도록 설계했습니다.<br>성능 팁: 락 홀딩 시간을 짧게 유지, 락 계층화(락 순서 정의), trylock 사용, 프로파일링(perf, lockstat)으로 핫스팟 식별이 실무 핵심입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Linux 커널(qspinlock/ticket spinlock)과 glibc pthread, Go runtime, InnoDB에서 사용<br>코드:<br>// C: pthread mutex (glibc + Linux futex 사용 경로)<br>#include <pthread.h><br>pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;<br>void f(){ pthread_mutex_lock(&m); /* critical */ pthread_mutex_unlock(&m); }<br><br>// Go: sync.Mutex (사용 예: Kubernetes controllers)<br>var mu sync.Mutex<br>mu.Lock()<br>// critical<br>mu.Unlock()<br><br>사용 위치: glibc의 pthread_mutex는 futex(리눅스 커널)를 통해 블로킹(버전: glibc >=2.3 계열), OpenJDK도 리눅스에서는 futex 기반 모니터 사용. MySQL/InnoDB(예: MySQL 8.0) 내부 mutexes가 동일 패턴을 따릅니다. Kubernetes(Go 1.20+) 코드베이스는 sync.Mutex를 광범위 사용합니다.<br>실무 패턴: 짧은 크리티컬 섹션, 파인-그레인 락, reader-writer 분리, lock contention 계측(perf, pstack), 백오프와 공정성(티켓/queue locks) 적용.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A mutex (mutual exclusion) is a primitive that serializes access to shared resources among threads or CPUs. In production, choosing the right lock type and minimizing contention are crucial for latency and throughput.</p>
+        <p>How it works: A mutex typically has a fast-path using an atomic compare-and-swap (CAS) so uncontended acquires/releases cost only a few CPU cycles. On contention the implementation enqueues waiters and transitions to a blocking primitive (Linux futex, OS wait queues, or runtime parking) to avoid busy-waiting and excessive CPU use. Modern runtimes combine spinning for short waits and blocking for longer waits to trade latency vs CPU.<br>Scalability and algorithms: For high core counts, simple spinlocks become bottlenecks. Scalable algorithms like MCS (Mellor‑Crummey and Scott) queue locks, ticket locks (fair ordering), and reader-writer locks are used in databases and kernels. Linux uses qspinlock/ticket spinlock variants for short critical sections and futex for sleeping. Language runtimes (Go's sync.Mutex, pthreads in glibc) optimize common uncontended cases and defer to kernel primitives when needed.<br>Practical notes: Keep critical sections tiny, prefer fine-grained locks or lock sharding, measure with perf/lockstat, and prefer lock-free or RCU-like designs for read-heavy workloads.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Used in Linux kernel, glibc pthreads, Go runtime, and InnoDB/MySQL<br>Code:<br>// C pthread: (glibc -> futex path on Linux)<br>#include <pthread.h><br>pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;<br>void f(){ pthread_mutex_lock(&m); /* critical */ pthread_mutex_unlock(&m); }<br><br>// Go: sync.Mutex (common in Kubernetes controllers)<br>var mu sync.Mutex<br>mu.Lock()<br>// critical<br>mu.Unlock()<br><br>Where used: glibc pthread_mutex routes to futex on Linux (glibc 2.3+ era); OpenJDK uses OS futex-based monitors on Linux; Linux kernel (qspinlock/ticket spinlock) uses ticket/qspinlock implementations since Linux 3.x for SMP fairness and performance. InnoDB (MySQL 8.0) uses internal mutex constructs backed by pthread/futex mechanisms. Kubernetes (Go 1.20+) relies heavily on sync.Mutex.<br>Production patterns: keep lock hold times minimal, prefer sharding/reader-writer for read-heavy workloads, measure contention with perf/lockstat, apply exponential backoff or queue locks to avoid convoys.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
