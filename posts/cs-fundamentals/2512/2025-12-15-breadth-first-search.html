@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Breadth-First Search (BFS)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BFS는 그래프의 레벨별(최단 경로, 연결성 검사) 탐색 방법으로, 실제 시스템에서 빠른 도달성 계산과 레벨 기반 분석에 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Breadth-First Search (BFS)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-15</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BFS는 그래프의 레벨별(최단 경로, 연결성 검사) 탐색 방법으로, 실제 시스템에서 빠른 도달성 계산과 레벨 기반 분석에 널리 사용됩니다.</p>
+        <p>작동 원리: BFS는 큐(frontier)를 사용해 시작점으로부터 거리 0,1,2… 순서로 이웃을 방문합니다. 각 정점은 한 번만 방문(visited 집합)하고 간선과 정점 수에 대해 O(V+E) 시간 복잡도를 가집니다. 실무에서는 고도로 병렬화하거나 메모리 최적화(프론티어 압축, CSR 포맷)를 적용합니다.<br>성능 팁: 대규모 그래프에선 방향 최적화(Top-down vs Bottom-up, Beamer et al., 2012)를 적용해 초고차수 노드 처리 비용을 줄이고, 분산 시스템(Pregel/Giraph)이나 GPU(cuGraph)로 프론티어를 병렬 처리합니다. 메모리 재배치(정점 재넘버링)를 통해 캐시 친화성을 높이는 것이 핵심입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Neo4j에서의 최단 경로(무가중):<br>코드:<br><pre><code class="language-cypher">// Neo4j 4.x<br>MATCH (a:Person {id:'A'}), (b:Person {id:'B'})<br>MATCH p = shortestPath((a)-[*]-(b))<br>RETURN p</code></pre><br>출처: Neo4j 엔진은 무가중 최단경로에 내부적으로 BFS 변형 사용<br>사례: GPU 가속(rapids cuGraph)<br>코드:<br><pre><code class="language-python"># cuGraph 22.12+, CUDA 11.x 환경<br>import cudf, cugraph<br>df = cudf.DataFrame({'src':[0,1,1],'dst':[1,2,3]})<br>G = cugraph.Graph()<br>G.from_cudf_edgelist(df,'src','dst')<br>res = cugraph.bfs(G, start=0)</code></pre><br>출처: RAPIDS cuGraph (NVIDIA)<br>실무 패턴:<br>- 작은 지름 그래프는 BFS가 빠름(소셜 네트워크 탐색)<br>- 초대형 그래프는 방향 최적화 + 재넘버링 + 분산/가속기 병행<br>참조: Beamer et al., "Direction-Optimizing Breadth-First Search", 2012; Graph500 구현 채택</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>BFS explores a graph level-by-level (useful for unweighted shortest paths and reachability) and is widely used in production for fast neighborhood queries and graph analytics.</p>
+        <p>How it works: BFS uses a queue (the frontier) to visit nodes in increasing distance order from a source. Each vertex is marked visited to avoid repeats; complexity is O(V+E). In production, BFS is optimized by storing graphs in CSR/adjacency lists, compressing frontiers, and applying vertex renumbering to improve locality.<br>Performance notes: For large graphs, direction-optimizing BFS (top-down vs bottom-up) reduces work on high-degree vertices (Beamer et al., 2012). Parallel implementations use distributed frameworks (Pregel/Giraph) or GPU libraries (RAPIDS cuGraph) to process frontiers concurrently. Memory layout and avoiding high-degree hotspots are key engineering concerns.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Neo4j unweighted shortest path<br>Code:<br><pre><code class="language-cypher">// Neo4j 4.x<br>MATCH (a:Person {id:'A'}), (b:Person {id:'B'})<br>MATCH p = shortestPath((a)-[*]-(b))<br>RETURN p</code></pre><br>Used in: Neo4j query planner/algorithms (internal BFS-like traversal for shortestPath)<br>Case: GPU-accelerated BFS with RAPIDS cuGraph<br>Code:<br><pre><code class="language-python"># cuGraph 22.12+, CUDA 11.x<br>import cudf, cugraph<br>df = cudf.DataFrame({'src':[0,1,1],'dst':[1,2,3]})<br>G = cugraph.Graph()<br>G.from_cudf_edgelist(df, 'src', 'dst')<br>res = cugraph.bfs(G, start=0)</code></pre><br>Used in: NVIDIA RAPIDS for high-throughput graph analytics<br>Production patterns:<br>- Use BFS for single-source unweighted shortest paths / reachability and social graph hops<br>- Apply direction-optimizing BFS and vertex renumbering on big graphs<br>- Offload frontier work to GPUs or distribute via Pregel/Giraph for scalability<br>References: Beamer et al., "Direction-Optimizing Breadth-First Search" (2012); Graph500 implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
