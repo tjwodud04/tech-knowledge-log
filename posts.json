@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Breadth-First Search (BFS)",
+      "date": "2025-12-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-15-breadth-first-search.html",
+      "excerpt": "BFS는 그래프의 레벨별(최단 경로, 연결성 검사) 탐색 방법으로, 실제 시스템에서 빠른 도달성 계산과 레벨 기반 분석에 널리 사용됩니다."
+    },
+    {
       "title": "Mutex Lock (뮤텍스 락)",
       "date": "2025-12-12",
       "category": "cs-fundamentals",
