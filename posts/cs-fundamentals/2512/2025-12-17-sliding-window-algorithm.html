@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sliding Window Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="슬라이딩 윈도우는 고정 길이의 '창'을 입력 스트림 위에서 이동시키며 국소 통계/집계를 유지하는 기법으로, 네트워크 TCP, 스트리밍 집계, 레이트리미팅 등 실무에서 성능·정확성 균형을 맞추는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Sliding Window Algorithm</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-17</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>슬라이딩 윈도우는 고정 길이의 '창'을 입력 스트림 위에서 이동시키며 국소 통계/집계를 유지하는 기법으로, 네트워크 TCP, 스트리밍 집계, 레이트리미팅 등 실무에서 성능·정확성 균형을 맞추는 데 중요합니다.</p>
+        <p>작동 원리: 윈도우 길이(W)를 정하고 창을 시간(또는 항목) 축에서 이동시키며 들어오고 나가는 데이터만 업데이트해 전체를 재계산하지 않습니다. 이로써 O(1)–O(log n) 증분 업데이트가 가능해 지연과 메모리를 낮출 수 있습니다. 이벤트 타임/프로세싱 타임, 슬라이딩 vs 튜블링(고정 분할) 차이를 설계 시 명확히 해야 하며, 지연 허용(grace), 정렬되지 않은 사건(out-of-order) 처리가 실무 관건입니다.<br><br>기술적 상세: 슬라이딩 윈도우는 두 가지 구현 축을 가집니다. 1) 포인트 업데이트(큐/덱/원형 버퍼)로 최근 W개 항목을 유지해 합/평균을 O(1)로 갱신; 2) 시간 기반 윈도우는 버킷(예: 시간 분해능도의 링 버퍼)로 누적해 윈도우 간 델타를 취함. 스트리밍 시스템은 종종 상태 백엔드(RocksDB)와 체크포인트를 써서 장애복구와 정확성을 유지합니다. 레이트리미터 관점에선 Redis ZSET을 이용한 타임스탬프 기반 슬라이딩 윈도우가 실제로 널리 사용됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Apache Kafka Streams에서 슬라이딩 윈도우 집계<br>  코드:<br>  <pre><code class="language-java">// Kafka Streams &gt;=2.7<br>  KStream&lt;String, Long&gt; stream = builder.stream("input-topic");<br>  KTable&lt;Windowed&lt;String&gt;, Long&gt; counts = stream<br>    .groupByKey()<br>    .windowedBy(SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofSeconds(30), Duration.ofSeconds(5)))<br>    .count(Materialized.as("sliding-counts"));</code></pre><br>  사용처: 실시간 세션 중복 제거나 최근 30초 내 행동 집계(Confluent/Kafka Streams production).<br><br>- 사례: Redis 기반 슬라이딩 윈도우 레이트리미터 (많은 스타트업과 API 게이트웨이)<br>  코드(redis-cli):<br>  <pre><code class="language-bash">now=$(date +%s%3N)<br>  window=60000<br>  redis-cli ZADD key $now $now<br>  redis-cli ZREMRANGEBYSCORE key 0 $((now-window))<br>  count=$(redis-cli ZCARD key)</code></pre><br>  실무 패턴: ZSET에 타임스탬프를 멤버로 추가해 오래된 항목 제거 후 카운트로 현재 윈도우 사용량 평가. 만약 고가용성 필요 시 Lua 스크립트로 원자화.<br><br>- 사례: Apache Flink (버전 1.12+)의 SlidingEventTimeWindows<br>  코드: <code>.window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(5)))</code><br>  사용처: 사용자 행동 분석, 지연·정렬 보정(grace period)과 RocksDB 상태 백엔드 활용.<br><br>실무 팁: 윈도우 크기와 슬라이드 간격을 서비스 SLO(지연·해상도) 기준으로 정하고, 상태 스냅샷/체크포인트 주기를 적절히 설정해 복구 시간(RTO)을 제어하세요.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Sliding-window maintains a fixed-size 'window' over a stream and updates aggregates incrementally, which is essential for low-latency analytics, TCP flow control, and rate limiting in production systems.</p>
+        <p>How it works: pick a window size W (time or count) and move the window over the stream; update only the items entering and leaving the window instead of recomputing everything. Implementations use ring buffers, dequeues, or timestamped buckets to get O(1) or O(log n) updates. Important production considerations include event-time vs processing-time semantics, out-of-order events, grace periods, and state persistence.<br><br>Technical details: time-based sliding windows are typically implemented as fixed-size buckets (e.g., 1s buckets for a 1-minute window) enabling efficient delta computations between windows. Count-based sliding windows often use a double-ended queue holding the last W items. Stream engines persist window state to backends (e.g., RocksDB in Flink/Kafka Streams) and use checkpoints to ensure fault tolerance. For rate limiting, timestamp-sorted sets (Redis ZSET) form a practical, widely-used sliding-window approach that can be atomically executed with Lua scripts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Apache Kafka Streams (>=2.7) sliding windows<br>  Code:<br>  <pre><code class="language-java">KStream&lt;String, Long&gt; stream = builder.stream("input-topic");<br>  KTable&lt;Windowed&lt;String&gt;, Long&gt; counts = stream<br>    .groupByKey()<br>    .windowedBy(SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofSeconds(30), Duration.ofSeconds(5)))<br>    .count(Materialized.as("sliding-counts"));</code></pre><br>  Where used: realtime session deduplication and last-30s metrics in Confluent/Kafka Streams deployments.<br><br>- Case: Redis sliding-window rate limiter (used across many API gateways)<br>  Code (redis-cli):<br>  <pre><code class="language-bash">now=$(date +%s%3N)<br>  window=60000<br>  redis-cli ZADD key $now $now<br>  redis-cli ZREMRANGEBYSCORE key 0 $((now-window))<br>  count=$(redis-cli ZCARD key)</code></pre><br>  Production patterns: wrap the sequence in a Redis Lua script for atomicity; use TTL/compaction to bound memory.<br><br>- Case: Apache Flink sliding windows (1.12+)<br>  Code: <code>.window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(5)))</code><br>  Where used: user behavior analytics, sessionization with RocksDB state backend and checkpointing.<br><br>Production tips: choose window size and slide by SLOs, persist state to a durable store, and handle out-of-order events with a configured grace/allowed-lateness.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
