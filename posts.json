@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sliding Window Algorithm",
+      "date": "2025-12-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-17-sliding-window-algorithm.html",
+      "excerpt": "슬라이딩 윈도우는 고정 길이의 '창'을 입력 스트림 위에서 이동시키며 국소 통계/집계를 유지하는 기법으로, 네트워크 TCP, 스트리밍 집계, 레이트리미팅 등 실무에서 성능·정확성 균형을 맞추는 데 중요합니다."
+    },
+    {
       "title": "Breadth-First Search (BFS)",
       "date": "2025-12-15",
       "category": "cs-fundamentals",
