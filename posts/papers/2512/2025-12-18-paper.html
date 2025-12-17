@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>MMGR: Multi-Modal Generative Reasoning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MMGR: Multi-Modal Generative Reasoning">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    /* Post-specific overrides only */
+    .post-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      color: #111827;
+    }
+    
+    .topic-meta {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .topic-meta strong {
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .topic-meta > div {
+      margin: 0.5rem 0;
+    }
+    
+    .topic-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 1.75rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    
+    .topic-section h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    .topic-section p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.75;
+    }
+    
+    .arxiv-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .arxiv-link,
+    .hf-link {
+      display: inline-block;
+      padding: 0.65rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      color: white !important;
+    }
+    
+    .arxiv-link {
+      background: #3b82f6;
+    }
+    
+    .arxiv-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .hf-link {
+      background: #ffb400;
+    }
+    
+    .hf-link:hover {
+      background: #e69a00;
+      transform: translateY(-1px);
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .post-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .post-content h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topic-section {
+        padding: 1.25rem;
+      }
+      
+      .topic-section h2 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>MMGR: Multi-Modal Generative Reasoning</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Zefan Cai, Haoyi Qiu, Tianyi Ma, Haozhe Zhao, Gengze Zhou, Kung-Hsiang Huang, Parisa Kordjamshidi, Minjia Zhang, Xiao Wen, Jiuxiang Gu</div>
+        <div><strong>발행일 / Published:</strong> 2025-12-18</div>
+        <div><strong>Arxiv ID:</strong> 2512.14691</div>
+        <div><strong>Affiliation:</strong> </div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>기존 영상 생성 평가 지표(FVD 등)는 시각적 품질에 치중해 인과성·물리성·전역 일관성 같은 추론 실패를 놓친다. 본문은 물리적, 논리적, 3D 공간적, 2D 공간적, 시간적 다섯 가지 능력에 기반한 MMGR(Multi-Modal Generative Reasoning Evaluation and Benchmark)를 제시하여 추상 추론(ARC-AGI, 스도쿠), 구현형 내비게이션(실제 3D 이동·위치추정), 물리적 상식(스포츠·구성적 상호작용) 등 세 영역에서 세밀한 정합성 지표로 평가한다. 주요 영상·이미지 모델 벤치마크 결과, 물리적 상식 과제에서는 중간 성과를 보였으나 추상 추론(ARC-AGI)은 10% 미만 정확도, 장기 공간 계획이 필요한 구현형 과제에서는 크게 부진해 성능 격차가 컸다. 분석은 모델들이 지각적 신호에 과도하게 의존하고 전역 상태 일관성이 약하며 시각적 타당성만을 보상하는 목적함수가 인과적 정합성을 저해함을 지적하며, MMGR이 추론 중심의 통합 진단 벤치마크로서 발전 방향을 제시한다고 결론지었다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Video foundation models generate visually realistic and temporally coherent content, but their reliability as world simulators depends on whether they capture physical, logical, and spatial constraints. Existing metrics such as Frechet Video Distance (FVD) emphasize perceptual quality and overlook reasoning failures, including violations of causality, physics, and global consistency. We introduce MMGR (Multi-Modal Generative Reasoning Evaluation and Benchmark), a principled evaluation framework based on five reasoning abilities: Physical, Logical, 3D Spatial, 2D Spatial, and Temporal. MMGR evaluates generative reasoning across three domains: Abstract Reasoning (ARC-AGI, Sudoku), Embodied Navigation (real-world 3D navigation and localization), and Physical Commonsense (sports and compositional interactions). MMGR applies fine-grained metrics that require holistic correctness across both video and image generation. We benchmark leading video models (Veo-3, Sora-2, Wan-2.2) and image models (Nano-banana, Nano-banana Pro, GPT-4o-image, Qwen-image), revealing strong performance gaps across domains. Models show moderate success on Physical Commonsense tasks but perform poorly on Abstract Reasoning (below 10 percent accuracy on ARC-AGI) and struggle with long-horizon spatial planning in embodied settings. Our analysis highlights key limitations in current models, including overreliance on perceptual data, weak global state consistency, and objectives that reward visual plausibility over causal correctness. MMGR offers a unified diagnostic benchmark and a path toward reasoning-aware generative world models.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2512.14691" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2512.14691" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
