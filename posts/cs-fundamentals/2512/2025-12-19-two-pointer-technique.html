@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Pointer Technique / 투 포인터 기법</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="핵심 개념 및 실무적 중요성 (1-2 sentences)">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Two-Pointer Technique / 투 포인터 기법</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-19</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>핵심 개념 및 실무적 중요성 (1-2 sentences)</p>
+        <p>투 포인터 기법은 정렬된 배열이나 연속된 시퀀스에서 두 개의 인덱스(포인터)를 이동시켜 문제를 선형 시간에 해결하는 패턴입니다. 실무에서는 메모리-시간 절약이 중요할 때(예: 윈도우 집계, 정렬 병합, 슬라이딩 윈도우 기반 레이트 리미팅) 자주 사용됩니다.<br><br>작동 원리는 간단합니다: 왼쪽/오른쪽(또는 앞/뒤) 포인터를 조건에 따라 한 칸씩 이동시키며 상태를 유지(stateful)합니다. 예를 들어 합이 목표값인 쌍을 찾을 때 정렬된 배열에서 왼쪽을 올리거나 오른쪽을 내리면 탐색 공간을 선형으로 줄입니다. 데이터베이스의 Merge Join(예: PostgreSQL의 nodeMergejoin.c)은 두 입력 스트림의 현재 위치를 가리키는 포인터를 이동시키며 동작합니다. 스트리밍 시스템(Apache Flink/Kafka Streams)의 슬라이딩 윈도우 구현이나 Redis 기반 슬라이딩-윈도우 레이트리미터도 타임스탬프 범위를 유지하기 위해 유사한 두 포인터/큐 로직을 씁니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: PostgreSQL Merge Join (데이터베이스 조인)<br>  출처: PostgreSQL 소스 src/backend/executor/nodeMergejoin.c (PostgreSQL 14)<br>  코드(개념적):<br>  <pre><code class="language-c">while (left_has &amp;&amp; right_has) {<br>    if (left_val &lt; right_val) advance_left();<br>    else if (left_val &gt; right_val) advance_right();<br>    else emit_match_and_advance_both();<br>  }</code></pre><br>  실무 패턴: 입력이 정렬되어 있을 때 I/O와 메모리 사용을 최소화하기 위해 사용.<br><br>- 사례: Redis 기반 슬라이딩 윈도우 레이트리미터<br>  출처: Redis ZSET 방식(사용자 구현 사례, Redis 6+)<br>  코드(명령 예시):<br>  <pre><code class="language-redis">ZADD user:1000:timestamps now score<br>  ZREMRANGEBYSCORE user:1000 -inf (now-window)<br>  ZCARD user:1000</code></pre><br>  실무 패턴: 좌측(오래된 타임스탬프) 제거와 우측(현재 입력) 추가로 윈도우를 관리, 원자성 위해 Lua 스크립트 사용.<br><br>베스트 프랙티스: 입력이 정렬되지 않으면 선행 정렬 비용을 고려, 스트리밍에서는 포인터 대신 링 버퍼/슬라이딩 큐를 사용해 GC 부담 최소화.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Core concept and practical importance (1-2 sentences)</p>
+        <p>The two-pointer technique moves two indices over a sequence to solve problems in linear time when order or contiguity matters. In production systems it reduces memory and CPU compared to naive nested scans—useful for sliding-window aggregations, merge joins, and rate limiting.<br><br>How it works: keep two pointers (left/right or head/tail) and advance one or the other based on a condition. For example, finding pairs summing to a target in a sorted array moves the left pointer up when the sum is too small and the right pointer down when too large, achieving O(n). Databases implement this as Merge Join (e.g., PostgreSQL) by advancing pointers over sorted input streams. Stream processing engines (Apache Flink, Kafka Streams) and Redis-based sliding-window rate limiters use analogous pointer/queue logic to maintain time windows efficiently.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: PostgreSQL Merge Join (database join)<br>  Source: PostgreSQL source src/backend/executor/nodeMergejoin.c (PostgreSQL 14)<br>  Code (concept):<br>  <pre><code class="language-c">while (left_has &amp;&amp; right_has) {<br>    if (left_val &lt; right_val) advance_left();<br>    else if (left_val &gt; right_val) advance_right();<br>    else emit_match_and_advance_both();<br>  }</code></pre><br>  Production patterns: use when inputs are sorted (or can be sorted cheaply) to minimize I/O and memory.<br><br>- Case: Redis sliding-window rate limiter<br>  Source: community patterns using Redis ZSET (Redis 6+)<br>  Code (commands):<br>  <pre><code class="language-redis">ZADD user:1000:timestamps now now<br>  ZREMRANGEBYSCORE user:1000 -inf (now-window)<br>  ZCARD user:1000</code></pre><br>  Production patterns: remove old timestamps (left pointer) and add new (right), bundle as Lua script for atomicity; prefer ring buffers in high-throughput systems to avoid expensive sorted-set ops.<br><br>Notes: Prefer two-pointer when ordering or monotonicity holds; otherwise consider hashing or external sort costs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
