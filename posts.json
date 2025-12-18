@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2025-12-19",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-19-two-pointer-technique.html",
+      "excerpt": "핵심 개념 및 실무적 중요성 (1-2 sentences)"
+    },
+    {
       "title": "MMGR: Multi-Modal Generative Reasoning",
       "date": "2025-12-18",
       "category": "papers",
