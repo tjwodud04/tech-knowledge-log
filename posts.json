@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sliding Window Technique",
+      "date": "2025-12-22",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-22-sliding-window-technique.html",
+      "excerpt": "슬라이딩 윈도우 기법은 연속 데이터 스트림이나 시퀀스에서 고정 크기 창을 겹치며 이동시켜 로컬 통계나 집계를 유지하는 방법으로, 스트리밍 분석·네트워크 제어·시계열 처리 등 실서비스에서 지연과 정확성 균형에 중요합니다."
+    },
+    {
       "title": "Two-Pointer Technique / 투 포인터 기법",
       "date": "2025-12-19",
       "category": "cs-fundamentals",
