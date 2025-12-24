@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>SemanticGen: Video Generation in Semantic Space</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SemanticGen: Video Generation in Semantic Space">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    /* Post-specific overrides only */
+    .post-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      color: #111827;
+    }
+    
+    .topic-meta {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .topic-meta strong {
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .topic-meta > div {
+      margin: 0.5rem 0;
+    }
+    
+    .topic-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 1.75rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    
+    .topic-section h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    .topic-section p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.75;
+    }
+    
+    .arxiv-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .arxiv-link,
+    .hf-link {
+      display: inline-block;
+      padding: 0.65rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      color: white !important;
+    }
+    
+    .arxiv-link {
+      background: #3b82f6;
+    }
+    
+    .arxiv-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .hf-link {
+      background: #ffb400;
+    }
+    
+    .hf-link:hover {
+      background: #e69a00;
+      transform: translateY(-1px);
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .post-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .post-content h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topic-section {
+        padding: 1.25rem;
+      }
+      
+      .topic-section h2 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>SemanticGen: Video Generation in Semantic Space</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Jianhong Bai, Xiaoshi Wu, Xintao Wang, Fu Xiao, Yuanxing Zhang, Qinghe Wang, Xiaoyu Shi, Menghan Xia, Zuozhu Liu, Haoji Hu</div>
+        <div><strong>발행일 / Published:</strong> 2025-12-25</div>
+        <div><strong>Arxiv ID:</strong> 2512.20619</div>
+        <div><strong>Affiliation:</strong> Kling Team</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>최신 비디오 생성 모델들이 VAE 잠재공간에서 직접 비디오 라텐트를 모델링하는 데서 오는 느린 수렴과 긴 영상 생성 시의 높은 계산 비용 문제를 해결하기 위해, 본 논문은 SemanticGen을 제안합니다. 핵심 아이디어는 영상의 중복성을 이용해 먼저 압축된 고수준의 의미적(semantic) 공간에서 전역 구성을 계획하고, 그 뒤에 고주파 세부정보를 덧붙이는 두 단계 확산 모델을 사용하는 것입니다. 1단계에서는 전역 레이아웃을 정의하는 의미적 비디오 특징을 생성하고, 2단계에서는 이 특징들에 조건화된 VAE 라텐트를 생성해 최종 픽셀을 복원합니다. 이 접근법은 VAE 라텐트 공간에서 직접 생성하는 것보다 빠르게 수렴하고 긴 영상 생성에서도 계산 효율이 높아 고화질 영상을 생성하며 기존 최첨단 방법들과 강력한 기준선들을 능가합니다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>State-of-the-art video generative models typically learn the distribution of video latents in the VAE space and map them to pixels using a VAE decoder. While this approach can generate high-quality videos, it suffers from slow convergence and is computationally expensive when generating long videos. In this paper, we introduce SemanticGen, a novel solution to address these limitations by generating videos in the semantic space. Our main insight is that, due to the inherent redundancy in videos, the generation process should begin in a compact, high-level semantic space for global planning, followed by the addition of high-frequency details, rather than directly modeling a vast set of low-level video tokens using bi-directional attention. SemanticGen adopts a two-stage generation process. In the first stage, a diffusion model generates compact semantic video features, which define the global layout of the video. In the second stage, another diffusion model generates VAE latents conditioned on these semantic features to produce the final output. We observe that generation in the semantic space leads to faster convergence compared to the VAE latent space. Our method is also effective and computationally efficient when extended to long video generation. Extensive experiments demonstrate that SemanticGen produces high-quality videos and outperforms state-of-the-art approaches and strong baselines.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2512.20619" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2512.20619" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
