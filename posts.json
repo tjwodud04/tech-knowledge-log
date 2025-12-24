@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "SemanticGen: Video Generation in Semantic Space",
+      "date": "2025-12-25",
+      "category": "papers",
+      "url": "posts/papers/2512/2025-12-25-paper.html",
+      "excerpt": "SemanticGen: Video Generation in Semantic Space"
+    },
+    {
       "title": "Sliding Window Technique",
       "date": "2025-12-22",
       "category": "cs-fundamentals",
