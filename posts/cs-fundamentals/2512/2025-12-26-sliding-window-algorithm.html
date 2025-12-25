@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sliding Window Algorithm / 슬라이딩 윈도우 알고리즘</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="슬라이딩 윈도우는 연속 데이터 스트림이나 시계열에서 '최근 N개' 또는 '최근 T초'의 상태를 유지·계산하는 기법으로, 레이트 리미팅, 스트리밍 집계, 압축(예: LZ77) 등 실무 시스템에서 성능·정확도 균형을 맞출 때 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Sliding Window Algorithm / 슬라이딩 윈도우 알고리즘</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-26</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>슬라이딩 윈도우는 연속 데이터 스트림이나 시계열에서 '최근 N개' 또는 '최근 T초'의 상태를 유지·계산하는 기법으로, 레이트 리미팅, 스트리밍 집계, 압축(예: LZ77) 등 실무 시스템에서 성능·정확도 균형을 맞출 때 중요합니다.</p>
+        <p>기본 개념은 윈도우(카운트 기반 혹은 시간 기반)를 한 칸씩 이동하면서 유효 항목을 추가·제거해 집계(합, 카운트, 최대 등)를 유지하는 것입니다. 구현 방식은 단순 큐(O(1) 삽입/삭제), 링버퍼, 혹은 버킷으로 나눈 근사(예: 고정-버킷 슬라이딩 윈도우)로 나뉩니다. 정확한 로그 기반(sliding log)은 각 이벤트 타임스탬프를 저장해 정확도를 보장하지만 메모리를 많이 쓰고, 카운터-버킷 방식은 메모리와 계산을 줄이는 대신 분해능(resolution) 트레이드오프가 있습니다.<br><br>응용 관점에서 중요한 최적화는: 1) 오래된 항목을 빠르게 제거하는 데이터 구조(예: deque 또는 Redis ZSET 범위 삭제), 2) 근사 알고리즘 사용 시 버킷 크기와 에러 한계 설정, 3) 멀티-노드 환경에서 시계 동기와 샤딩 고려입니다. Datar et al.의 스트림-슬라이딩 윈도우 연구(2002)와 압축 알고리즘(LZ77)이 대표적 학술·실무 배경입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: API Gateway / Rate limiting (많은 엔터프라이즈와 오픈소스 플러그인)<br>  코드:<br>  <pre><code class="language-bash"># Redis로 슬라이딩 로그 방식 레이트리미터 (Unix timestamp milliseconds)<br>  ZADD key now member<br>  ZREMRANGEBYSCORE key 0 (now - window_ms)<br>  ZCARD key</code></pre><br>  또는 Lua로 원자적 실행(예: Kong/Traefik Redis 플러그인에서 사용되는 패턴)<br>  실무 패턴: ZSET에 타임스탬프를 저장해 범위 삭제로 오래된 이벤트 제거. 트래픽이 클 땐 버킷화(초단위 버킷 합산)로 메모리 절감.<br><br>- 사례: 데이터 압축 (gzip/zlib)<br>  코드:<br>  <pre><code class="language-python">import zlib<br>  out = zlib.compress(b'data to compress')</code></pre><br>  설명: zlib (예: zlib 1.2.11)의 deflate 알고리즘은 LZ77 기반 슬라이딩 윈도우를 내부에 사용해 일치 문자열을 윈도우에서 찾음.<br><br>참고: Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002), 그리고 zlib 소스(1.2.11+) 참조.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Sliding-window maintains a moving subset (last N items or last T seconds) of a stream for online aggregation, crucial in rate limiting, stream analytics, and compression (LZ77) in production systems.</p>
+        <p>Core idea: keep a window that slides over incoming events; update aggregates by adding new events and removing expired ones. Implementations range from exact logs (store timestamps per event) to ring buffers and bucketed approximations. Exact logs give accuracy but high memory; bucketed counters (fixed buckets per window) trade accuracy for lower memory and CPU. Key concerns are O(1) add/remove, fast eviction of stale items, and error bounds in approximations.<br><br>Optimizations used in production include using deque/linked lists for monotonic queues (max/min queries), sorted sets for time-range deletions (e.g., Redis ZSET), and careful bucket sizing to bound error. Foundational research: Datar et al. (2002) on sliding-window streaming algorithms; LZ77 describes sliding-window use in compression.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: API rate limiting in gateways and edge services<br>  Code (Redis sliding-log pattern):<br>  <pre><code class="language-bash"># add current event<br>  ZADD rl:{key} &lt;now_ms&gt; &lt;unique_id&gt;<br>  # remove old events<br>  ZREMRANGEBYSCORE rl:{key} 0 &lt;now_ms - window_ms&gt;<br>  # count<br>  ZCARD rl:{key}</code></pre><br>  Where used: Common pattern in Kong/Tyk/Traefik plugins, many companies’ edge-rate-limiters. Production pattern: use Lua scripts for atomicity; switch to bucketed counters when QPS is very high.<br><br>- Case: Compression (gzip/zlib)<br>  Code:<br>  <pre><code class="language-python">import zlib<br>  compressed = zlib.compress(b'...')</code></pre><br>  Where used: zlib (e.g., zlib 1.2.11) implements deflate (LZ77 sliding-window) in countless systems (NGINX, browsers, tar/gzip).<br><br>References: Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002); zlib source and docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
