@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sliding Window Algorithm / 슬라이딩 윈도우 알고리즘",
+      "date": "2025-12-26",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-26-sliding-window-algorithm.html",
+      "excerpt": "슬라이딩 윈도우는 연속 데이터 스트림이나 시계열에서 '최근 N개' 또는 '최근 T초'의 상태를 유지·계산하는 기법으로, 레이트 리미팅, 스트리밍 집계, 압축(예: LZ77) 등 실무 시스템에서 성능·정확도 균형을 맞출 때 중요합니다."
+    },
+    {
       "title": "SemanticGen: Video Generation in Semantic Space",
       "date": "2025-12-25",
       "category": "papers",
