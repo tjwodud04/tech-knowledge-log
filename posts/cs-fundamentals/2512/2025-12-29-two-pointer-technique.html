@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Pointer Technique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="두 포인터 기법은 정렬된 데이터나 순차 스트림에서 두 개의 인덱스(포인터)를 사용해 선형 시간·상수 추가공간으로 문제를 푸는 방법으로, 데이터베이스의 병합조인·스트림 윈도잉 등 실무 시스템에서 성능 핵심입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Two-Pointer Technique</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-29</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>두 포인터 기법은 정렬된 데이터나 순차 스트림에서 두 개의 인덱스(포인터)를 사용해 선형 시간·상수 추가공간으로 문제를 푸는 방법으로, 데이터베이스의 병합조인·스트림 윈도잉 등 실무 시스템에서 성능 핵심입니다.</p>
+        <p>작동 원리: 두 포인터는 일반적으로 하나를 앞쪽(head), 하나를 뒤쪽(tail)에 두고 조건에 따라 각각 이동합니다. 예를 들어 정렬된 두 배열의 교집합/병합, 슬라이딩 윈도우(시간 범위 유지), 혹은 투 포인터로 누적 합을 유지하며 목표치를 찾는 경우에 사용됩니다. 핵심은 포인터 이동 규칙이 전체 요소를 한 번씩만 살펴보도록 보장해 O(n) 시간 복잡도를 얻는 것입니다.<br><br>기술적 세부: 데이터가 정렬되어 있거나 타임스탬프 순서로 들어오는 스트림에서 경계(윈도우 시작/끝)를 포인터로 표현하면 버퍼 재스캔을 피할 수 있습니다. 데이터베이스의 Merge Join(정렬된 릴레이션에 대해)에서는 각 릴레이션의 커서(포인터)를 진전시키며 비교 · 출력 · 스킵을 수행합니다. 생산 환경에서는 메모리 제한·스트리밍 레이턴시를 고려해 포인터 기반 인덱스와 고정 버퍼를 결합해 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: PostgreSQL의 Merge Join (예: PostgreSQL v14의 executor)<br>코드: nodeMergejoin.c (src/backend/executor/nodeMergejoin.c) 구조는 두 입력의 현재 튜플 포인터를 비교해 작은 쪽을 advance함으로써 병합을 수행합니다. (간단화된 의사코드)<br><pre><code class="language-plaintext">while (!left.done &amp;&amp; !right.done) {<br>  if (left.key &lt; right.key) advance(left);<br>  else if (left.key &gt; right.key) advance(right);<br>  else emit_match(left, right);<br>}</code></pre><br>- 사례: Apache Flink 윈도우 큐 (예: Flink 1.16) — 타임스탬프 정렬 버퍼의 head/tail 포인터로 윈도우 경계 유지. 실무 패턴: 정렬/정규화된 입력, 모노톤 타임스탬프 가정, 포인터 이동 대신 전체 스캔 방지.<br>- 예제 코드 (파이썬, 슬라이딩 합):<br><pre><code class="language-plaintext">l=nums<br>s=0; i=0<br>for j in range(len(l)):<br>  s+=l[j]<br>  while s&gt;target:<br>    s-=l[i]; i+=1<br>  if s==target: return (i,j)</code></pre><br>프로덕션 베스트프랙티스: 입력 정렬 보장, 포인터 오프셋을 64비트로 관리(대용량 스트림), 버퍼 회전(circular buffer)으로 메모리 재사용.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The two-pointer technique uses two indices (pointers) to traverse ordered arrays or streams, enabling linear-time solutions with constant extra space—widely used in merge joins, sliding windows, and streaming buffers in production systems.</p>
+        <p>How it works: Typically one pointer (head) and another (tail) advance according to a rule derived from ordering or window constraints. In sorted arrays you can merge or find intersections by advancing the pointer with the smaller key; in sliding-window problems you advance the tail until the window condition breaks and then move the head to shrink the window. The invariant is that each element is touched a constant number of times, yielding O(n) time.<br><br>Technical details: In databases and stream processors, two-pointer logic maps to cursors over sorted inputs or time-ordered buffers. Merge Join implementations keep two cursors that advance without backtracking. Stream window implementations (e.g., tumbling/sliding windows) maintain head/tail offsets into a circular buffer to evict old events efficiently. Production concerns include monotonic ordering assumptions, buffer sizing, and overflow handling for long-lived pointers.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: PostgreSQL Merge Join (e.g., PostgreSQL v14/v15)<br>Source: src/backend/executor/nodeMergejoin.c — executor keeps two tuple cursors and advances the smaller key. Simplified pseudocode:<br><pre><code class="language-plaintext">while (!left_done &amp;&amp; !right_done) {<br>  if (left.key &lt; right.key) advance(left);<br>  else if (left.key &gt; right.key) advance(right);<br>  else emit_match(left,right);<br>}</code></pre><br>- Case: Apache Flink window operators (e.g., Flink 1.16)<br>Source: window buffer implementations keep head/tail indices into an event buffer to slide windows without full scans.<br>- Code example (Python sliding-sum pattern):<br><pre><code class="language-plaintext">arr=nums<br>s=0; i=0<br>for j,x in enumerate(arr):<br>  s+=x<br>  while s&gt;target:<br>    s-=arr[i]; i+=1<br>  if s==target: return (i,j)</code></pre><br>Production patterns: guarantee sorted/monotonic input (or sort/partition first), use circular buffers to reuse memory, use 64-bit counters for high-throughput streams, and prefer pointer advancement over rescans to minimize latency.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
