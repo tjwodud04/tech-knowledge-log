@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique",
+      "date": "2025-12-29",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-29-two-pointer-technique.html",
+      "excerpt": "두 포인터 기법은 정렬된 데이터나 순차 스트림에서 두 개의 인덱스(포인터)를 사용해 선형 시간·상수 추가공간으로 문제를 푸는 방법으로, 데이터베이스의 병합조인·스트림 윈도잉 등 실무 시스템에서 성능 핵심입니다."
+    },
+    {
       "title": "Sliding Window Algorithm / 슬라이딩 윈도우 알고리즘",
       "date": "2025-12-26",
       "category": "cs-fundamentals",
