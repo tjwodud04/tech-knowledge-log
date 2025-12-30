@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Breadth-First Search (BFS)",
+      "date": "2025-12-31",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2512/2025-12-31-breadth-first-search.html",
+      "excerpt": "BFS(너비 우선 탐색)는 그래프/트리의 레벨 단위 탐색 알고리즘으로, 최단 경로(가중치 없는 그래프) 계산과 네트워크 탐색에서 실무적으로 중요합니다."
+    },
+    {
       "title": "Two-Pointer Technique",
       "date": "2025-12-29",
       "category": "cs-fundamentals",
