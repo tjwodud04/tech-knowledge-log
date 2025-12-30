@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Breadth-First Search (BFS)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BFS(너비 우선 탐색)는 그래프/트리의 레벨 단위 탐색 알고리즘으로, 최단 경로(가중치 없는 그래프) 계산과 네트워크 탐색에서 실무적으로 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Breadth-First Search (BFS)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2025-12-31</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BFS(너비 우선 탐색)는 그래프/트리의 레벨 단위 탐색 알고리즘으로, 최단 경로(가중치 없는 그래프) 계산과 네트워크 탐색에서 실무적으로 중요합니다.</p>
+        <p>작동 원리: BFS는 큐를 사용해 시작 정점에서 인접 정점을 레벨 순으로 방문합니다. 시간 복잡도는 O(V+E)이며, 방문 표시(visited 비트셋)와 레벨(depth) 배열을 유지해 중복 탐색을 막습니다. 실무에서는 깊이 제한(depth cutoff), 재방문 방지, 그리고 메모리·IO 최적화가 필수입니다.<br><br>대규모/분산 환경: 페타바이트급 그래프에서는 단일 머신 메모리에 모든 정점을 올릴 수 없어 외부 메모리 알고리즘(GraphChi)이나 Pregel/Giraph/Pregel 계열의 BSP(초단계 superstep) 모델로 BFS를 병렬화합니다. 또한 두 노드 간 최단경로는 양방향 BFS(bidirectional BFS)로 방문 공간을 기하급수적으로 줄일 수 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Neo4j 그래프DB 탐색(Neo4j 4.x)<br>코드:<br><pre><code class="language-java">// Java API<br>TraversalDescription td = db.traversalDescription()<br>  .breadthFirst()<br>  .relationships(RelationshipType.withName("FRIEND"))<br>  .maxDepth(3);<br>for (Path p : td.traverse(startNode)) { /* process */ }</code></pre><br>사용처: 소셜 추천, 권한 전파(Neo4j 공식 문서)<br><br>- 사례: Apache Giraph / Pregel 스타일 분산 BFS<br>명령 예: <code>bin/giraph.sh -ca giraph.SplitMasterWorker=false -mc org.apache.giraph.examples.BFSComputation ...</code><br>사용처: Facebook/Pregel 논문 기반의 대규모 그래프 처리<br><br>실무 패턴:<br>- 방문 비트셋과 레벨 배열로 메모리 최소화<br>- 깊이 제한, 양방향 BFS로 탐색 폭 축소<br>- 분산 환경에선 체크포인트와 superstep 동기화로 회복성 확보</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Breadth-First Search (BFS) is a level-order graph traversal used to compute shortest paths in unweighted graphs and to explore network neighborhoods in production systems.</p>
+        <p>How it works: BFS uses a FIFO queue to expand a frontier one level at a time from a source node. Complexity is O(V+E). Implementations maintain a visited bitset and a distance/level array to avoid revisits and to produce shortest-path distances. Practical systems add depth cutoffs and early exits for performance and safety.<br><br>At scale: Single-machine BFS hits memory/IO limits; systems use external-memory algorithms (e.g., GraphChi) or distributed BSP models (Pregel/Giraph/Apache Giraph, Google’s Pregel-inspired systems) where each superstep expands the frontier in parallel. For point-to-point queries, bidirectional BFS is a common optimization to reduce explored nodes dramatically.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Neo4j graph traversal (Neo4j 4.x)<br>Code:<br><pre><code class="language-java">TraversalDescription td = db.traversalDescription()<br>  .breadthFirst()<br>  .relationships(RelationshipType.withName("FRIEND"))<br>  .maxDepth(3);<br>for (Path p : td.traverse(startNode)) { /* handle path */ }</code></pre><br>Used for: social recommendations, access propagation (Neo4j docs)<br><br>- Case: Apache Giraph / Pregel-style BFS<br>Command example:<br><code>bin/giraph.sh -ca giraph.SplitMasterWorker=false -mc org.apache.giraph.examples.BFSComputation ...</code><br>Used for: large-scale graph analytics (Facebook/Pregel lineage)<br><br>Production patterns:<br>- Use visited bitset + level array; prefer bidirectional BFS for single-pair queries<br>- In distributed runs, checkpoint supersteps and tune frontier partitioning to reduce communication</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
