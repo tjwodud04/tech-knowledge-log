@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sliding Window",
+      "date": "2026-01-02",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-02-sliding-window.html",
+      "excerpt": "슬라이딩 윈도우는 시간/인덱스 축 위에서 고정 크기 창을 움직이며 연속 데이터의 집계·제어·검증을 하는 기법으로, 스트리밍 집계·레이트리밋·신뢰성 전송 등에서 실무적으로 매우 중요합니다."
+    },
+    {
       "title": "Breadth-First Search (BFS)",
       "date": "2025-12-31",
       "category": "cs-fundamentals",
