@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sliding Window</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="슬라이딩 윈도우는 시간/인덱스 축 위에서 고정 크기 창을 움직이며 연속 데이터의 집계·제어·검증을 하는 기법으로, 스트리밍 집계·레이트리밋·신뢰성 전송 등에서 실무적으로 매우 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Sliding Window</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-02</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>슬라이딩 윈도우는 시간/인덱스 축 위에서 고정 크기 창을 움직이며 연속 데이터의 집계·제어·검증을 하는 기법으로, 스트리밍 집계·레이트리밋·신뢰성 전송 등에서 실무적으로 매우 중요합니다.</p>
+        <p>작동 원리: 슬라이딩 윈도우는 '윈도우 크기'와 '이동 간격'(stride)으로 정의됩니다. 시간 기반 윈도우(time-based)는 예: 지난 1분 동안의 평균, 카운트 계산에 쓰이고, 개수 기반(count-based)은 마지막 N개 이벤트를 대상으로 합니다. 핵심은 중복 계산을 줄이는 인크리멘탈 업데이트(예: deque/큐로 오래된 항목 제거, 새 항목 추가)와 정합성(워터마크, 아웃 오브 오더 처리)입니다. 연구적으로 Datar et al.의 "sliding-window model"(2002)과 그 후속들이 스트림 요약과 근사 알고리즘을 다뤘고, Count-Min Sketch나 exponential decay를 혼합해 메모리 효율을 얻습니다.<br>운영 관점: 실무 시스템은 전통적인 슬라이딩 윈도우를 그대로 쓰기보다 '패닝(panes)'이나 'hop/slide windows'로 분해해 부분 결과를 캐시하고 병합합니다. Apache Flink는 이벤트타임 슬라이딩 윈도우에서 pane pre-aggregation를 사용하고, Kafka Streams는 SlidingWindows API로 키-별 증분 집계를 제공합니다. 레이트 리밋은 Redis의 sorted set 패턴이나 NGINX의 limit_req(레키 버킷 근사)를 통해 구현됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Apache Flink에서 이벤트타임 슬라이딩 윈도우 (Flink 1.16+)<br>코드:<br><pre><code class="language-java">stream<br>  .keyBy(...)<br>  .window(SlidingEventTimeWindows.of(Time.minutes(5), Time.seconds(30)))<br>  .reduce(...);</code></pre><br>사용처: Alibaba/Netflix 등에서 스트림 집계(세션화·사기탐지)로 사용.<br>사례: Kafka Streams 슬라이딩 윈도우 (Kafka Streams 2.x+)<br>코드:<br><pre><code class="language-java">stream.groupByKey()<br>  .windowedBy(SlidingWindows.withTimeDifferenceAndGrace(Duration.ofMinutes(5), Duration.ofSeconds(30)))<br>  .count();</code></pre><br>사례: Redis 기반 API 레이트 리밋 (슬라이딩 윈도우 카운터)<br>코드(명령):<br><pre><code class="language-bash">ZADD key now member<br>ZREMRANGEBYSCORE key 0 (now-window)<br>ZCOUNT key (now-window) now<br>EXPIRE key window</code></pre><br>실무 패턴: pane 기반 사전 집계로 중복 계산 줄이기, 워터마크와 grace 기간으로 지연/재정렬 보상, 메모리 제약 시 근사 알고리즘(CMS, HyperLogLog) 사용. 참고: Datar et al. 2002, Flink/Kafka Streams 공식 문서.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Sliding window moves a fixed-size window over time or sequence indices to compute rolling aggregates, rate limits, or control transfer; it's fundamental in stream processing, networking, and API throttling.</p>
+        <p>How it works: Define window size and slide (stride). Time-based windows (e.g., last 1 minute) and count-based windows (last N events) are common. Efficient implementations use incremental update structures (deque/ring buffer) to drop expired entries and add new ones without full recomputation. In distributed stream engines you also need watermarking and out-of-order handling to ensure correctness. Academic foundations include Datar et al.'s sliding-window model (2002) and later work on summarized/approximate windows using sketches or exponential decay.<br>Production patterns: To avoid reprocessing overlapping data, systems break sliding windows into panes or hops, pre-aggregate each pane, then merge. Apache Flink uses pane pre-aggregation and window assigners; Kafka Streams offers SlidingWindows APIs with local state stores for incremental counts. For rate limiting, Redis sorted-set sliding-window counters are widely used in front-line API gateways; some proxies use token/leaky-bucket approximations (NGINX/Envoy).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Apache Flink event-time sliding window (Flink 1.16+)<br>Code:<br><pre><code class="language-java">stream<br>  .keyBy(...)<br>  .window(SlidingEventTimeWindows.of(Time.minutes(5), Time.seconds(30)))<br>  .reduce(...);</code></pre><br>Used by: Alibaba, Netflix, Uber for streaming analytics and fraud detection.<br>Case: Kafka Streams sliding window (Kafka Streams 2.x+)<br>Code:<br><pre><code class="language-java">stream.groupByKey()<br>  .windowedBy(SlidingWindows.withTimeDifferenceAndGrace(Duration.ofMinutes(5), Duration.ofSeconds(30)))<br>  .count();</code></pre><br>Case: Redis sliding-window rate limiter (sorted-set pattern)<br>Commands:<br><pre><code class="language-bash">ZADD key &lt;now&gt; &lt;id&gt;<br>ZREMRANGEBYSCORE key 0 &lt;now-window&gt;<br>CNT=$(ZCOUNT key &lt;now-window&gt; &lt;now&gt;)<br>EXPIRE key &lt;window&gt;</code></pre><br>Production patterns: pane-based pre-aggregation to reduce overlap costs; use local state stores (RocksDB) for key-partitioned windows; fall back to sketches (Count-Min, HLL) for memory-constrained high-cardinality streams. References: Datar et al. 2002, Flink/Kafka Streams docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
