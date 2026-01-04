@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Dynamic Programming (동적 계획법)",
+      "date": "2026-01-05",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-05-dynamic-programming.html",
+      "excerpt": "동적 계획법은 중복 부분문제와 최적 부분구조를 이용해 복잡한 문제를 효율적으로 푸는 기법으로, 검색·음성인식·유전체 정렬 등 실제 시스템에서 핵심 성능 병목을 해결합니다."
+    },
+    {
       "title": "Sliding Window",
       "date": "2026-01-02",
       "category": "cs-fundamentals",
