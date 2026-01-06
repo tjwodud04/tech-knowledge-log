@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Disjoint Set Union (Union-Find)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Disjoint Set Union(Union-Find)은 서로소 집합의 합집합과 탐색을 빠르게 처리하는 자료구조로, 그래프 연결성, 이미지 분할, SMT(자동정리) 등 실제 시스템에서 대규모 동적 동치관계를 관리하는 데 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Disjoint Set Union (Union-Find)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-07</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Disjoint Set Union(Union-Find)은 서로소 집합의 합집합과 탐색을 빠르게 처리하는 자료구조로, 그래프 연결성, 이미지 분할, SMT(자동정리) 등 실제 시스템에서 대규모 동적 동치관계를 관리하는 데 핵심적입니다.</p>
+        <p>작동 원리: 각 원소는 트리의 루트(대표자)를 가리키며, find는 경로압축(path compression)으로 트리 높이를 낮추고, union은 랭크(rank)나 크기(size)를 기준으로 작은 트리를 큰 트리에 붙입니다. 이렇게 하면 연산의 상수에 가까운 역아커만(α(n))의 상한을 얻습니다. 구현상 고려사항은 병렬/분산 환경에서의 동시성, 록-프리 또는 배치 병합(batch union) 전략이며, 외부 기억장치 처리(디스크 기반 대규모 데이터)에서는 스트리밍과 외부 정렬과 결합해 사용합니다.<br>실무 영향: Kruskal 기반의 MST(최소 신장 트리), 이미지 처리의 연결성 레이블링, SMT 솔버의 합동성 폐쇄(congruence closure) 등에서 성능·메모리 병목을 완화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: OpenCV(이미지 연결성 레이블링)<br>  코드: cv::connectedComponentsWithStats(src, labels, stats, centroids); // OpenCV 4.x<br>  실무 패턴: 2-패스 알고리즘에서 로컬 합집합을 먼저 병합 후 전역 path-compression 적용<br>- 사례: Boost C++(그래프 알고리즘의 Kruskal)<br>  코드: #include <boost/pending/disjoint_sets.hpp><br>  // boost::disjoint_sets<std::size_t*, std::size_t*> ds(&rank[0], &parent[0]);<br>  사용처: Boost.Graph의 Kruskal 구현(Boost 1.70+)<br>- 사례: Z3/SMT 솔버(동치 관계 관리)<br>  설명: Microsoft Z3의 내부 합동성 폐쇄는 union-find 기반 구조를 사용해 동치 클래스 전파와 재작성 규칙을 효율화(참고: Z3 소스, Microsoft Research).<br>실무 팁: path-compression + union-by-rank을 기본으로 하고, 멀티스레드 환경에서는 배치 합집합 후 단일 스레드로 압축하거나 락-그레인 합병을 사용하세요.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Disjoint Set Union (Union-Find) is a data structure for maintaining partitioned sets with fast union and find operations; it’s widely used to manage dynamic equivalence classes in production systems like graph libraries, image processors, and SMT solvers.</p>
+        <p>How it works: each element points to a parent forming trees whose roots are set representatives. Find uses path compression to flatten trees; union uses rank/size to attach smaller trees to larger ones. Combined, these give nearly-constant amortized time per operation (inverse Ackermann α(n)). Practical concerns include concurrency (lock-free or batched merges), external-memory variants for huge datasets, and integration into streaming or parallel graph frameworks.<br>Where it matters: Kruskal MST implementations, two-pass connected-component labeling in computer vision, and congruence closure/equality propagation in SMT solvers — all rely on union-find to keep costs low while merging many equivalence relations.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: OpenCV connected components (image processing)<br>  Code: cv::connectedComponentsWithStats(src, labels, stats, centroids); // OpenCV 4.x<br>  Production pattern: local unions per tile, then border merges + final path compression to scale on large images.<br>- Case: Boost (Kruskal in Boost.Graph)<br>  Code: #include <boost/pending/disjoint_sets.hpp><br>        boost::disjoint_sets<std::size_t*, std::size_t*> ds(&rank[0], &parent[0]);<br>  Where used: Boost.Graph MST routines (Boost 1.70+).<br>- Case: Z3 SMT solver (Microsoft Research)<br>  Note: Z3’s congruence-closure/equality engine uses union-find-like structures to propagate equalities efficiently (see Z3 source on GitHub).<br>Production patterns: always use path-compression + union-by-rank, batch unions in parallel settings, and prefer per-shard local DSU then global merge for distributed workloads.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
