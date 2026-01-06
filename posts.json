@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Disjoint Set Union (Union-Find)",
+      "date": "2026-01-07",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-07-disjoint-set-union.html",
+      "excerpt": "Disjoint Set Union(Union-Find)은 서로소 집합의 합집합과 탐색을 빠르게 처리하는 자료구조로, 그래프 연결성, 이미지 분할, SMT(자동정리) 등 실제 시스템에서 대규모 동적 동치관계를 관리하는 데 핵심적입니다."
+    },
+    {
       "title": "Dynamic Programming (동적 계획법)",
       "date": "2026-01-05",
       "category": "cs-fundamentals",
