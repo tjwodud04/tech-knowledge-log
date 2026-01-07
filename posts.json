@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "InfiniDepth: Arbitrary-Resolution and Fine-Grained Depth Estimation with Neural Implicit Fields",
+      "date": "2026-01-08",
+      "category": "papers",
+      "url": "posts/papers/2601/2026-01-08-paper.html",
+      "excerpt": "InfiniDepth: Arbitrary-Resolution and Fine-Grained Depth Estimation with Neural Implicit Fields"
+    },
+    {
       "title": "Disjoint Set Union (Union-Find)",
       "date": "2026-01-07",
       "category": "cs-fundamentals",
