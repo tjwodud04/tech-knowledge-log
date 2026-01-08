@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2026-01-09",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-09-two-pointer-technique.html",
+      "excerpt": "두 포인터 기법은 배열/시퀀스에서 두 개의 인덱스를 사용해 선형 시간으로 문제를 푸는 패턴으로, 정렬·윈도우·머지 연산에서 메모리·속도 효율을 극대화합니다."
+    },
+    {
       "title": "InfiniDepth: Arbitrary-Resolution and Fine-Grained Depth Estimation with Neural Implicit Fields",
       "date": "2026-01-08",
       "category": "papers",
