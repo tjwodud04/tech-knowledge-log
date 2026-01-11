@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Pointer Technique / 투 포인터 기법</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="두 포인터 기법은 배열·리스트를 한 번 스캔하면서 두 개의 포인터(인덱스/이터레이터)를 이용해 조건을 유지하거나 부분구간을 처리하는 방법으로, 메모리 절약과 O(n) 시간 복잡도로 실무 시스템에서 자주 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Two-Pointer Technique / 투 포인터 기법</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-12</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>두 포인터 기법은 배열·리스트를 한 번 스캔하면서 두 개의 포인터(인덱스/이터레이터)를 이용해 조건을 유지하거나 부분구간을 처리하는 방법으로, 메모리 절약과 O(n) 시간 복잡도로 실무 시스템에서 자주 사용됩니다.</p>
+        <p>작동 원리: 하나는 읽기(read/fast), 하나는 쓰기(write/slow) 또는 양쪽 끝에서 수렴하는 투포인터 등 패턴으로 나뉩니다. 슬라이딩 윈도우(연속 구간 합/최대 길이), 중복 제거(in-place unique), 병합(merge-join) 등에서 핵심 불변식을 유지하며 포인터를 이동합니다. 구현상 주의점은 경계 검사, 이터레이터 유효성, 메모리 오버랩을 피하는 것입니다.<br><br>기술적 상세: 대부분 O(n) 단일 패스 알고리즘이며 추가 O(1) 공간을 요구합니다. 예: 중복 제거는 read가 새 원소를 찾을 때만 write를 증가시키고 대입합니다. 정렬된 두 배열 병합은 각각의 포인터가 작은 값을 가져간 쪽을 증가시키며 합집합/교집합을 O(n+m)로 계산합니다. 스트리밍/윈도우 집계나 DB의 정렬 병합 조인(merge join) 등 프로덕션 시스템에서 높은 처리량을 제공합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: libstdc++ std::unique (GCC 12의 구현)<br>코드:<br><pre><code class="language-cpp">template&lt;class ForwardIt&gt;<br>ForwardIt unique(ForwardIt first, ForwardIt last) {<br>  if (first==last) return last;<br>  auto result = first;<br>  while (++first != last) {<br>    if (!(*result == *first)) *(++result) = *first;<br>  }<br>  return ++result;<br>}</code></pre><br>위치: GNU libstdc++ 구현(예: GCC 12) — 컨테이너에서 중복을 인플레이스로 제거.<br><br>- 사례: PostgreSQL의 Sort-Merge Join (PostgreSQL 14+)<br>패턴: 두 테이블의 정렬된 커서를 각각 포인팅하여 비교 후 작은 쪽을 이동시켜 조인을 O(n+m)로 수행.<br><br>- 사례: Rust std::vec::Vec::retain (Rust 1.60+)<br>코드(핵심 패턴):<br><pre><code class="language-rust">let mut write = 0;<br>for read in 0..v.len() {<br>  if predicate(&amp;v[read]) {<br>    v.swap(write, read);<br>    write += 1;<br>  }<br>}<br>v.truncate(write);</code></pre><br>실무 패턴: 메모리 할당을 피하고 연속 메모리 특성 유지, 경계/안전 검사 고려. 대용량 스트리밍(예: Apache Flink의 윈도우 집계)이나 DB 엔진의 병합 단계에서 성능과 메모리 이득이 큼.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Two-pointer technique uses two indices/iterators to scan data structures (one-pass or two-end) to maintain invariants like window bounds or in-place filtering, delivering O(n) time and O(1) extra space in many production contexts.</p>
+        <p>How it works: common variants are fast/slow (read/write) for in-place compaction, sliding-window for variable-length subarray problems, and left/right converging pointers for partitioning. The algorithm keeps a small set of invariants—when to advance which pointer—and relies on safe iterator semantics and boundary checks. It's widely used where minimal allocation and linear throughput matter.<br><br>Technical details: implementations typically move the write pointer only when a retained element is encountered, or advance either pointer based on comparisons (merge-like). Complexity is linear in input size; correctness depends on treating overlaps carefully (use assignment or swap depending on aliasing). This pattern is embedded in systems for merge joins, streaming windows, and standard libraries' in-place operations.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: std::unique in GNU libstdc++ (GCC 12)<br>Code:<br><pre><code class="language-cpp">template&lt;class ForwardIt&gt;<br>ForwardIt unique(ForwardIt first, ForwardIt last) {<br>  if (first==last) return last;<br>  auto result = first;<br>  while (++first != last) {<br>    if (!(*result == *first)) *(++result) = *first;<br>  }<br>  return ++result;<br>}</code></pre><br>Where: libstdc++ source (used across C++ apps) — in-place duplicate removal.<br><br>- Case: PostgreSQL Sort-Merge Join (PostgreSQL 14+)<br>Pattern: two sorted cursors advance based on comparison to produce join results in O(n+m), used in production DB query engines.<br><br>- Case: Rust Vec::retain (Rust std 1.60+)<br>Code:<br><pre><code class="language-rust">let mut write = 0;<br>for read in 0..v.len() {<br>  if f(&amp;v[read]) { v.swap(write, read); write+=1; }<br>}<br>v.truncate(write);</code></pre><br>Production patterns: prefer index/iterator-safe moves, avoid extra allocations, test boundary and aliasing cases. Used in high-throughput streaming, DB operators, and standard library routines.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
