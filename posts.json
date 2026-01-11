@@ -2,6 +2,13 @@
   "posts": [
     {
       "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2026-01-12",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-12-two-pointer-technique.html",
+      "excerpt": "두 포인터 기법은 배열·리스트를 한 번 스캔하면서 두 개의 포인터(인덱스/이터레이터)를 이용해 조건을 유지하거나 부분구간을 처리하는 방법으로, 메모리 절약과 O(n) 시간 복잡도로 실무 시스템에서 자주 사용됩니다."
+    },
+    {
+      "title": "Two-Pointer Technique / 투 포인터 기법",
       "date": "2026-01-09",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2601/2026-01-09-two-pointer-technique.html",
