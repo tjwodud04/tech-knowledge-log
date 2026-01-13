@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Pointer Technique / 투 포인터 기법</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="두 포인터 기법은 정렬된 시퀀스에서 두 개의 인덱스를 이동시키며 조건을 만족하는 구간이나 교집합/병합을 찾는 알고리즘 패턴으로, 대용량 검색·쿼리 실행·스트리밍 시스템에서 비용을 낮추고 I/O를 절감하기 위해 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Two-Pointer Technique / 투 포인터 기법</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-14</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>두 포인터 기법은 정렬된 시퀀스에서 두 개의 인덱스를 이동시키며 조건을 만족하는 구간이나 교집합/병합을 찾는 알고리즘 패턴으로, 대용량 검색·쿼리 실행·스트리밍 시스템에서 비용을 낮추고 I/O를 절감하기 위해 널리 쓰입니다.</p>
+        <p>작동 원리: 두 개(또는 다수)의 포인터(p, q)를 각각 시퀀스의 시작에 두고 비교 결과에 따라 한쪽 혹은 양쪽 포인터를 전진시킵니다. 예: 정렬된 두 리스트의 교집합은 양쪽 포인터가 가리키는 값이 같을 때 결과에 추가하고, 작으면 작은 쪽을 한 칸 전진시키는 방식으로 O(n+m) 시간에 처리됩니다. 변형으로는 고정 길이 창을 이동하는 슬라이딩 윈도우(연속 합/최대 길이 부분배열), 서로 다른 속도로 진행하며 충돌 검사하는 두 포인터(예: 롱런 압축 해제) 등이 있습니다.<br>실전 최적화: 입력이 크게 편향되어 있으면 galloping/exponential search(긴 리스트를 빠르게 건너뛰기) 또는 skip pointers/skip lists를 사용해 희소-조밀 불균형을 줄입니다. 밀도가 높을 때는 비트셋(bitset)으로 변환해 랭크/선택 연산을 사용하는 편이 더 빠릅니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Apache Lucene / Elasticsearch에서의 문서 ID 교집합<br>코드:<br><pre><code class="language-python"># 정렬된 두 posting list의 교집합 (실무 단순화 버전)<br>def intersect(a,b):<br>    i=j=0<br>    res=[]<br>    while i&lt;len(a) and j&lt;len(b):<br>        if a[i]==b[j]: res.append(a[i]); i+=1; j+=1<br>        elif a[i]&lt;b[j]: i+=1<br>        else: j+=1<br>    return res</code></pre><br>Where: ConjunctionDISI 및 PostingsEnum 상호작용(예: Lucene 8.x/9.x)에서 AND 쿼리의 핵심 연산으로 사용됩니다. 참고 소스: Apache Lucene releases (e.g., lucene 8.11.0 ConjunctionDISI).<br>사례2: PostgreSQL의 Merge Join (src/backend/executor/nodeMergejoin.c, PostgreSQL v13+)는 정렬된 두 소스에 대해 두 포인터를 이용해 I/O와 비교를 최소화합니다.<br>실무 패턴: 입력이 정렬되어 있음을 보장, 편향된 길이에는 galloping/binary-advance 사용, 밀집도 높으면 비트셋으로 전환, 대용량 외부 정렬/병합 시 메모리 버퍼 크기와 I/O 배치 고려.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The two-pointer technique advances two indices over sequences (often sorted) to find matches, windows, or merges with linear-ish cost — crucial for search engines, DB join operators, and streaming analytics to reduce CPU and I/O.</p>
+        <p>How it works: Place pointers i and j at sequence starts and compare targets. For sorted-list intersection increment the smaller pointer; when equal emit a result. Sliding-window is a related pattern where left/right pointers expand/contract to maintain invariants (sum, unique count). Variants include multi-pointer merges (k-way merge), two-phase iteration (skip/advance APIs), and exponential/galloping search to jump in long lists.<br>Optimizations in production: use skip pointers or index-level skip lists (Lucene) to avoid linear scans across sparse lists; switch to bitsets/bitmap indices when posting density is high (faster rank/select operations); use branchless or SIMD-accelerated compares for CPU-heavy loops. For extremely skewed sizes, advance the larger list with binary/exponential search to reduce work.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Lucene/Elasticsearch postings intersection<br>Code:<br><pre><code class="language-python"># simple intersect of sorted docIDs<br>def intersect(a,b):<br>    i=j=0<br>    out=[]<br>    while i&lt;len(a) and j&lt;len(b):<br>        if a[i]==b[j]: out.append(a[i]); i+=1; j+=1<br>        elif a[i]&lt;b[j]: i+=1<br>        else: j+=1<br>    return out</code></pre><br>Where: Lucene (ConjunctionDISI, releases 8.x/9.x) implements posting-list intersections with two-pointer base logic plus skip/galloping; Elasticsearch uses Lucene under the hood. Case2: PostgreSQL merge join (nodeMergejoin.c in PostgreSQL v12+) uses a two-pointer merge over sorted inputs for efficient joins. Production patterns: ensure sorted inputs or maintain order during ingestion, apply galloping/skip when lists are size-skewed, convert to bitset for dense posting lists, and tune memory buffers for external merges.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
