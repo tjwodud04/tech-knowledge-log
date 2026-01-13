@@ -2,6 +2,13 @@
   "posts": [
     {
       "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2026-01-14",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-14-two-pointer-technique.html",
+      "excerpt": "두 포인터 기법은 정렬된 시퀀스에서 두 개의 인덱스를 이동시키며 조건을 만족하는 구간이나 교집합/병합을 찾는 알고리즘 패턴으로, 대용량 검색·쿼리 실행·스트리밍 시스템에서 비용을 낮추고 I/O를 절감하기 위해 널리 쓰입니다."
+    },
+    {
+      "title": "Two-Pointer Technique / 투 포인터 기법",
       "date": "2026-01-12",
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2601/2026-01-12-two-pointer-technique.html",
