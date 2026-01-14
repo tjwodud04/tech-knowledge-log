@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "MemGovern: Enhancing Code Agents through Learning from Governed Human Experiences",
+      "date": "2026-01-15",
+      "category": "papers",
+      "url": "posts/papers/2601/2026-01-15-paper.html",
+      "excerpt": "MemGovern: Enhancing Code Agents through Learning from Governed Human Experiences"
+    },
+    {
       "title": "Two-Pointer Technique / 투 포인터 기법",
       "date": "2026-01-14",
       "category": "cs-fundamentals",
