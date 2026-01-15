@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Topological Sort</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="위상정렬은 방향 비순환 그래프(DAG)의 노드들을 선형으로 정렬해 모든 방향 간선을 앞->뒤로 배치하는 알고리즘이며, 빌드·스케줄링·의존성 해소에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Topological Sort</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-16</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>위상정렬은 방향 비순환 그래프(DAG)의 노드들을 선형으로 정렬해 모든 방향 간선을 앞->뒤로 배치하는 알고리즘이며, 빌드·스케줄링·의존성 해소에서 필수적입니다.</p>
+        <p>작동 원리: 대표적 구현으로 Kahn 알고리즘(진입차수 0 노드 큐에서 제거)과 DFS 기반(후위순회 역순)이 있습니다. 두 방법 모두 시간복잡도는 O(V+E)로, 사이클이 발견되면 정렬이 불가능하므로 사이클 검출을 함께 수행합니다. 실무에서는 DAG 가정을 검증하고, 부분적 병렬화(여러 진입차수0 노드를 동시에 처리)로 스루풋을 높입니다.<br><br>시스템 적용: 빌드 시스템(Bazel/Buck/Pants)은 소스·아티팩트 의존성을 위상정렬해 빌드 액션 순서를 결정합니다. 워크플로 오케스트레이터(Apache Airflow)는 작업 DAG를 위상정렬로 스케줄링·백필(backfill)합니다. 분산 데이터프레임 엔진(예: Apache Spark DAGScheduler)은 스테이지 생성·의존성 해소에서 유사한 위상적 처리를 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google의 Bazel(오픈소스)에서 빌드 액션 정렬<br>  코드: 빌드 호출: <code>bazel build //path:target</code><br>  설명: Bazel은 타깃 의존 그래프를 분석해 실행 가능한 액션들을 위상적으로 정렬, 병렬 실행과 캐싱을 적용 (Bazel 오픈소스 문서)<br>- 사례: Apache Airflow (v2.x)에서 DAG 스케줄링<br>  코드: <br>  <pre><code class="language-python">from airflow import DAG<br>  a &gt;&gt; b  # a가 끝난 뒤 b 실행 (위상 제약)</code></pre><br>  설명: Airflow는 DAG 노드 의존성을 기반으로 작업 순서를 계산하고 스케줄러가 위상적 순서를 따라 실행<br>- 사례: Git의 토폴로지컬 출력<br>  명령: <code>git rev-list --topo-order HEAD</code>  (커밋 그래프의 위상적 순서로 나열)<br><br>실무 패턴: 사이클 방지(의존성 버전 고정), 병렬화 가능한 서브그래프 동시 실행, 캐시/증분 빌드를 위한 위상 기반 증분 처리.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Topological sort orders nodes of a directed acyclic graph (DAG) so every directed edge goes from earlier to later—critical for builds, schedulers, and dependency resolution in production.</p>
+        <p>How it works: Two common algorithms are Kahn’s algorithm (remove nodes with in-degree 0 iteratively) and DFS postorder reverse. Both run in O(V+E) and detect cycles when no node with zero in-degree exists. Production schedulers extend this by executing multiple zero-in-degree nodes in parallel to increase throughput and by validating DAG acyclicity at submission time.<br><br>Where it fits: Build systems (Bazel/Buck/Pants) compute a topological order of build actions; workflow engines (Apache Airflow) compute task execution order from DAGs; distributed data engines (Apache Spark’s DAGScheduler) use DAG/topological reasoning to create stages and dependencies for job execution.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case:<br>- Case: Bazel (open source, Google-origin) orders build actions<br>  Code: <code>bazel build //path:target</code><br>  Note: Bazel resolves the target dependency graph into a topological order, enabling parallel action execution and caching (see Bazel docs).<br>- Case: Apache Airflow (v2.x) DAG dependency syntax<br>  Code:<br>  <pre><code class="language-python">from airflow import DAG<br>  t1 &gt;&gt; t2  # t2 depends on t1 (topological constraint)</code></pre><br>  Note: Airflow scheduler computes runnable tasks from DAG topology and handles backfill/clearing by topo order.<br>- Case: Git topological commit listing<br>  Command: <code>git rev-list --topo-order HEAD</code>  (produces commits in topological order)<br><br>Production patterns: validate DAGs at ingestion, process independent subgraphs in parallel, and use topological order plus caching for incremental builds and retries.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
