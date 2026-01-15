@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Topological Sort",
+      "date": "2026-01-16",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-16-topological-sort.html",
+      "excerpt": "위상정렬은 방향 비순환 그래프(DAG)의 노드들을 선형으로 정렬해 모든 방향 간선을 앞->뒤로 배치하는 알고리즘이며, 빌드·스케줄링·의존성 해소에서 필수적입니다."
+    },
+    {
       "title": "MemGovern: Enhancing Code Agents through Learning from Governed Human Experiences",
       "date": "2026-01-15",
       "category": "papers",
