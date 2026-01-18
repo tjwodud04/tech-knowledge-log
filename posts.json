@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Binary Search / 이진 탐색",
+      "date": "2026-01-19",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-19-binary-search.html",
+      "excerpt": "이진 탐색은 정렬된 시퀀스에서 로그 시간에 항목을 찾는 기본 알고리즘으로, 데이터베이스 인덱스 노드, 라이브러리 API, 빌드·디버깅 도구 등 실무 시스템에서 빈번히 사용됩니다."
+    },
+    {
       "title": "Topological Sort",
       "date": "2026-01-16",
       "category": "cs-fundamentals",
