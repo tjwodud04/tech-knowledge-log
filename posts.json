@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique (투-포인터 기법)",
+      "date": "2026-01-21",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-21-two-pointer-technique.html",
+      "excerpt": "두 개의 인덱스(포인터)를 사용해 선형 시간/상수 추가 공간으로 연속 데이터 문제를 해결하는 기법으로, 생산 시스템의 성능·메모리 최적화에 자주 사용됩니다."
+    },
+    {
       "title": "Binary Search / 이진 탐색",
       "date": "2026-01-19",
       "category": "cs-fundamentals",
