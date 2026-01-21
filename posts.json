@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization",
+      "date": "2026-01-22",
+      "category": "papers",
+      "url": "posts/papers/2601/2026-01-22-paper.html",
+      "excerpt": "Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization"
+    },
+    {
       "title": "Two-Pointer Technique (투-포인터 기법)",
       "date": "2026-01-21",
       "category": "cs-fundamentals",
