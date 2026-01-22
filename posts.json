@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique (양쪽 포인터 / two-pointer)",
+      "date": "2026-01-23",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-23-two-pointer-technique.html",
+      "excerpt": "두 포인터 기법은 배열/리스트의 양쪽(또는 두 위치)을 동시에 이동시키며 상태를 갱신하는 알고리즘 패턴으로, 정렬·병합·슬라이딩 윈도우 문제에서 고성능과 저메모리 구현에 필수적입니다."
+    },
+    {
       "title": "Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization",
       "date": "2026-01-22",
       "category": "papers",
