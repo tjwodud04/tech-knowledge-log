@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Breadth-First Search (BFS)",
+      "date": "2026-01-26",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-26-breadth-first-search.html",
+      "excerpt": "BFS(너비 우선 탐색)는 그래프/트리에서 시작 노드로부터 동일한 거리(레벨)를 먼저 방문하는 탐색 기법으로, 비가중치 최단경로, 레벨 집계, 연결성 검사 등 실무 시스템에서 빈번히 사용됩니다."
+    },
+    {
       "title": "Two-Pointer Technique (양쪽 포인터 / two-pointer)",
       "date": "2026-01-23",
       "category": "cs-fundamentals",
