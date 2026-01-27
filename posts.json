@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2026-01-28",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-28-two-pointer-technique.html",
+      "excerpt": "투 포인터는 배열/스트림에서 두 개의 인덱스(또는 이터레이터)를 사용해 선형 시간으로 구간, 교집합, 중복 제거, 슬라이딩 윈도우 작업을 수행하는 기법으로, 로그 처리·검색 인덱스·레이트리미팅 같은 실무 시스템에서 성능·메모리 이점을 줍니다."
+    },
+    {
       "title": "Breadth-First Search (BFS)",
       "date": "2026-01-26",
       "category": "cs-fundamentals",
