@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Pointer Technique / 투 포인터 기법</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="투 포인터는 배열/스트림에서 두 개의 인덱스(또는 이터레이터)를 사용해 선형 시간으로 구간, 교집합, 중복 제거, 슬라이딩 윈도우 작업을 수행하는 기법으로, 로그 처리·검색 인덱스·레이트리미팅 같은 실무 시스템에서 성능·메모리 이점을 줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Two-Pointer Technique / 투 포인터 기법</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-28</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>투 포인터는 배열/스트림에서 두 개의 인덱스(또는 이터레이터)를 사용해 선형 시간으로 구간, 교집합, 중복 제거, 슬라이딩 윈도우 작업을 수행하는 기법으로, 로그 처리·검색 인덱스·레이트리미팅 같은 실무 시스템에서 성능·메모리 이점을 줍니다.</p>
+        <p>작동 원리: 오른쪽 포인터로 데이터를 확장하고 왼쪽 포인터로 제약(길이, 합, 중복 등)을 만족하도록 줄이는 방식입니다. 핵심 불변식(invariant)을 유지하면 각 원소를 상수번만 방문해 O(n) 시간과 O(1) 추가 메모리로 문제를 해결합니다. 변형으로는 고정 길이 윈도우(rolling metrics), 가변 길이 슬라이딩 윈도우(최대 길이 조건), 두 정렬된 리스트의 병합/교집합(두 포인터가 각각 한 리스트를 순회)과 빠른/느린 포인터(사이클 탐지, 중복 삭제) 등이 있습니다.<br>실무에서의 가치: 검색엔진의 포스팅 리스트 교집합(AND 쿼리), 로그 스트림의 윈도우 집계, 네트워크/API 레이트 제어에서의 슬라이딩 윈도우 카운터 등에서 랜덤 접근 없이도 메모리 효율적으로 처리합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Apache Lucene(검색엔진)의 포스팅 리스트 교집합 처리<br>  코드: (개념)<br><pre><code class="language-cpp">// 두 정렬된 포스트 리스트의 교집합(접근은 DocID 순)<br>int i=0,j=0; while(i&lt;a.size() &amp;&amp; j&lt;b.size()){ if(a[i]==b[j]){ out.push_back(a[i]); i++; j++; }<br> else if(a[i]&lt;b[j]) i++; else j++; }</code></pre><br>  WHERE: Apache Lucene (검색 쿼리 처리, Lucene 9.x 코드베이스에서 postings intersection 최적화)<br>  실무 패턴: 포스트 리스트가 메모리 초과 시 블록 단위로 스트리밍하며 iterator 기반 두 포인터 접근을 사용.<br><br>- 사례: Redis 기반 슬라이딩 윈도우 레이트 리미터 (Sorted Set + ZREMRANGEBYSCORE 패턴)<br>  코드(Lua snippet):<br><pre><code class="language-lua">local key=KEYS[1]; local now=ARGV[1]; redis.call('ZREMRANGEBYSCORE',key,0,now-60)<br>local cnt=redis.call('ZCARD',key)<br>if cnt &lt; tonumber(ARGV[2]) then redis.call('ZADD',key,now,now) end</code></pre><br>  WHERE: Redis(예: Redis Labs 블로그/프로덕션 레이트리미팅 사례), 사용환경 Redis 6/7<br>  실무 패턴: ZSET으로 타임스탬프를 유지하며 왼쪽(이전 타임스탬프) 제거와 오른쪽(현재 추가)을 통해 사실상 두 포인터로 윈도우 유지.<br><br>- 연구/시스템 레퍼런스: 슬라이딩 윈도우 스트림 통계에 관한 Datar et al. (2002) 및 RocksDB/LevelDB의 정렬된 SST 병합(compaction)은 내부적으로 iterator(두 포인터 유사)를 사용해 효율적 병합을 수행.<br>  실무 팁: 불변식(윈도우 조건)을 명시하고 포인터 이동을 최소화, 블록 단위 스트리밍 처리로 캐시 효율 개선.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The two-pointer technique uses two indices or iterators to maintain a window or traverse two streams simultaneously, enabling linear-time, low-memory solutions for range queries, merging, deduplication, and sliding-window aggregates in production systems.</p>
+        <p>How it works: Advance the right pointer to expand state and move the left pointer to restore invariants (sum <= K, window length, uniqueness, etc.). Each element is typically visited once or a constant number of times, yielding O(n) time and O(1) extra space. Variants include fixed-size sliding windows (rolling stats), variable-size sliding windows (maximize/minimize under constraints), fast/slow pointers (cycle detection, removing duplicates), and two-iterator merging for sorted sequences.<br>Why it matters: Search engines, stream processors, and storage systems rely on these patterns to avoid random-access or heavy buffering. Implementations often combine iterator abstraction with block streaming for cache locality and to support large datasets that don’t fit in memory.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Apache Lucene postings intersection<br>  Code (concept):<br><pre><code class="language-cpp">int i=0,j=0; while(i&lt;a.size() &amp;&amp; j&lt;b.size()){ if(a[i]==b[j]){ out.push_back(a[i]); i++; j++; }<br> else if(a[i]&lt;b[j]) i++; else j++; }</code></pre><br>  WHERE: Apache Lucene (postings intersection in Lucene 9.x). Production pattern: iterator-based two-pointer merge, block-loading large posting lists.<br><br>- Case: Redis sliding-window rate limiter (Sorted Set + ZREMRANGEBYSCORE)<br>  Code (Lua snippet):<br><pre><code class="language-lua">local key=KEYS[1]; local now=ARGV[1]<br>redis.call('ZREMRANGEBYSCORE',key,0,now-60)<br>local cnt=redis.call('ZCARD',key)<br>if cnt &lt; tonumber(ARGV[2]) then redis.call('ZADD',key,now,now) end</code></pre><br>  WHERE: Common in Redis-based API gateways (Redis 6/7 examples, Redis Labs blog). Pattern: keep timestamps in ZSET, trim old entries (left pointer) and append new (right).<br><br>- Case: RocksDB/LevelDB compaction and merge iterators use two-way merge logic during SST merging (production storage engines like RocksDB v6+/Facebook/Meta deployments).<br><br>Production tips: express invariants, prefer iterator/block streaming for large data, and benchmark pointer movement cost (I/O vs CPU).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
