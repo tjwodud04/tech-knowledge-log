@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contrastive Learning (대조학습)",
+      "date": "2026-01-28",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2601/2026-01-28-contrastive-learning.html",
+      "excerpt": "대조학습은 서로 다른 뷰(augmentation 또는 다른 모달리티)의 양성 쌍은 가깝게, 음성 쌍은 멀게 학습해 표현을 얻는 자기지도/준지도 기법으로, 검색·추천·제로샷 분류 등 실서비스에서 유용합니다."
+    },
+    {
       "title": "Two-Pointer Technique / 투 포인터 기법",
       "date": "2026-01-28",
       "category": "cs-fundamentals",
