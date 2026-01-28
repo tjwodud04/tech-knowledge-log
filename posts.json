@@ -1,46 +1,11 @@
 {
   "posts": [
     {
-      "title": "Two-Pointer Technique / 투 포인터 기법",
-      "date": "2026-01-28",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-28-two-pointer-technique.html",
-      "excerpt": "투 포인터는 배열/스트림에서 두 개의 인덱스(또는 이터레이터)를 사용해 선형 시간으로 구간, 교집합, 중복 제거, 슬라이딩 윈도우 작업을 수행하는 기법으로, 로그 처리·검색 인덱스·레이트리미팅 같은 실무 시스템에서 성능·메모리 이점을 줍니다."
-    },
-    {
-      "title": "Breadth-First Search (BFS)",
-      "date": "2026-01-26",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-26-breadth-first-search.html",
-      "excerpt": "BFS(너비 우선 탐색)는 그래프/트리에서 시작 노드로부터 동일한 거리(레벨)를 먼저 방문하는 탐색 기법으로, 비가중치 최단경로, 레벨 집계, 연결성 검사 등 실무 시스템에서 빈번히 사용됩니다."
-    },
-    {
-      "title": "Two-Pointer Technique (양쪽 포인터 / two-pointer)",
-      "date": "2026-01-23",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-23-two-pointer-technique.html",
-      "excerpt": "두 포인터 기법은 배열/리스트의 양쪽(또는 두 위치)을 동시에 이동시키며 상태를 갱신하는 알고리즘 패턴으로, 정렬·병합·슬라이딩 윈도우 문제에서 고성능과 저메모리 구현에 필수적입니다."
-    },
-    {
       "title": "Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization",
       "date": "2026-01-22",
       "category": "papers",
       "url": "posts/papers/2601/2026-01-22-paper.html",
       "excerpt": "Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization"
-    },
-    {
-      "title": "Two-Pointer Technique (투-포인터 기법)",
-      "date": "2026-01-21",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-21-two-pointer-technique.html",
-      "excerpt": "두 개의 인덱스(포인터)를 사용해 선형 시간/상수 추가 공간으로 연속 데이터 문제를 해결하는 기법으로, 생산 시스템의 성능·메모리 최적화에 자주 사용됩니다."
-    },
-    {
-      "title": "Binary Search / 이진 탐색",
-      "date": "2026-01-19",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-19-binary-search.html",
-      "excerpt": "이진 탐색은 정렬된 시퀀스에서 로그 시간에 항목을 찾는 기본 알고리즘으로, 데이터베이스 인덱스 노드, 라이브러리 API, 빌드·디버깅 도구 등 실무 시스템에서 빈번히 사용됩니다."
     },
     {
       "title": "Topological Sort",
@@ -57,27 +22,6 @@
       "excerpt": "MemGovern: Enhancing Code Agents through Learning from Governed Human Experiences"
     },
     {
-      "title": "Two-Pointer Technique / 투 포인터 기법",
-      "date": "2026-01-14",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-14-two-pointer-technique.html",
-      "excerpt": "두 포인터 기법은 정렬된 시퀀스에서 두 개의 인덱스를 이동시키며 조건을 만족하는 구간이나 교집합/병합을 찾는 알고리즘 패턴으로, 대용량 검색·쿼리 실행·스트리밍 시스템에서 비용을 낮추고 I/O를 절감하기 위해 널리 쓰입니다."
-    },
-    {
-      "title": "Two-Pointer Technique / 투 포인터 기법",
-      "date": "2026-01-12",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-12-two-pointer-technique.html",
-      "excerpt": "두 포인터 기법은 배열·리스트를 한 번 스캔하면서 두 개의 포인터(인덱스/이터레이터)를 이용해 조건을 유지하거나 부분구간을 처리하는 방법으로, 메모리 절약과 O(n) 시간 복잡도로 실무 시스템에서 자주 사용됩니다."
-    },
-    {
-      "title": "Two-Pointer Technique / 투 포인터 기법",
-      "date": "2026-01-09",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-09-two-pointer-technique.html",
-      "excerpt": "두 포인터 기법은 배열/시퀀스에서 두 개의 인덱스를 사용해 선형 시간으로 문제를 푸는 패턴으로, 정렬·윈도우·머지 연산에서 메모리·속도 효율을 극대화합니다."
-    },
-    {
       "title": "InfiniDepth: Arbitrary-Resolution and Fine-Grained Depth Estimation with Neural Implicit Fields",
       "date": "2026-01-08",
       "category": "papers",
@@ -92,39 +36,11 @@
       "excerpt": "Disjoint Set Union(Union-Find)은 서로소 집합의 합집합과 탐색을 빠르게 처리하는 자료구조로, 그래프 연결성, 이미지 분할, SMT(자동정리) 등 실제 시스템에서 대규모 동적 동치관계를 관리하는 데 핵심적입니다."
     },
     {
-      "title": "Dynamic Programming (동적 계획법)",
-      "date": "2026-01-05",
+      "title": "Two-Pointer Technique / 투 포인터 기법",
+      "date": "2025-12-19",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-05-dynamic-programming.html",
-      "excerpt": "동적 계획법은 중복 부분문제와 최적 부분구조를 이용해 복잡한 문제를 효율적으로 푸는 기법으로, 검색·음성인식·유전체 정렬 등 실제 시스템에서 핵심 성능 병목을 해결합니다."
-    },
-    {
-      "title": "Sliding Window",
-      "date": "2026-01-02",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2601/2026-01-02-sliding-window.html",
-      "excerpt": "슬라이딩 윈도우는 시간/인덱스 축 위에서 고정 크기 창을 움직이며 연속 데이터의 집계·제어·검증을 하는 기법으로, 스트리밍 집계·레이트리밋·신뢰성 전송 등에서 실무적으로 매우 중요합니다."
-    },
-    {
-      "title": "Breadth-First Search (BFS)",
-      "date": "2025-12-31",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-31-breadth-first-search.html",
-      "excerpt": "BFS(너비 우선 탐색)는 그래프/트리의 레벨 단위 탐색 알고리즘으로, 최단 경로(가중치 없는 그래프) 계산과 네트워크 탐색에서 실무적으로 중요합니다."
-    },
-    {
-      "title": "Two-Pointer Technique",
-      "date": "2025-12-29",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-29-two-pointer-technique.html",
-      "excerpt": "두 포인터 기법은 정렬된 데이터나 순차 스트림에서 두 개의 인덱스(포인터)를 사용해 선형 시간·상수 추가공간으로 문제를 푸는 방법으로, 데이터베이스의 병합조인·스트림 윈도잉 등 실무 시스템에서 성능 핵심입니다."
-    },
-    {
-      "title": "Sliding Window Algorithm / 슬라이딩 윈도우 알고리즘",
-      "date": "2025-12-26",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-26-sliding-window-algorithm.html",
-      "excerpt": "슬라이딩 윈도우는 연속 데이터 스트림이나 시계열에서 '최근 N개' 또는 '최근 T초'의 상태를 유지·계산하는 기법으로, 레이트 리미팅, 스트리밍 집계, 압축(예: LZ77) 등 실무 시스템에서 성능·정확도 균형을 맞출 때 중요합니다."
+      "url": "posts/cs-fundamentals/2512/2025-12-19-two-pointer-technique.html",
+      "excerpt": "핵심 개념 및 실무적 중요성 (1-2 sentences)"
     },
     {
       "title": "SemanticGen: Video Generation in Semantic Space",
@@ -132,20 +48,6 @@
       "category": "papers",
       "url": "posts/papers/2512/2025-12-25-paper.html",
       "excerpt": "SemanticGen: Video Generation in Semantic Space"
-    },
-    {
-      "title": "Sliding Window Technique",
-      "date": "2025-12-22",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-22-sliding-window-technique.html",
-      "excerpt": "슬라이딩 윈도우 기법은 연속 데이터 스트림이나 시퀀스에서 고정 크기 창을 겹치며 이동시켜 로컬 통계나 집계를 유지하는 방법으로, 스트리밍 분석·네트워크 제어·시계열 처리 등 실서비스에서 지연과 정확성 균형에 중요합니다."
-    },
-    {
-      "title": "Two-Pointer Technique / 투 포인터 기법",
-      "date": "2025-12-19",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-19-two-pointer-technique.html",
-      "excerpt": "핵심 개념 및 실무적 중요성 (1-2 sentences)"
     },
     {
       "title": "MMGR: Multi-Modal Generative Reasoning",
@@ -162,13 +64,6 @@
       "excerpt": "슬라이딩 윈도우는 고정 길이의 '창'을 입력 스트림 위에서 이동시키며 국소 통계/집계를 유지하는 기법으로, 네트워크 TCP, 스트리밍 집계, 레이트리미팅 등 실무에서 성능·정확성 균형을 맞추는 데 중요합니다."
     },
     {
-      "title": "Breadth-First Search (BFS)",
-      "date": "2025-12-15",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-15-breadth-first-search.html",
-      "excerpt": "BFS는 그래프의 레벨별(최단 경로, 연결성 검사) 탐색 방법으로, 실제 시스템에서 빠른 도달성 계산과 레벨 기반 분석에 널리 사용됩니다."
-    },
-    {
       "title": "Mutex Lock (뮤텍스 락)",
       "date": "2025-12-12",
       "category": "cs-fundamentals",
@@ -183,25 +78,11 @@
       "excerpt": "Wan-Move: Motion-controllable Video Generation via Latent Trajectory Guidance"
     },
     {
-      "title": "Merge Sort (병합 정렬)",
-      "date": "2025-12-10",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-10-merge-sort.html",
-      "excerpt": "병합 정렬은 분할 정복 기반의 안정 정렬로, 메모리 한계를 넘는 대용량 데이터 정렬(외부 정렬)과 안정성이 필요한 시스템에서 중요합니다."
-    },
-    {
       "title": "Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms",
       "date": "2025-12-09",
       "category": "papers",
       "url": "posts/papers/2512/2025-12-09-paper.html",
       "excerpt": "Enhancing Retrieval-Augmented Generation with Entity Linking for Educational Platforms"
-    },
-    {
-      "title": "Dynamic Programming (DP) — practical systems view",
-      "date": "2025-12-08",
-      "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2512/2025-12-08-dynamic-programming.html",
-      "excerpt": "동적계획법(DP)은 중복 부분문제를 재사용해 최적해를 구하는 기법으로, 음성인식·생물정보·그래프 알고리즘 등 프로덕션 시스템에서 성능과 안정성을 좌우합니다."
     },
     {
       "title": "Hash Table (해시 테이블)",
