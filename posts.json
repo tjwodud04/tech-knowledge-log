@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security",
+      "date": "2026-01-29",
+      "category": "papers",
+      "url": "posts/papers/2601/2026-01-29-paper.html",
+      "excerpt": "AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security"
+    },
+    {
       "title": "Contrastive Learning (대조학습)",
       "date": "2026-01-28",
       "category": "cs-fundamentals",
