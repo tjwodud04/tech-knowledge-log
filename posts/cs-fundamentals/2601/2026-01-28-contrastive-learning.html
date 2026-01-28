@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Contrastive Learning (대조학습)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="대조학습은 서로 다른 뷰(augmentation 또는 다른 모달리티)의 양성 쌍은 가깝게, 음성 쌍은 멀게 학습해 표현을 얻는 자기지도/준지도 기법으로, 검색·추천·제로샷 분류 등 실서비스에서 유용합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Contrastive Learning (대조학습)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-01-28</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대조학습은 서로 다른 뷰(augmentation 또는 다른 모달리티)의 양성 쌍은 가깝게, 음성 쌍은 멀게 학습해 표현을 얻는 자기지도/준지도 기법으로, 검색·추천·제로샷 분류 등 실서비스에서 유용합니다.</p>
+        <p>기본 아이디어는 InfoNCE(또는 대조 손실)를 통해 정규화된 임베딩간 코사인 유사도를 최대화/최소화하는 것입니다. 데이터 증강(이미지: crop/color jitter, 텍스트: dropout/MLM 등)으로 양성 쌍을 만들고, 미니배치의 다른 샘플이나 메모리뱅크/모멘텀 인코더(MoCo)로 음성을 제공합니다. 수식적으로는 logits_{i,j}=sim(z_i,z_j)/τ, cross-entropy로 양성 인덱스 정답을 맞추면 됩니다. τ는 온도 파라미터로 분포 샤프닝 역할을 합니다.<br><br>실무 확장으로는 대규모 멀티모달 대조(예: CLIP)와 음성 없이도 동작하는 BYOL/DINO(음성 없이 자기증류) 등이 있습니다. 생산 환경에서는 임베딩을 Faiss로 색인해 빠른 근접검색을 수행하거나(메트릭 벡터 검색), 파인튜닝으로 downstream 태스크(검색, 추천, 유사도 기반 필터링)에 통합합니다. 하이퍼파라미터: 배치사이즈/음성수, τ, augmentation 강도, 음성탐색(인-배치 vs memory)·모멘텀 여부가 성능에 큰 영향을 미칩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: OpenAI CLIP (2021) — 이미지-텍스트 대조 학습으로 제로샷 분류/검색에 사용<br>코드:<br><pre><code class="language-python"># transformers 4.30, torch 1.12 예시: 임베딩-유사도 계산<br>from transformers import CLIPProcessor, CLIPModel<br>model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')<br>proc = CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')<br>inputs = proc(text=['a dog'], images=image, return_tensors='pt')<br>emb = model.get_image_features(**inputs)<br>emb = emb / emb.norm(dim=-1, keepdim=True)</code></pre><br>실무 패턴: 학습 후 Faiss(1.7.3)로 벡터 색인 및 ANN 검색(대규모 서비스에서 메모리/효율 튜닝), 온도 τ 튜닝 및 혼합 정규화 전략 사용<br><br>사례: SimCLR (Google Research) / MoCo v2 (Facebook AI Research)<br>코드(학습 호출 예):<br>python main_moco.py --arch resnet50 --batch-size 256 --epochs 200  # MoCo PyTorch repo<br>실무 베스트프랙티스: 대형 배치 또는 메모리뱅크/모멘텀으로 충분한 음성 확보, Faiss로 프로덕션 검색, 증강과 τ 민감도 모니터링</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Contrastive learning trains representations by pulling positive pairs closer and pushing negatives apart; it's central to self-supervised pretraining and retrieval/zero-shot production systems.</p>
+        <p>The canonical mechanism is an InfoNCE-style loss: normalize embeddings, compute cosine similarities, divide by a temperature τ, and optimize cross-entropy to identify positive pairs among negatives. Positives come from strong augmentations (images) or paired modalities (image↔text); negatives come from other batch samples, memory banks, or momentum encoders (MoCo). Key knobs: batch size (more in-batch negatives), τ (controls peakiness), augmentation recipe, and whether to use explicit negatives (SimCLR/MoCo) or implicit self-distillation (BYOL/DINO).<br><br>In production, contrastive pretrained encoders are used for nearest-neighbor search (ANN with Faiss), semantic search, recommendation two-tower models, and multimodal retrieval (CLIP). Practical considerations include embedding dimensionality, indexing strategy (IVF/PQ in Faiss), mixed precision/OOM handling during large-batch self-supervised training, and downstream fine-tuning strategies.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: OpenAI CLIP (2021) — image-text contrastive pretraining used for zero-shot classification and retrieval<br>Code:<br><pre><code class="language-python"># transformers&gt;=4.30, torch&gt;=1.12: compute normalized image embeddings<br>from transformers import CLIPProcessor, CLIPModel<br>model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')<br>proc = CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')<br>inputs = proc(text=['a dog'], images=image, return_tensors='pt')<br>img_emb = model.get_image_features(**inputs)<br>img_emb = img_emb / img_emb.norm(dim=-1, keepdim=True)</code></pre><br>Production patterns: index embeddings with Faiss (v1.7+) using IVF+PQ for large corpora, tune τ and augmentation pipeline, use mixed precision and gradient accumulation for effective large-batch training.<br><br>Case: MoCo v2 (Facebook AI Research) / SimCLR (Google Research)<br>Command (MoCo PyTorch repo):<br>python main_moco.py --arch resnet50 --batch-size 256 --epochs 200<br>Best practices: ensure sufficient negatives (batch or memory), monitor collapse (BYOL/DINO fixes), and validate embeddings with downstream retrieval/linear-probe tasks.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
