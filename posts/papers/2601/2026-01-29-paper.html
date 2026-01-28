@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    /* Post-specific overrides only */
+    .post-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      color: #111827;
+    }
+    
+    .topic-meta {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .topic-meta strong {
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .topic-meta > div {
+      margin: 0.5rem 0;
+    }
+    
+    .topic-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 1.75rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    
+    .topic-section h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    .topic-section p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.75;
+    }
+    
+    .arxiv-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .arxiv-link,
+    .hf-link {
+      display: inline-block;
+      padding: 0.65rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      color: white !important;
+    }
+    
+    .arxiv-link {
+      background: #3b82f6;
+    }
+    
+    .arxiv-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .hf-link {
+      background: #ffb400;
+    }
+    
+    .hf-link:hover {
+      background: #e69a00;
+      transform: translateY(-1px);
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .post-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .post-content h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topic-section {
+        padding: 1.25rem;
+      }
+      
+      .topic-section h2 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Dongrui Liu, Qihan Ren, Chen Qian, Shuai Shao, Yuejin Xie, Yu Li, Zhonghao Yang, Haoyu Luo, Peng Wang, Qingyu Liu</div>
+        <div><strong>발행일 / Published:</strong> 2026-01-29</div>
+        <div><strong>Arxiv ID:</strong> 2601.18491</div>
+        <div><strong>Affiliation:</strong> AI45Research</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>자율적인 도구 사용과 환경 상호작용을 하는 AI 에이전트들이 복잡한 안전·보안 문제를 일으키는데, 기존 가드레일은 에이전트 특유의 위험 인식과 위험 진단의 투명성이 부족하다는 문제를 지적합니다. 이를 해결하기 위해 저자들은 위험의 출처(어디서), 실패 양상(어떻게), 결과(무엇인지)를 직교적으로 분류하는 통합된 3차원 분류체계를 제안했습니다. 이 체계에 따라 세밀한 에이전트 안전 벤치마크(ATBench)와 에이전트 궤적 전반에 걸쳐 맥락적 모니터링과 근본 원인 진단을 제공하는 Diagnostic Guardrail 프레임워크(AgentDoG)를 제시하여, 단순한 이진 판정이 아닌 근거와 투명성을 제공합니다. AgentDoG는 Qwen·Llama 계열의 4B/7B/8B 모델 변형으로 공개되며, 다양한 복잡한 상호작용 시나리오에서 최첨단 성능을 보였고 모든 모델과 데이터셋을 오픈소스로 공개했습니다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The rise of AI agents introduces complex safety and security challenges arising from autonomous tool use and environmental interactions. Current guardrail models lack agentic risk awareness and transparency in risk diagnosis. To introduce an agentic guardrail that covers complex and numerous risky behaviors, we first propose a unified three-dimensional taxonomy that orthogonally categorizes agentic risks by their source (where), failure mode (how), and consequence (what). Guided by this structured and hierarchical taxonomy, we introduce a new fine-grained agentic safety benchmark (ATBench) and a Diagnostic Guardrail framework for agent safety and security (AgentDoG). AgentDoG provides fine-grained and contextual monitoring across agent trajectories. More Crucially, AgentDoG can diagnose the root causes of unsafe actions and seemingly safe but unreasonable actions, offering provenance and transparency beyond binary labels to facilitate effective agent alignment. AgentDoG variants are available in three sizes (4B, 7B, and 8B parameters) across Qwen and Llama model families. Extensive experimental results demonstrate that AgentDoG achieves state-of-the-art performance in agentic safety moderation in diverse and complex interactive scenarios. All models and datasets are openly released.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2601.18491" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2601.18491" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
