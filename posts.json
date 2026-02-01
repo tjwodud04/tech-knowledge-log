@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Layer Normalization (LayerNorm)",
+      "date": "2026-02-02",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-02-layer-normalization.html",
+      "excerpt": "LayerNorm은 한 샘플의 피처 차원 전체를 정규화해 내부 공변량 변화(Internal Covariate Shift)를 줄이는 방법입니다. 특히 RNN/Transformer 계열 모델에서 배치 크기 의존성을 제거해 안정적 학습과 추론을 가능하게 합니다."
+    },
+    {
       "title": "AgentDoG: A Diagnostic Guardrail Framework for AI Agent Safety and Security",
       "date": "2026-01-29",
       "category": "papers",
