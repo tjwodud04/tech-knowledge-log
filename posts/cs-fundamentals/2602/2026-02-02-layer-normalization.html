@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Layer Normalization (LayerNorm)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LayerNorm은 한 샘플의 피처 차원 전체를 정규화해 내부 공변량 변화(Internal Covariate Shift)를 줄이는 방법입니다. 특히 RNN/Transformer 계열 모델에서 배치 크기 의존성을 제거해 안정적 학습과 추론을 가능하게 합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Layer Normalization (LayerNorm)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-02</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LayerNorm은 한 샘플의 피처 차원 전체를 정규화해 내부 공변량 변화(Internal Covariate Shift)를 줄이는 방법입니다. 특히 RNN/Transformer 계열 모델에서 배치 크기 의존성을 제거해 안정적 학습과 추론을 가능하게 합니다.</p>
+        <p>작동 원리: LayerNorm은 입력 x의 각 샘플에 대해 feature 차원(보통 채널 또는 임베딩 차원)에 대해 평균 μ와 분산 σ^2를 계산하고, (x-μ)/sqrt(σ^2+ε)로 정규화한 뒤 학습 가능한 스케일 γ와 시프트 β를 적용합니다. 수식: y = γ * (x-μ)/sqrt(σ^2+ε) + β. BatchNorm과 달리 배치 통계에 의존하지 않아 배치 크기 1이거나 분산이 큰 분산 추론 환경에서 유리합니다.<br>운영 관점: Transformer 원논문(Vaswani et al., 2017)과 BERT(Devlin et al., 2018)는 LayerNorm을 핵심으로 사용합니다. 실무에서는 'Post-LN'(원본)과 'Pre-LN'(사전정규화) 변형이 있고, Pre-LN은 매우 깊은 트랜스포머를 학습할 때 안정성(그래디언트 소실 완화)을 제공합니다. 고성능 추론 환경에서는 NVIDIA/FasterTransformer, TensorRT 같은 런타임에서 LayerNorm을 커널로 퓨전해 레이턴시를 줄입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Google BERT, Hugging Face Transformers, NVIDIA FasterTransformer에서 사용<br>코드: PyTorch 예시 (PyTorch>=1.8, transformers>=4.x)<br><pre><code class="language-python">import torch<br>from torch import nn<br>ln = nn.LayerNorm(normalized_shape=768, eps=1e-6)<br>x = torch.randn(2, 128, 768)<br>y = ln(x)  # shape preserved</code></pre><br>Hugging Face 모델 내부: transformers/models/bert/modeling_bert.py 에서 nn.LayerNorm 사용(예: transformers v4.20). 실무 패턴:<br>- 학습: Pre-LN 트랜스포머 권장(더 큰 lr, 더 깊은 모델 안정화)<br>- 추론: TensorRT/FasterTransformer로 LayerNorm 퓨전(레이턴시 감소)<br>- 소규모 배치: BatchNorm 대신 LayerNorm 사용(온디바이스/스트리밍 서비스 환경)<br>참고: BERT (Devlin et al., 2018), Vaswani et al., 2017, FasterTransformer 문서</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LayerNorm normalizes across the feature dimension of each sample, stabilizing training and removing batch-size dependence—useful for RNNs and Transformer-based production models.</p>
+        <p>How it works: For each sample, LayerNorm computes mean μ and variance σ^2 over the feature axes and normalizes: y = γ * (x-μ)/sqrt(σ^2+ε) + β. Unlike BatchNorm it does not rely on batch statistics, so it behaves consistently with batch size 1 and during streaming/inference. In Transformers, LayerNorm is applied before/after residual blocks; ‘Pre-LN’ (normalizing before sublayers) improves gradient flow in very deep stacks and is widely adopted in production transformer implementations.<br>Practical notes: LayerNorm is lightweight (O(F) per token) and GPU-friendly; production stacks often use fused kernels provided by NVIDIA (FasterTransformer, TensorRT) or ONNX Runtime to reduce latency. Research papers comparing BatchNorm/LayerNorm include BERT (Devlin et al., 2018) and many follow-ups analyzing Pre-LN vs Post-LN behavior.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Used in Google BERT, Hugging Face Transformers, OpenAI/GPT family (variants), NVIDIA FasterTransformer<br>Code:<br><pre><code class="language-python"># PyTorch (tested with torch&gt;=1.8, transformers&gt;=4.0)<br>import torch<br>from torch import nn<br>ln = nn.LayerNorm(768, eps=1e-6)<br>x = torch.randn(4, 512, 768)  # batch, seq_len, hidden<br>out = ln(x)</code></pre><br>Where used: transformers/models/bert/modeling_bert.py (transformers v4.x) and many pretrained checkpoints (BERT, RoBERTa). Production patterns:<br>- Use Pre-LN for deeper models to stabilize training.<br>- Fuse LayerNorm in inference (NVIDIA FasterTransformer / TensorRT / ONNX Runtime) to cut latency.<br>- Replace with RMSNorm only for memory/throughput trade-offs (see research on RMSNorm by Shazeer).<br>References: Vaswani et al., 2017; Devlin et al., 2018; Hugging Face Transformers docs; NVIDIA FasterTransformer.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
