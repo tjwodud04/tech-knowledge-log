@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>CodeOCR: On the Effectiveness of Vision Language Models in Code Understanding</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CodeOCR: On the Effectiveness of Vision Language Models in Code Understanding">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    /* Post-specific overrides only */
+    .post-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      color: #111827;
+    }
+    
+    .topic-meta {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .topic-meta strong {
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .topic-meta > div {
+      margin: 0.5rem 0;
+    }
+    
+    .topic-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 1.75rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    
+    .topic-section h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    .topic-section p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.75;
+    }
+    
+    .arxiv-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .arxiv-link,
+    .hf-link {
+      display: inline-block;
+      padding: 0.65rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      color: white !important;
+    }
+    
+    .arxiv-link {
+      background: #3b82f6;
+    }
+    
+    .arxiv-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .hf-link {
+      background: #ffb400;
+    }
+    
+    .hf-link:hover {
+      background: #e69a00;
+      transform: translateY(-1px);
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .post-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .post-content h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topic-section {
+        padding: 1.25rem;
+      }
+      
+      .topic-section h2 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>CodeOCR: On the Effectiveness of Vision Language Models in Code Understanding</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Yuling Shi, Chaoxiang Xie, Zhensu Sun, Yeheng Chen, Chenxu Zhang, Longfei Yun, Chengcheng Wan, Hongyu Zhang, David Lo, Xiaodong Gu</div>
+        <div><strong>발행일 / Published:</strong> 2026-02-05</div>
+        <div><strong>Arxiv ID:</strong> 2602.01785</div>
+        <div><strong>Affiliation:</strong> Shanghai Jiao Tong University</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대형 언어모델(LLM)은 코드 이해에서 뛰어난 성과를 보였지만, 코드 길이가 길어질수록 컨텍스트 길이와 연산 비용이 선형으로 증가해 효율성이 문제됩니다. 이 논문은 코드 텍스트 대신 렌더링한 코드를 이미지로 표현해 해상도를 낮추는 방식으로 압축하면 시각 능력을 가진 멀티모달 LLM(MLLM)이 더 적은 토큰 비용으로도 코드를 이해할 수 있다는 아이디어를 제시합니다. 실험 결과 MLLM은 최대 8배 토큰 절감으로도 코드 이해가 가능하고, 문법 하이라이팅 같은 시각적 단서를 활용하면 4배 압축 수준에서도 코드 완성 성능이 향상되며, 클론 검출 같은 과제는 시각적 압축에 매우 강인해 일부 경우 원문 텍스트보다 성능이 오히려 높았습니다. 전반적으로 MLLM의 이미지 기반 코드 표현은 추론 효율성을 높일 유망한 경로지만, 한계와 추가 연구가 필요함을 보여줍니다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Large Language Models (LLMs) have achieved remarkable success in source code understanding, yet as software systems grow in scale, computational efficiency has become a critical bottleneck. Currently, these models rely on a text-based paradigm that treats source code as a linear sequence of tokens, which leads to a linear increase in context length and associated computational costs. The rapid advancement of Multimodal LLMs (MLLMs) introduces an opportunity to optimize efficiency by representing source code as rendered images. Unlike text, which is difficult to compress without losing semantic meaning, the image modality is inherently suitable for compression. By adjusting resolution, images can be scaled to a fraction of their original token cost while remaining recognizable to vision-capable models. To explore the feasibility of this approach, we conduct the first systematic study on the effectiveness of MLLMs for code understanding. Our experiments reveal that: (1) MLLMs can effectively understand code with substantial token reduction, achieving up to 8x compression; (2) MLLMs can effectively leverage visual cues such as syntax highlighting, improving code completion performance under 4x compression; and (3) Code-understanding tasks like clone detection exhibit exceptional resilience to visual compression, with some compression ratios even slightly outperforming raw text inputs. Our findings highlight both the potential and current limitations of MLLMs in code understanding, which points out a shift toward image-modality code representation as a pathway to more efficient inference.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2602.01785" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://huggingface.co/papers/2602.01785" class="hf-link" target="_blank" rel="noopener">View on HF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
