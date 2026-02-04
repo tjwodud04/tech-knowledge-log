@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "CodeOCR: On the Effectiveness of Vision Language Models in Code Understanding",
+      "date": "2026-02-05",
+      "category": "papers",
+      "url": "posts/papers/2602/2026-02-05-paper.html",
+      "excerpt": "CodeOCR: On the Effectiveness of Vision Language Models in Code Understanding"
+    },
+    {
       "title": "Layer Normalization (LayerNorm)",
       "date": "2026-02-02",
       "category": "cs-fundamentals",
