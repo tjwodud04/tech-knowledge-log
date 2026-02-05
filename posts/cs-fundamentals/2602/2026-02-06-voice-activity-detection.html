@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Voice Activity Detection (VAD)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VAD(음성 활동 검출)는 오디오 스트림에서 말이 있는 구간을 판별해 대역폭, ASR 비용, 음성 인식 정확도를 개선하는 핵심 전처리 기술입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Voice Activity Detection (VAD)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-06</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>VAD(음성 활동 검출)는 오디오 스트림에서 말이 있는 구간을 판별해 대역폭, ASR 비용, 음성 인식 정확도를 개선하는 핵심 전처리 기술입니다.</p>
+        <p>작동 원리: 전통적 VAD는 에너지(루트 평균 제곱), 스펙트럴 신호 대 잡음비(SNR) 또는 통계적 모델(예: Sohn et al., 1999)의 가설 검정을 사용합니다. WebRTC의 VAD(오픈소스)는 프레임(10/20/30ms) 단위 특징(에너지, ZCR, 스펙트럼)에 기반한 규칙/통계적 결정 로직을 쓰고, 상용·연구 시스템에선 DNN/LSTM 기반의 확률적 VAD가 잡음에 더 강합니다.<br>실무적 고려: 프레임 크기, 리샘플링(16kHz 권장), 공격성(aggressiveness) 설정, 후처리(연속성 유지용 hangover/smoothing)와 임계치 튜닝이 중요합니다. 프로덕션에서는 VAD를 웨이크워드/엔드포인트 탐지와 결합해 네트워크 전송량과 ASR 호출 비용을 줄입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: WebRTC VAD (Chromium / webrtcvad Python wrapper)<br>코드:<br><pre><code class="language-python">import webrtcvad, wave<br>v=webrtcvad.Vad(2) # aggressiveness 0-3<br># 16kHz, 16bit mono, 30ms frames</code></pre> <br>사용처: WebRTC 기반 통화(Chrome, Signal 등)에서 실시간 전송 최적화.<br><br>- 사례: Kaldi (음성인식 파이프라인)<br>명령:<br><pre><code class="language-bash"># Kaldi feature -&gt; VAD<br>compute-vad --energy-delta=5.0 scp:feats.scp ark,scp:vad.ark,vad.scp</code></pre> <br>사용처: 대규모 ASR 트레이닝/디코딩(예: Kaldi v5.x 기반 프로덕션).<br><br>- 사례: Silero VAD, pyannote.audio (DNN 기반)<br>코드:<br><pre><code class="language-python"># Silero VAD (PyTorch)<br>from silero_vad import get_speech_timestamps<br>speech_ts = get_speech_timestamps(audio, model)</code></pre> <br>사용처: 챗봇/녹음 자동 분할, 오프라인 배치 전처리.<br><br>실무 패턴: 10–30ms 프레임, 리샘플 16kHz, 후처리(hangover 200–500ms), VAD+endpointing 분리, DNN 모델은 라이트웨이트(quantize, prune)로 엣지 배포.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Voice Activity Detection (VAD) finds speech vs non-speech regions in audio to reduce bandwidth, lower ASR cost, and improve recognition accuracy in real systems.</p>
+        <p>How it works: Classic VAD uses frame-level energy, zero-crossing rate, or statistical tests (Sohn et al., 1999). WebRTC's VAD (open-source) combines spectral features and decision logic for 10/20/30ms frames. Modern production systems often use DNN/LSTM/CNN models trained to predict speech probabilities, which are more robust to noise and reverberation. Key operational knobs are frame size, sampling rate (commonly 16 kHz), aggressiveness/threshold, hangover/smoothing, and post-filtering for endpointing.<br>Engineering trade-offs: Simple energy VAD is cheap and works in clean conditions; neural VADs cost more but reduce false positives in noisy/telephony conditions. In real-time systems, implement frame buffering, lookahead for low-latency smoothing, and quantized models for edge deployment.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: WebRTC VAD (Chromium / webrtcvad Python wrapper)<br>Code:<br><pre><code class="language-python">import webrtcvad<br>v=webrtcvad.Vad(2) # aggressiveness 0-3<br># feed 10/20/30ms 16kHz 16-bit mono frames</code></pre> <br>Where used: Real-time calls (Chrome, Signal) to avoid transmitting silence.<br><br>- Case: Kaldi (ASR pipelines)<br>Command:<br><pre><code class="language-bash"># compute VAD from features (Kaldi featbin)<br>compute-vad --energy-delta=5.0 scp:feats.scp ark:vad.ark</code></pre> <br>Where used: Large-scale ASR training/decoding (Kaldi v5.x deployments).<br><br>- Case: Silero VAD / pyannote.audio (DNN)<br>Code:<br><pre><code class="language-python">from silero_vad import get_speech_timestamps<br>speech_ts = get_speech_timestamps(audio, model)</code></pre> <br>Where used: voicemail segmentation, batching ASR jobs, wake-word endpointing.<br><br>Production patterns: use 10–30ms frames, resample to 16kHz, apply hangover/smoothing (200–500ms), separate VAD and endpointing, and quantize/prune DNNs for edge.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
