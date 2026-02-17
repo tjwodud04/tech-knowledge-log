@@ -8,6 +8,13 @@
       "excerpt": "Mixture-of-Experts(MoE)는 거대한 파라미터 수를 희소 활성화로 효율화해 추론·학습 비용을 낮추는 기법으로, 대형 언어모델·번역·멀티태스크 시스템에서 실무 이점을 제공합니다."
     },
     {
+      "title": "Hunt Globally: Deep Research AI Agents for Drug Asset Scouting in Investing, Business Development, and Search & Evaluation",
+      "date": "2026-02-17",
+      "category": "papers",
+      "url": "posts/papers/2602/2026-02-17-paper.html",
+      "excerpt": "Hunt Globally: Deep Research AI Agents for Drug Asset Scouting in Investing, Business Development, and Search & Evaluation"
+    },
+    {
       "title": "Voice Activity Detection (VAD)",
       "date": "2026-02-06",
       "category": "cs-fundamentals",
