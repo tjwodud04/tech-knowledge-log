@@ -2,9 +2,9 @@
   "posts": [
     {
       "title": "Mixture-of-Experts (MoE) for Large Models",
-      "date": "2026-02-17",
+      "date": "2026-02-16",
       "category": "cs-fundamentals",
-      "url": "posts/cs-fundamentals/2602/2026-02-17-mixture-of-experts-moe.html",
+      "url": "posts/cs-fundamentals/2602/2026-02-16-mixture-of-experts-moe.html",
       "excerpt": "Mixture-of-Experts(MoE)는 거대한 파라미터 수를 희소 활성화로 효율화해 추론·학습 비용을 낮추는 기법으로, 대형 언어모델·번역·멀티태스크 시스템에서 실무 이점을 제공합니다."
     },
     {
