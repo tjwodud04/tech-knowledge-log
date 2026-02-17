@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Mixture-of-Experts (MoE) for Large Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Mixture-of-Experts(MoE)는 거대한 파라미터 수를 희소 활성화로 효율화해 추론·학습 비용을 낮추는 기법으로, 대형 언어모델·번역·멀티태스크 시스템에서 실무 이점을 제공합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Mixture-of-Experts (MoE) for Large Models</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-17</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Mixture-of-Experts(MoE)는 거대한 파라미터 수를 희소 활성화로 효율화해 추론·학습 비용을 낮추는 기법으로, 대형 언어모델·번역·멀티태스크 시스템에서 실무 이점을 제공합니다.</p>
+        <p>핵심은 여러 '전문가(expert)' 서브네트워크를 가지고 입력마다 소수의 전문가만 활성화하는 것(예: top-1 또는 top-2 gating)입니다. 이렇게 하면 모델 파라미터는 수조 단위가 되어도 각 연산은 전체가 아닌 일부 전문가에만 적용되어 FLOPs와 메모리 사용을 절감합니다. 실무 관점에서는 라우팅 오버헤드, 전문가간 로드 불균형, 통신(모델/데이터 병렬) 비용을 관리하는 것이 관건입니다.<br><br>작동 원리: 입력은 게이팅 네트워크를 통해 각 전문가의 점수를 계산하고, 상위 k개 전문가에 토큰을 할당합니다. 토큰 분배 후 각 전문가별로 배치를 모아 병렬로 처리하고 결과를 다시 합칩니다. 추가로 load-balancing loss(예: Switch/GShard 논문)가 도입되어 특정 전문가로의 편중을 완화합니다. 프로덕션에서는 ZeRO/optimizer sharding, 전문가 샤딩(expert parallelism), mixed precision을 함께 써서 메모리·속도 트레이드오프를 최적화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google — GShard (Mesh TensorFlow) 및 Switch Transformer (Google Brain, 2021 논문)<br>  코드: Switch 논문의 top-1 gating 개념 기반 (PyTorch 예시)<br>  <pre><code class="language-python">logits = gate_proj(x)             # [B, E]<br>  topk, idx = logits.topk(1, dim=-1)<br>  mask = one_hot(idx, E)            # routing mask<br>  expert_inp = mask.unsqueeze(-1)*x.unsqueeze(1)<br>  # 각 전문가별로 모아서 처리 -&gt; scatter_reduce/all_to_all 필요</code></pre><br>  실무 패턴: top-1 gating (Switch)로 통신·메모리 최소화, load-balancing loss 사용<br><br>- 사례: Microsoft DeepSpeed — DeepSpeed-MoE (GitHub: microsoft/DeepSpeed)<br>  코드(명령/설정 예시): deepspeed 실행과 함께 MoE 모듈 사용, ZeRO(stage 2/3) 병행 권장<br>  실무 패턴: expert-parallel + data-parallel 조합, capacity_factor로 토큰 캡 용량 조절<br><br>- 사례: Meta/Fairseq, T5X — 연구 및 오픈소스 구현에서 MoE 레이어 활용<br>  참조: GShard(2020), Switch Transformer(2021), DeepSpeed MoE 구현 문서</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Mixture-of-Experts (MoE) sparsely activates subsets of parameters per input, enabling trillion-parameter models with reduced compute per token — critical for large-scale LLMs and multilingual systems.</p>
+        <p>Core idea: maintain many expert sub-networks but activate only a few (e.g., top-1/top-2) per token via a gating network. This yields models with very large parameter counts while keeping FLOPs and memory per step low. In production you must address routing overhead, expert load imbalance, and cross-device communication; those are the main engineering challenges.<br><br>How it works: inputs pass through a gate that scores experts; the top-k experts receive the token (possibly with capacity limits). Tokens routed to the same expert are batched and processed in parallel; outputs are combined (weighted sum). Practical systems add a load-balancing loss (as in Switch/GShard) and use model-parallel patterns (expert sharding, all-to-all). For efficiency use mixed precision and optimizer sharding (ZeRO) to handle parameter scale.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Google — GShard (Mesh TensorFlow) and Switch Transformer (Google Brain, 2020/2021 papers)<br>  Code: core top-1 gating pattern (PyTorch-like pseudo-code)<br>  <pre><code class="language-python">logits = gate_proj(x)        # [B, num_experts]<br>  topk_vals, topk_idx = logits.topk(1, dim=-1)<br>  mask = F.one_hot(topk_idx, num_experts)<br>  expert_inputs = mask.unsqueeze(-1) * x.unsqueeze(1)<br>  # pack per-expert, process, then gather (requires scatter/all_to_all)</code></pre><br>  Production patterns: use top-1 for minimal comms, add load-balancing loss, tune capacity_factor.<br><br>- Case: Microsoft — DeepSpeed MoE (GitHub: microsoft/DeepSpeed)<br>  Code/Config: run training with DeepSpeed MoE modules and ZeRO (recommended); see DeepSpeed MoE examples in repo.<br>  Production patterns: combine expert-parallel and data-parallel, apply mixed precision and ZeRO stage 2/3 to fit huge expert parameters.<br><br>- Case: Open-source research — fairseq/T5X implementations adopt MoE layers for multilingual/translation tasks (see GShard/Switch papers and implementation references).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
