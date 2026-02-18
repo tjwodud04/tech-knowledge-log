@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Knowledge Distillation / 지식 증류</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="지식 증류는 큰(teacher) 모델이 가진 예측 분포를 작은(student) 모델로 전달해 경량화·추론 속도 향상 및 일반화 개선을 노리는 기법입니다. 실무에서는 온디바이스·저지연 서비스에서 모델 사이즈와 지연을 줄이는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Knowledge Distillation / 지식 증류</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-18</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>지식 증류는 큰(teacher) 모델이 가진 예측 분포를 작은(student) 모델로 전달해 경량화·추론 속도 향상 및 일반화 개선을 노리는 기법입니다. 실무에서는 온디바이스·저지연 서비스에서 모델 사이즈와 지연을 줄이는 데 중요합니다.</p>
+        <p>작동 원리: teacher의 로짓(logits)을 온도 T로 부드럽게(softmax/온도) 만들어 student가 동일 분포를 모사하도록 KL 손실로 학습합니다. 최종 손실은 지도학습 교차엔트로피와 온도 기반 KL 손실의 가중합(alpha)으로 구성됩니다. 기술적 팁: T와 alpha는 성능-크기 트레이드오프의 핵심 하이퍼파라미터이며, 레이블이 부족한 도메인에서는 teacher의 소프트 라벨이 강력한 규제 역할을 합니다.<br><br>실무적 고려: 대형 NLP(예: BERT류)에서는 DistilBERT/TinyBERT 같은 논문 및 오픈소스가 프로덕션으로 채택되어 왔고, 이후 ONNX/TensorRT 또는 TFLite로 변환해 배포합니다. 단계별로는 (1) teacher 준비(배치정규화/평가 모드 고정), (2) student 아키텍처·초기화(부분 weight 초기화), (3) 하이퍼파라미터 탐색(T, alpha, learning rate), (4) 정밀도·양자화 병행(quant-aware fine-tune)입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Hugging Face DistilBERT (Sanh et al., 2019)과 Transformers 예제<br>  출처: https://github.com/huggingface/transformers/tree/main/examples/research_projects/distillation (transformers==4.30+ 권장)<br>  코드:<br>  <pre><code class="language-python"># PyTorch 간단한 KD 루프<br>  T=4.0; alpha=0.5<br>  kd_loss = nn.KLDivLoss(reduction='batchmean')<br>  for x,y in loader:<br>      t_logits = teacher(x).logits.detach()<br>      s_logits = student(x).logits<br>      loss_ce = F.cross_entropy(s_logits, y)<br>      loss_kd = kd_loss(F.log_softmax(s_logits/T,dim=1), F.softmax(t_logits/T,dim=1)) * (T*T)<br>      loss = alpha*loss_ce + (1-alpha)*loss_kd<br>      loss.backward(); opt.step()</code></pre><br>  실무 패턴:<br>  - teacher는 eval 모드로 고정(복제 불필요한 Dropout 제거)<br>  - 사전학습된 teacher에서 student 일부 레이어 초기화(transfer-init)<br>  - distillation 후 모델을 ONNX/TensorRT 또는 TFLite로 변환해 배포(지연·메모리 절감)<br>  참고 논문: Hinton et al., 2015; DistilBERT 2019; TinyBERT 2020.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Knowledge distillation transfers predictive behavior from a large teacher model to a smaller student, enabling lower latency and smaller footprint in production. It's widely used for on-device and low-latency services.</p>
+        <p>How it works: The teacher's logits are softened by a temperature T (softmax(logits/T)). The student is trained to match that soft distribution via a KL divergence term while still optimizing the usual cross-entropy on hard labels. Total loss = alpha * CE(student, labels) + (1-alpha) * T^2 * KL(soft(student/T), soft(teacher/T)).<br><br>Practical details: Tune T and alpha to balance mimicry vs. label fidelity; higher T spreads probability mass and reveals dark knowledge (inter-class similarities). Common variants: intermediate layer matching (FitNets), data-free distillation, and task-agnostic distillation (DistilBERT/TinyBERT). In production, distillation is often combined with quantization and pruning before exporting to ONNX/TensorRT or TFLite for inference speedups.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Hugging Face DistilBERT (Sanh et al., 2019) and Transformers distillation examples<br>  Source: https://github.com/huggingface/transformers/tree/main/examples/research_projects/distillation (use transformers>=4.30)<br>  Code (PyTorch snippet):<br>  <pre><code class="language-python"># PyTorch KD training loop<br>  T=4.0; alpha=0.5<br>  kd_loss = nn.KLDivLoss(reduction='batchmean')<br>  for x,y in loader:<br>      t_logits = teacher(x).logits.detach()<br>      s_logits = student(x).logits<br>      loss_ce = F.cross_entropy(s_logits, y)<br>      loss_kd = kd_loss(F.log_softmax(s_logits/T,dim=1), F.softmax(t_logits/T,dim=1)) * (T*T)<br>      loss = alpha*loss_ce + (1-alpha)*loss_kd<br>      loss.backward(); opt.step()</code></pre><br>  Production patterns:<br>  - Fix teacher to eval() to remove stochastic layers<br>  - Initialize student from teacher subsets when possible (transfer-init)<br>  - After distillation, apply quantization-aware fine-tuning and export to ONNX/TensorRT or TFLite for deployment<br>  References: Hinton et al., 2015; DistilBERT (Sanh et al., 2019); TinyBERT (Jiao et al., 2020).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
