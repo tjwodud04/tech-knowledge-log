@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Knowledge Distillation / 지식 증류",
+      "date": "2026-02-18",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-18-knowledge-distillation.html",
+      "excerpt": "지식 증류는 큰(teacher) 모델이 가진 예측 분포를 작은(student) 모델로 전달해 경량화·추론 속도 향상 및 일반화 개선을 노리는 기법입니다. 실무에서는 온디바이스·저지연 서비스에서 모델 사이즈와 지연을 줄이는 데 중요합니다."
+    },
+    {
       "title": "Hunt Globally: Deep Research AI Agents for Drug Asset Scouting in Investing, Business Development, and Search & Evaluation",
       "date": "2026-02-17",
       "category": "papers",
