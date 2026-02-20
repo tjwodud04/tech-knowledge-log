@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Contextual Embeddings (BERT-style)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="컨텍스추얼 임베딩은 문맥을 반영한 토큰/문장 벡터로, 검색·추천·QA 같은 실무 시스템에서 의미 기반 매칭의 정밀도를 크게 향상시킵니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Contextual Embeddings (BERT-style)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-20</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>컨텍스추얼 임베딩은 문맥을 반영한 토큰/문장 벡터로, 검색·추천·QA 같은 실무 시스템에서 의미 기반 매칭의 정밀도를 크게 향상시킵니다.</p>
+        <p>작동 원리: Transformer 기반 모델(BERT 계열)은 self-attention으로 각 토큰을 주변 토큰 맥락과 결합해 컨텍스추얼 표현을 만듭니다. 사전학습(예: 마스크 언어 모델)으로 일반적 언어 지식을 획득하고, 다운스트림 태스크에 맞게 파인튜닝하거나 쌍(sentence/sentence-pair) 임베딩을 위해 Sentence-BERT처럼 쌍별/쌍분리 학습을 합니다. 시스템 관점에서는 'cross-encoder'(정확도 우수, 계산비용 큼)와 'bi-encoder'/'dual-encoder'(검색에 적합, 어닐스/ANN으로 확장 가능) 트레이드오프가 핵심입니다.<br><br>엔진·알고리즘: 실무에서는 임베딩을 정규화해 코사인 유사도로 비교하고, 대규모 색인에는 FAISS(HNSW/IVF+PQ) 또는 Elasticsearch의 dense_vector를 사용합니다. 배치 추론·GPU 가속, FP16, 양자화로 비용을 낮추고 주기적 재인덱싱과 드리프트 모니터링을 병행합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Used in Hugging Face/sentence-transformers; Google announced BERT improvements in Search (2020).<br>코드:<br><pre><code class="language-bash">pip install sentence-transformers==2.2.0 faiss-cpu</code></pre> <br><pre><code class="language-python">from sentence_transformers import SentenceTransformer<br>import faiss, numpy as np<br>m = SentenceTransformer('all-MiniLM-L6-v2')  # small, production-friendly<br>emb = m.encode(['query','doc1','doc2'], convert_to_numpy=True, batch_size=32)<br>emb = emb / np.linalg.norm(emb, axis=1, keepdims=True)<br>idx = faiss.IndexHNSWFlat(emb.shape[1], 32)<br>idx.add(emb[1:])<br>D,I = idx.search(emb[[0]], k=2)</code></pre><br>실무 패턴:<br>- 사전계산된 문서 임베딩을 저장(OSS: FAISS, Milvus, Elastic dense_vector)<br>- ANN(HNSW/IVF+PQ)로 레이턴시와 비용 절감<br>- 도메인 파인튜닝 또는 미세조정된 pooling 전략(CLS vs mean) 적용<br>출처: Devlin et al., BERT (2018); Reimers & Gurevych, Sentence-BERT (2019); Karpukhin et al., DPR (2020); Hugging Face Transformers docs.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Contextual embeddings are token/sentence vectors from transformer models (BERT-style) that encode context-dependent meaning, improving semantic search, QA, and recommendation accuracy in production.</p>
+        <p>How it works: Transformer models use self-attention to produce context-aware token embeddings; pooled vectors (CLS or mean) become sentence-level representations. Models are pretrained (e.g., masked language modeling) then fine-tuned for downstream tasks. Architecturally, you choose between cross-encoders (pairwise interaction, high accuracy, expensive) and bi-/dual-encoders (independent encoding, scalable for retrieval with ANN).<br><br>Systems & algorithms: In production you normalize vectors and compare via cosine or inner product; scale uses ANN libraries—FAISS (HNSW, IVF+PQ), Milvus, or Elasticsearch dense_vector. Typical optimizations: batching, GPU inference, FP16, quantization, sharded indices, and monitoring embedding drift with periodic reindexing.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Used in Hugging Face sentence-transformers; Google integrated BERT into Search (blog, 2020).<br>Code:<br><pre><code class="language-bash">pip install sentence-transformers==2.2.0 faiss-cpu</code></pre><br><pre><code class="language-python">from sentence_transformers import SentenceTransformer<br>import faiss, numpy as np<br>m = SentenceTransformer('all-MiniLM-L6-v2')<br>emb = m.encode(['query','doc1','doc2'], convert_to_numpy=True)<br>emb /= np.linalg.norm(emb, axis=1, keepdims=True)<br>idx = faiss.IndexHNSWFlat(emb.shape[1], 32)<br>idx.add(emb[1:])<br>D,I = idx.search(emb[[0]], k=2)</code></pre><br>Production patterns:<br>- Precompute document embeddings and store in FAISS/Milvus/Elastic<br>- Use ANN (HNSW for low-latency; IVF+PQ for very large corpora)<br>- Fine-tune on domain data or use Sentence-BERT for semantic similarity<br>Sources: Devlin et al., BERT (2018); Reimers & Gurevych, Sentence-BERT (2019); Karpukhin et al., DPR (2020); Hugging Face Transformers docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
