@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contextual Embeddings (BERT-style)",
+      "date": "2026-02-20",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-20-contextual-embeddings.html",
+      "excerpt": "컨텍스추얼 임베딩은 문맥을 반영한 토큰/문장 벡터로, 검색·추천·QA 같은 실무 시스템에서 의미 기반 매칭의 정밀도를 크게 향상시킵니다."
+    },
+    {
       "title": "Knowledge Distillation / 지식 증류",
       "date": "2026-02-18",
       "category": "cs-fundamentals",
