@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Pitch (F0) Detection — 실무 핵심 요약 / Practical Primer",
+      "date": "2026-02-23",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-23-pitch-detection-f0.html",
+      "excerpt": "F0(기본주파수) 검출은 음성·음악의 음높이를 추정하는 핵심 기능으로, 음성인식, TTS, 음악정보검색, 오토튜닝 등 프로덕션 시스템에서 필수적입니다."
+    },
+    {
       "title": "Contextual Embeddings (BERT-style)",
       "date": "2026-02-20",
       "category": "cs-fundamentals",
