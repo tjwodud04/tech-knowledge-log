@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Pitch (F0) Detection — 실무 핵심 요약 / Practical Primer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="F0(기본주파수) 검출은 음성·음악의 음높이를 추정하는 핵심 기능으로, 음성인식, TTS, 음악정보검색, 오토튜닝 등 프로덕션 시스템에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Pitch (F0) Detection — 실무 핵심 요약 / Practical Primer</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-23</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>F0(기본주파수) 검출은 음성·음악의 음높이를 추정하는 핵심 기능으로, 음성인식, TTS, 음악정보검색, 오토튜닝 등 프로덕션 시스템에서 필수적입니다.</p>
+        <p>작동원리: 전통적으로는 자기상관(autocorrelation), 평균-비율 오차(YIN, 2002), 켑스트럼/스펙트럼 피크 추적 같은 주파수·시간 도메인 분석을 씁니다. pYIN(확률적 YIN)이나 Viterbi 기반 포스트프로세싱은 옳은 옥타브 선택과 연속성 보장을 도와줍니다. 최근 연구(예: CREPE, 2018)는 컨벌루션 신경망을 사용해 멜/스펙트로그램 대신 직접 파형에서 F0를 회귀 또는 분포로 예측해 잡음/다중음 환경에서 강건성을 높였습니다.<br><br>실무 팁: 프레임 크기(예: 1024~4096 샘플), 홉 길이(10~32ms), 주파수 범위(예: 50–2000Hz), 전처리(프리엠퍼시스, 윈도잉)와 음성/비음성(voicing) 판단 임계값 설정이 성능에 큰 영향을 줍니다. 실시간 시스템은 낮은 레이턴시와 간단한 오토코릴레이션/AMDF 기반 추정 + 이중 필터(미디안+칼만)로 안정화하는 패턴을 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: librosa (audio analysis, 버전 0.8+)<br>코드:<br><pre><code class="language-python">import librosa<br>y, sr = librosa.load('input.wav', sr=16000)<br># YIN 기반 F0 추정<br>f0 = librosa.yin(y, fmin=50, fmax=1500, sr=sr, frame_length=2048, hop_length=256)<br># pYIN(음높이+voicing 확률)<br>f0_py, voiced_flag, prob = librosa.pyin(y, fmin=50, fmax=1500, sr=sr)</code></pre><br>실무 패턴: 프레임-단위 후속 스무딩(미디안 필터, Viterbi)으로 옥타브 오류 감소<br><br>- 사례: CREPE (Kim et al., 2018, pip 'crepe')<br>코드:<br><pre><code class="language-python">import crepe<br>crepe.predict('input.wav', sr=16000, model_capacity='full')</code></pre><br>사용처: CREPE은 연구·프로덕션에서 잡음 환경에서의 단선율 F0 추적에 활용됩니다.<br><br>- 사례: aubio CLI (버전 0.4.x)<br>명령:<br><pre><code class="language-bash">aubio pitch input.wav --samplerate 44100</code></pre><br>- 사례: Kaldi 툴킷: 'compute-and-process-kaldi-pitch-feats'는 음성인식 파이프라인에서 널리 사용<br><br>프로덕션 패턴:<br>- 실시간: 작은 프레임·경량 알고리즘 + 로컬 스무딩<br>- 오프라인/음악 분석: 고해상도 FFT/신경망 모델 + 후처리(확률적 보정)<br>참고: YIN(2002), pYIN(2014), CREPE(2018) 논문과 librosa/aubio/kaldi 오픈소스 구현을 참조</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>F0 (fundamental frequency) detection estimates pitch and is central to speech tech, TTS, music analysis, auto-tuning, and audio search in production systems.</p>
+        <p>How it works: classical methods use autocorrelation/AMDF, spectral peak/cepstrum analysis, and the YIN algorithm (de Cheveigné & Kawahara, 2002) for robust period estimation. pYIN adds a probabilistic model + Viterbi smoothing to reduce octave errors and handle voicing. Deep-learning approaches (e.g., CREPE, Kim et al., 2018) operate on raw waveforms or spectrograms to output F0 or F0 distributions, improving robustness in noisy or polyphonic contexts.<br><br>Practical knobs: choose frame_length (e.g., 1024–4096 samples), hop (10–32 ms), F0 search range (e.g., 50–2000 Hz), pre-emphasis and windowing. Postprocessing—voicing thresholding, median filters, Viterbi smoothing, and octave correction—are essential. For real-time low-latency systems, lightweight autocorrelation + simple smoothing is common; offline analysis favors high-res FFT or neural models.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case:<br>- Case: librosa (audio analysis, v0.8+)<br>Code:<br><pre><code class="language-python">import librosa<br>y, sr = librosa.load('input.wav', sr=16000)<br>f0 = librosa.yin(y, fmin=50, fmax=1500, sr=sr, frame_length=2048, hop_length=256)<br>f0_py, voiced_flag, prob = librosa.pyin(y, fmin=50, fmax=1500, sr=sr)</code></pre><br>Production patterns: frame-level postprocessing (median, Viterbi) to reduce octave flips.<br><br>- Case: CREPE (research/production; pip install crepe)<br>Code:<br><pre><code class="language-python">import crepe<br>crepe.predict('input.wav', sr=16000, model_capacity='full')</code></pre><br>CREPE used in research and apps needing robust single-F0 tracking.<br><br>- Case: aubio CLI (v0.4.x)<br>Command:<br><pre><code class="language-bash">aubio pitch input.wav --samplerate 44100</code></pre><br>- Case: Kaldi toolkit: 'compute-and-process-kaldi-pitch-feats' is widely used in speech pipelines.<br><br>References and best practices: YIN (2002), pYIN (2014), CREPE (2018); tune frame/hop/F0-range, apply voicing confidence thresholds, and choose algorithm based on latency and noise constraints.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
