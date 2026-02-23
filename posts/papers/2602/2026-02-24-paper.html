@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Deniz Qian, Hung-Ting Chen, Eunsol Choi</div>
+        <div><strong>발행일 / Published:</strong> 2026-02-20</div>
+        <div><strong>Arxiv ID:</strong> 2602.18425</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>다양한 정답을 허용하는 질문에 답하려면 다양한 문서를 포괄적으로 검색하는 것이 중요하다. 우리는 답변 포괄성을 극대화하도록 설계된 다회차 검색 프레임워크인 검색-검증-재검색(RVR)을 소개한다. 초기에는 리트리버가 원래의 쿼리를 받아 후보 문서 집합을 반환하고, 이어서 검증기가 그 중 고품질의 하위 집합을 식별한다. 이후 라운드에서는 쿼리에 이전에 검증된 문서들을 추가하여 이전 라운드에서 아직 포착되지 않은 답변들을 찾아낸다. RVR은 기성 리트리버로도 효과적이며, 우리의 추론 절차에 맞춰 리트리버를 미세조정하면 추가적인 이득이 있다. 우리 방법은 에이전트 기반 검색 접근법을 포함한 기준선들을 능가하며, 다중 답변 검색 데이터셋 QAMPARI에서 완전 리콜 비율에서 상대적으로 최소 10% 및 절대적으로 3%포인트 이상의 향상을 달성한다. 또한 서로 다른 기본 리트리버들에 걸쳐 도메인 외 데이터셋인 QUEST와 WebQuestionsSP에서도 일관된 향상을 보였다. 본 연구는 검증기를 활용하고 리트리버를 새로운 추론 시나리오에 적응시키는, 답변의 포괄적 회수를 위한 유망한 반복적 접근법을 제시한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Comprehensively retrieving diverse documents is crucial to address queries that admit a wide range of valid answers. We introduce retrieve-verify-retrieve (RVR), a multi-round retrieval framework designed to maximize answer coverage. Initially, a retriever takes the original query and returns a candidate document set, followed by a verifier that identifies a high-quality subset. For subsequent rounds, the query is augmented with previously verified documents to uncover answers that are not yet covered in previous rounds. RVR is effective even with off-the-shelf retrievers, and fine-tuning retrievers for our inference procedure brings further gains. Our method outperforms baselines, including agentic search approaches, achieving at least 10% relative and 3% absolute gain in complete recall percentage on a multi-answer retrieval dataset (QAMPARI). We also see consistent gains on two out-of-domain datasets (QUEST and WebQuestionsSP) across different base retrievers. Our work presents a promising iterative approach for comprehensive answer recall leveraging a verifier and adapting retrievers to a new inference scenario.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2602.18425" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2602.18425.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
