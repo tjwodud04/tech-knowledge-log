@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering",
+      "date": "2026-02-24",
+      "category": "papers",
+      "url": "posts/papers/2602/2026-02-24-paper.html",
+      "excerpt": "RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering"
+    },
+    {
       "title": "Pitch (F0) Detection — 실무 핵심 요약 / Practical Primer",
       "date": "2026-02-23",
       "category": "cs-fundamentals",
