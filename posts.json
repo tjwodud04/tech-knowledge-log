@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Fundamental Frequency (F0) / Pitch Estimation in Speech Processing",
+      "date": "2026-02-25",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-25-fundamental-frequency-pitch-estimation.html",
+      "excerpt": "기본 주파수(f0)는 음성의 음높이(pitch)를 수치화한 값으로 TTS, 음성 변환, 화자·감정 분석 등 실무 시스템에서 핵심적 음성 특성으로 사용됩니다."
+    },
+    {
       "title": "RVR: Retrieve-Verify-Retrieve for Comprehensive Question Answering",
       "date": "2026-02-24",
       "category": "papers",
