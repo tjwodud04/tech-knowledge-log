@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Fundamental Frequency (F0) / Pitch Estimation in Speech Processing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="기본 주파수(f0)는 음성의 음높이(pitch)를 수치화한 값으로 TTS, 음성 변환, 화자·감정 분석 등 실무 시스템에서 핵심적 음성 특성으로 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Fundamental Frequency (F0) / Pitch Estimation in Speech Processing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-25</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>기본 주파수(f0)는 음성의 음높이(pitch)를 수치화한 값으로 TTS, 음성 변환, 화자·감정 분석 등 실무 시스템에서 핵심적 음성 특성으로 사용됩니다.</p>
+        <p>작동 원리: f0 추정은 신호의 주기성 검출(시간영역)이나 스펙트럼의 성분 분석(주파수영역), 또는 딥러닝 기반의 회귀/분류로 이뤄집니다. 전통적 알고리즘으로는 YIN, RAPT, SWIPE, pYIN(확률적 YIN), WORLD의 DIO/Harvest가 널리 쓰이며, 최근에는 CREPE 같은 CNN 기반 end-to-end 추정기가 강력한 성능을 보입니다. 핵심 엔지니어링 포인트는 프레임 길이·피치 범위 설정(sampling_rate, frame_period), 음성/무성 판별(VOICING), f0 보간 및 스무딩, 로그-정규화(log-f0)입니다.<br>실무 고려사항: 프로덕션에서는 잡음·성문파형(voice break) 처리, 다중화자 보정(z-normalization), 실시간 레이턴시(버퍼 크기)와 같은 운영 제약을 최적화합니다. TTS나 보코더 조건화에서 unvoiced를 특별 토큰으로 처리하거나 0 대체(예: -inf) 후 보간하는 관행이 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Kaldi에서 피치 특징 계산<br>  코드: Kaldi의 compute-kaldi-pitch-feats 바이너리(예: Kaldi r4.1) 사용:<br>  <pre><code class="language-bash">compute-kaldi-pitch-feats --sample-frequency=16000 --frame-length=25 --frame-shift=10 ark:wav.scp ark,pitch.ark</code></pre><br>  사용처: ASR 피쳐로서 다수 엔터프라이즈 ASR 파이프라인에서 채택.<br>- 사례: TTS/보코더 (ESPnet / Mozilla TTS) — WORLD (DIO/Harvest)<br>  코드 (pyworld):<br>  <pre><code class="language-python">import pyworld as pw<br>  f0, t = pw.dio(x, fs=16000, frame_period=5.0)<br>  f0 = pw.stonemask(x, f0, t, fs)</code></pre><br>  사용처: 음성 합성에서 F0를 조건화(피치 제어/스타일 전이).<br>- 사례: 연구/강건성 — CREPE (CNN)<br>  코드:<br>  <pre><code class="language-bash">pip install crepe<br>  python -m crepe.predict audio.wav --output f0.npy --model=full</code></pre><br>  실무 패턴: 프레임-레벨 voicing 플래그 저장, log-f0 정규화(z-score) 및 median/kalman 스무딩, 실시간은 낮은 레이턴시 모델/버퍼 사용.<br>참고: librosa.yin (librosa>=0.8)과 pyworld(>=0.2) 같은 라이브러리가 실험과 프로덕션 파이프라인 간 가교 역할을 합니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Fundamental frequency (f0) measures pitch and is essential for TTS, voice conversion, prosody modeling, and speaker/affect features in production speech systems.</p>
+        <p>How it works: f0 estimation detects periodicity/time-domain autocorrelation peaks (e.g., YIN/RAPT/pYIN), analyzes harmonic structure in the spectrum, or uses learned models (e.g., CREPE CNN). Typical signal-processing steps: choose sample rate and frame period, compute candidate f0s per frame, perform voicing detection (voiced/unvoiced), then post-process (interpolate unvoiced regions, median/Kalman smoothing, log-domain normalization). WORLD (DIO+StoneMask/Harvest) is optimized for TTS pipelines and balances accuracy with real-time constraints.<br>Engineering notes: production systems tune pitch range (min/max Hz), handle octave errors via Viterbi smoothing or probabilistic pYIN, and store voicing flags alongside f0. When conditioning neural vocoders or acoustic models, practitioners normalize log-f0 per-speaker or use speaker-dependent offsets to avoid pitch shifting artifacts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Kaldi (ASR feature extraction)<br>  Code:<br>  <pre><code class="language-bash">compute-kaldi-pitch-feats --sample-frequency=16000 --frame-length=25 --frame-shift=10 ark:wav.scp ark,pitch.ark</code></pre><br>  Where used: Kaldi recipes and many production ASR stacks add pitch as auxiliary features.<br>- Case: TTS / Vocoder conditioning — WORLD via pyworld (common in ESPnet, Mozilla TTS)<br>  Code (Python):<br>  <pre><code class="language-python">import pyworld as pw<br>  f0, t = pw.dio(wave, fs=16000, frame_period=5.0)<br>  f0 = pw.stonemask(wave, f0, t, fs)</code></pre><br>  Where used: acoustic feature extraction for conditional vocoders and voice conversion research.<br>- Case: Neural pitch tracker — CREPE (research/robustness)<br>  Code:<br>  <pre><code class="language-bash">pip install crepe<br>  python -m crepe.predict audio.wav --output f0.npy --model=full</code></pre><br>  Production patterns: save voicing mask, use log-f0 + z-normalization per-speaker, median or Kalman smoothing, explicit handling of unvoiced frames (mask vs. sentinel). Libraries: librosa.yin (librosa>=0.8), pyworld (>=0.2), crepe (pip) are common building blocks.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
