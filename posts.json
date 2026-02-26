@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Blind Source Separation (ICA)",
+      "date": "2026-02-27",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2602/2026-02-27-blind-source-separation-ica.html",
+      "excerpt": "독립 성분 분석(ICA)은 여러 센서에 섞여 들어온 신호들을 통계적 독립성 기준으로 분리하는 기법으로, EEG 아티팩트 제거나 실시간 음성분리 같은 생산 시스템에서 중요합니다."
+    },
+    {
       "title": "Fundamental Frequency (F0) / Pitch Estimation in Speech Processing",
       "date": "2026-02-25",
       "category": "cs-fundamentals",
