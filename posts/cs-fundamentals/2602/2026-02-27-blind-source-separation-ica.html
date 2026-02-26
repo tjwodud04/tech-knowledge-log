@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Blind Source Separation (ICA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="독립 성분 분석(ICA)은 여러 센서에 섞여 들어온 신호들을 통계적 독립성 기준으로 분리하는 기법으로, EEG 아티팩트 제거나 실시간 음성분리 같은 생산 시스템에서 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Blind Source Separation (ICA)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-02-27</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>독립 성분 분석(ICA)은 여러 센서에 섞여 들어온 신호들을 통계적 독립성 기준으로 분리하는 기법으로, EEG 아티팩트 제거나 실시간 음성분리 같은 생산 시스템에서 중요합니다.</p>
+        <p>작동원리: ICA는 관측 행렬 X = AS (A: 혼합 행렬, S: 독립 원천) 모델을 가정하고, 비가우시안성과 통계적 독립성을 최대화하는 역혼합 행렬 W를 추정해 Ŝ = WX를 얻습니다. 전처리로 중심화(center)와 화이트닝(whitening, PCA)이 필수이며, 스케일/순서 불변성(ambiguity)을 염두에 둡니다. 대표 알고리즘으로는 InfoMax(Bell & Sejnowski 1995), FastICA(Hyvärinen 1999)가 있으며 목적함수로는 엔트로피/negentropy 기반이 흔합니다.<br><br>실무 팁: 실제 시스템에서는 잡음·비선형 혼합·시간적 의존성 때문에 단일 ICA가 충분치 않을 수 있어 IVA(Independent Vector Analysis), 시간-주파수 도메인 분리, 또는 딥러닝 하이브리드(예: 초기 분리 후 DNN 개선)를 사용합니다. 낮은 지연·경량 환경(임베디드 기기 또는 BCI)에서는 FastICA의 고정점 알고리즘이 실용적입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: EEG/MEG 전처리 (연구·임상) — MNE-Python에서 ICA를 사용해 눈깜박임·심전도 아티팩트 제거<br>  코드:<br>  <pre><code class="language-python">import mne<br>  raw = mne.io.read_raw_fif('subj_raw.fif', preload=True)<br>  ica = mne.preprocessing.ICA(n_components=20, method='fastica', random_state=42)<br>  ica.fit(raw)<br>  ica.exclude = [0,1]  # 자동 또는 시각검토로 선정<br>  raw_clean = ica.apply(raw.copy())</code></pre><br>  (MNE v1.x+, Python 3.8+)<br><br>- 사례: 일반 신호 분리·프로토타입 — scikit-learn FastICA<br>  코드:<br>  <pre><code class="language-python">from sklearn.decomposition import FastICA<br>  ica = FastICA(n_components=2, random_state=0)<br>  S = ica.fit_transform(X)  # X: mixed signals (n_samples, n_channels)<br>  A = ica.mixing_</code></pre><br>  (scikit-learn >=1.0)<br><br>실무 패턴:<br>- 항상 center+whiten, 여러 랜덤시드로 재시도, 성분 수 선택(CV 또는 explained variance), 분리 후 재합성 오류 확인<br>- 출처: Hyvärinen 1999 (FastICA), Bell & Sejnowski 1995 (InfoMax), MNE docs 및 scikit-learn 구현</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Independent Component Analysis (ICA) separates mixed sensor data into statistically independent sources; it's widely used in EEG artifact removal, BCI preprocessing, and lightweight audio demixing.</p>
+        <p>How it works: ICA models observations X = A S, where A is an unknown mixing matrix and S are independent sources. The algorithm finds an unmixing matrix W that yields Ŝ = W X by maximizing statistical independence (non-Gaussianity or entropy-based objectives). Common preprocessing steps are centering and whitening (PCA). Typical algorithms: InfoMax (Bell & Sejnowski, 1995) and FastICA (Hyvärinen, 1999) — FastICA uses a fixed-point iteration maximizing negentropy for speed.<br><br>Practical considerations: ICA has permutation and scaling ambiguities; it assumes linear mixtures and non-Gaussian sources. For convolutive/time-varying mixes or correlated sources, use IVA, time–frequency ICA, or hybrid DNN+ICA pipelines. In production, FastICA is chosen for low-latency/embedded use; research systems often combine ICA with automated component rejection heuristics for artifacts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: EEG/MEG preprocessing in research and clinics — MNE-Python uses ICA for EOG/ECG artifact removal.<br>  Code:<br>  <pre><code class="language-python">import mne<br>  raw = mne.io.read_raw_fif('subj_raw.fif', preload=True)<br>  ica = mne.preprocessing.ICA(n_components=20, method='fastica', random_state=42)<br>  ica.fit(raw)<br>  ica.exclude = [0,1]<br>  raw_clean = ica.apply(raw.copy())</code></pre><br>  (MNE >=1.0, Python 3.8+)<br><br>- Case: prototype audio/source separation — scikit-learn FastICA<br>  Code:<br>  <pre><code class="language-python">from sklearn.decomposition import FastICA<br>  ica = FastICA(n_components=2, random_state=0)<br>  S = ica.fit_transform(X)<br>  A = ica.mixing_</code></pre><br>  (scikit-learn >=1.0)<br><br>Production patterns:<br>- Always center and whiten before ICA; try multiple random seeds; validate by re-mixing and SNR metrics; persist mixing/unmixing matrices; for real-time pipelines use small n_components and incremental/low-latency implementations.<br>References: Bell & Sejnowski 1995 (InfoMax), Hyvärinen 1999 (FastICA), MNE and scikit-learn docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
