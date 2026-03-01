@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Reinforcement Learning from Human Feedback (RLHF)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RLHF는 대형언어모델(LLM)을 인간의 선호도(비교·평가)로 미세조정해 더 유용하고 안전한 출력을 얻는 기술로, 실제 서비스의 응답 품질·안전성 개선에 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Reinforcement Learning from Human Feedback (RLHF)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-02</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>RLHF는 대형언어모델(LLM)을 인간의 선호도(비교·평가)로 미세조정해 더 유용하고 안전한 출력을 얻는 기술로, 실제 서비스의 응답 품질·안전성 개선에 핵심적입니다.</p>
+        <p>작동 원리: 전형적 RLHF 파이프라인은 1) 인간이 A/B 답변 쌍을 비교해 선호 데이터 수집, 2) 이 데이터를 쓰는 보상모델(RM) 학습, 3) 원래의 언어모델을 보상 신호로 강화학습(PPO 등)해 정책을 미세조정하는 단계로 구성됩니다. 보상모델은 순위학습(pairwise loss)이나 크로스엔트로피로 학습되고, 정책 업데이트 시 원모델과의 KL 제약(또는 페널티)을 사용해 분포 붕괴를 막습니다.<br><br>연구·운영 포인트: Christiano et al. (2017)와 Stiennon et al. (2020), Ouyang et al. (InstructGPT, 2022)이 이 기법을 실무적으로 검증했습니다. Anthropic은 Constitutional AI로 레이블 비용을 낮추는 접근을 제시했고, 실무에서는 보상 해킹(reward hacking), 편향 증폭, 레이블 품질 검증이 중요한 운영 문제입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: OpenAI의 InstructGPT/ChatGPT (InstructGPT 논문, Ouyang et al. 2022) — 사람 선호 데이터를 통해 GPT-3 기반 모델을 조정<br>  코드:<br>  <pre><code class="language-python"># Hugging Face trl 기반 간단 예시<br>  from transformers import AutoModelForCausalLM, AutoTokenizer<br>  from trl import PPOTrainer, PPOConfig<br><br>  model = AutoModelForCausalLM.from_pretrained('gpt-neo-1.3B')<br>  tokenizer = AutoTokenizer.from_pretrained('gpt-neo-1.3B')<br>  ppo_config = PPOConfig(batch_size=4, ppo_epochs=4, kl_ctl=0.1)<br>  ppo_trainer = PPOTrainer(ppo_config, model, tokenizer)<br>  # preference_pairs: [(prompt, response_a, response_b, label), ...]<br>  # 보상모델로부터 보상 계산 후 ppo_trainer.step(...) 호출</code></pre><br>  사용처: Hugging Face trl 라이브러리(TRL/TRLX) 실험, InstructGPT 파이프라인 설계 참고<br><br>- 실무 패턴/베스트프랙티스:<br>  - SFT(지도학습)로 초기 안정성 확보 후 RM → PPO 파이프라인 수행<br>  - KL 제약 또는 페널티로 원모델 분포 유지<br>  - 보상모델 검증용 별도 검증셋과 휴먼리뷰 루프 운영<br>  - 생산 환경에서는 레이블 품질, 분포 드리프트 모니터링, 보상 해킹 방지 규칙 적용<br>참고: Christiano et al. 2017, Stiennon et al. 2020, Ouyang et al. 2022, Hugging Face trl 저장소</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>RLHF fine-tunes large models using human preference signals (pairwise comparisons or ratings) to produce more helpful, aligned, and safer outputs—critical for deployed conversational and assistant systems.</p>
+        <p>How it works: A typical RLHF pipeline collects human preference data (which of two outputs is preferred), trains a reward model (RM) to predict those preferences, then uses a reinforcement algorithm (commonly PPO) to update the policy/model to maximize predicted reward. During policy updates, practitioners add a KL penalty or constraint to keep the new policy close to the base model and avoid catastrophic drift.<br><br>Research & operational notes: Core papers include Christiano et al. (2017) "Deep RL from Human Preferences", Stiennon et al. (2020) on summarization, and Ouyang et al. (InstructGPT, 2022). Anthropic's Constitutional AI shows cost-effective alternatives using rule-based preference generation. Production concerns include reward hacking, bias amplification, annotator quality, and continual monitoring of reward-model alignment.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case:<br>- Case: OpenAI InstructGPT / ChatGPT (Ouyang et al., 2022) — human preference data + reward model + PPO<br>  Code:<br>  <pre><code class="language-python"># Minimal Hugging Face trl (PPO) sketch<br>  from transformers import AutoModelForCausalLM, AutoTokenizer<br>  from trl import PPOTrainer, PPOConfig<br><br>  model = AutoModelForCausalLM.from_pretrained('gpt-neo-1.3B')<br>  tokenizer = AutoTokenizer.from_pretrained('gpt-neo-1.3B')<br>  cfg = PPOConfig(batch_size=4, ppo_epochs=4, kl_ctl=0.1)<br>  trainer = PPOTrainer(cfg, model, tokenizer)<br>  # Compute rewards via a trained RewardModel, then call trainer.step(query, response, reward)</code></pre><br>  Where used: Hugging Face trl / trlx repos, InstructGPT production pipeline descriptions<br><br>- Production patterns / best practices:<br>  - Perform Supervised Fine-Tuning (SFT) first, then train RM, then PPO<br>  - Use KL control to prevent divergence from base model<br>  - Monitor for reward hacking and dataset drift; keep human-in-the-loop validation<br>  - Consider constitutional or synthetic preference generation (Anthropic) to reduce label costs<br>References: Christiano et al. 2017, Stiennon et al. 2020, Ouyang et al. 2022, Hugging Face trl</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
