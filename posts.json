@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Reinforcement Learning from Human Feedback (RLHF)",
+      "date": "2026-03-02",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-02-rlhf.html",
+      "excerpt": "RLHF는 대형언어모델(LLM)을 인간의 선호도(비교·평가)로 미세조정해 더 유용하고 안전한 출력을 얻는 기술로, 실제 서비스의 응답 품질·안전성 개선에 핵심적입니다."
+    },
+    {
       "title": "Blind Source Separation (ICA)",
       "date": "2026-02-27",
       "category": "cs-fundamentals",
