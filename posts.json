@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "DARE-bench: Evaluating Modeling and Instruction Fidelity of LLMs in Data Science",
+      "date": "2026-03-03",
+      "category": "papers",
+      "url": "posts/papers/2603/2026-03-03-paper.html",
+      "excerpt": "DARE-bench: Evaluating Modeling and Instruction Fidelity of LLMs in Data Science"
+    },
+    {
       "title": "Reinforcement Learning from Human Feedback (RLHF)",
       "date": "2026-03-02",
       "category": "cs-fundamentals",
