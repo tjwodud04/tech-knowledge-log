@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sentence Embeddings & Pooling (e.g., SBERT)",
+      "date": "2026-03-04",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-04-sentence-embeddings.html",
+      "excerpt": "문장 임베딩은 문장 단위 의미를 고정 길이 벡터로 표현해 검색, 추천, 클러스터링 등 실무 시스템에서 의미 기반 유사도 계산을 가능하게 한다."
+    },
+    {
       "title": "DARE-bench: Evaluating Modeling and Instruction Fidelity of LLMs in Data Science",
       "date": "2026-03-03",
       "category": "papers",
