@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sentence Embeddings & Pooling (e.g., SBERT)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="문장 임베딩은 문장 단위 의미를 고정 길이 벡터로 표현해 검색, 추천, 클러스터링 등 실무 시스템에서 의미 기반 유사도 계산을 가능하게 한다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Sentence Embeddings & Pooling (e.g., SBERT)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-04</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>문장 임베딩은 문장 단위 의미를 고정 길이 벡터로 표현해 검색, 추천, 클러스터링 등 실무 시스템에서 의미 기반 유사도 계산을 가능하게 한다.</p>
+        <p>작동 원리: 대표적 접근법인 SBERT(2019)는 두 개의 BERT 인코더를 시암 네트워크로 이용해 문장 쌍 유사도를 빠르게 계산하도록 학습한다. 토큰 레벨 출력(각 토큰의 contextual vector)을 풀링(pooling)해 문장 벡터를 만들며, 풀링 방식은 CLS 토큰, 평균(mean) 풀링, 최대(max) 풀링 등이 있다. 평균 풀링은 attention mask로 비어 있는 토큰을 제외한 가중 평균을 취해 실무에서 가장 안정적이다.<br><br>학습·최적화: 실무 모델은 미세조정(fine-tuning)에 contrastive loss, triplet loss, 또는 multiple negatives ranking loss를 사용해 의미적 구조를 보존한다. 생산 환경에서는 GPU 배치 인퍼런스, FP16, 토크나이저 캐시, 그리고 벡터 DB(FAISS, Milvus, Pinecone)와 IVF/PQ 양자화로 지연과 비용을 줄인다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: SBERT 논문 및 SentenceTransformers 라이브러리(UKP Lab) — 논문: Reimers & Gurevych 2019<br>  코드:<br>  <pre><code class="language-python"># requirements: sentence-transformers==2.2.0, faiss-cpu==1.7.3<br>  from sentence_transformers import SentenceTransformer, models<br>  word_emb = models.Transformer('sentence-transformers/all-MiniLM-L6-v2')<br>  pool = models.Pooling(word_emb.get_word_embedding_dimension(), pooling_mode_mean_tokens=True)<br>  model = SentenceTransformer(modules=[word_emb, pool])<br>  sentences = ['search query', 'candidate document']<br>  embs = model.encode(sentences, convert_to_numpy=True, show_progress_bar=False)<br>  # FAISS로 인덱싱<br>  import faiss<br>  d = embs.shape[1]<br>  index = faiss.IndexFlatIP(d)  # cosine via normalized vectors<br>  faiss.normalize_L2(embs)<br>  index.add(embs)<br>  D,I = index.search(embs, k=5)</code></pre><br>  실무 패턴:<br>  - batch encoding + GPU/FP16로 처리(대규모 코퍼스 재인덱싱 시)<br>  - FAISS IVF+PQ 또는 Milvus로 비용/검색속도 균형<br>  - 정기 재학습(로그 기반 hard negatives 수집) 및 벡터 모니터링(거리 분포)<br>  참고: FAISS는 Meta(구 Facebook)에서 개발된 벡터 라이브러리, SentenceTransformers는 널리 쓰이는 구현체.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Sentence embeddings convert sentences into fixed-length vectors for semantic similarity, enabling search, recommendation, clustering, and downstream ML in production systems.</p>
+        <p>How it works: SBERT (Sentence-BERT, Reimers & Gurevych 2019) uses siamese BERT encoders to produce sentence vectors that allow efficient similarity computation. Token-level outputs from a transformer are reduced to a single vector by pooling—common strategies are CLS token, mean pooling over token vectors, or max pooling. Mean pooling with attention mask (exclude padding) is often most robust in production.<br><br>Training & performance: Models are fine-tuned with contrastive losses (e.g., multiple negatives ranking loss, triplet loss) to preserve semantic relationships. Production deployments optimize throughput via batched GPU inference, FP16, tokenizer caching, and use vector stores (FAISS, Milvus, Pinecone) with IVF/PQ quantization to lower latency and storage costs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case:<br>- Case: SentenceTransformers (UKP Lab) & SBERT paper (Reimers & Gurevych, 2019). FAISS (Meta) used for vector search.<br>  Code:<br>  <pre><code class="language-python"># pip install sentence-transformers==2.2.0 faiss-cpu==1.7.3<br>  from sentence_transformers import SentenceTransformer, models<br>  word = models.Transformer('sentence-transformers/all-MiniLM-L6-v2')<br>  pool = models.Pooling(word.get_word_embedding_dimension(), pooling_mode_mean_tokens=True)<br>  model = SentenceTransformer(modules=[word, pool])<br>  embs = model.encode(['query','doc'], batch_size=64, convert_to_numpy=True)<br>  # FAISS index<br>  import faiss, numpy as np<br>  faiss.normalize_L2(embs)<br>  idx = faiss.IndexFlatIP(embs.shape[1])<br>  idx.add(embs)<br>  D,I = idx.search(embs, k=10)</code></pre><br>  Production patterns:<br>  - Use IVF+PQ and quantization for billion-scale corpora (FAISS/Milvus)<br>  - Periodic re-embed with new model versions and use mined hard negatives for fine-tuning<br>  - Serve embeddings via batched GPU inference or offload to vector DBs (Pinecone, Milvus) to scale</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
