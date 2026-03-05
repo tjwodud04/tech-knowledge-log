@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Conditional Random Fields (CRFs) for Sequence Labeling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CRF는 조건부 확률 모델로서 연속된 레이블(예: 개체명, 품사)을 문맥 전체를 고려해 예측해 실무 시스템에서 일관된 시퀀스 출력을 보장합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Conditional Random Fields (CRFs) for Sequence Labeling</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-06</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>CRF는 조건부 확률 모델로서 연속된 레이블(예: 개체명, 품사)을 문맥 전체를 고려해 예측해 실무 시스템에서 일관된 시퀀스 출력을 보장합니다.</p>
+        <p>작동 원리: CRF는 입력 시퀀스 x가 주어졌을 때 전체 레이블 시퀀스 y의 조건부 확률 P(y|x)를 모델링합니다. 로컬 특성(단어, 형태소, 접미사, 대문자 등)을 선형 결합한 점수에 대해 경로 전체 점수를 합산하고, 정규화로 확률을 얻습니다. 학습은 L-BFGS, SGD, 또는 확률적 경사 하강법으로 최대우도 추정을 수행하며, 추론은 Viterbi 알고리즘(최고 점수 경로)으로 합니다.<br>현업 관점: 전통적 NLP 파이프라인(Stanford NER, CRF++)에선 풍부한 수작업 특성(feature engineering)이 핵심입니다. 요즘은 BiLSTM-CRF 구조(Huang et al. 2015, Lample et al. 2016)가 주류로, 신경 임베딩으로 특성을 자동화하고 CRF를 출력층에 둬 레이블 간 제약(예: I-ORG가 B-PER 뒤에 올 수 없음)을 보장합니다. CRF는 작은 데이터에선 여전히 견고하고, 규칙과 특성 결합이 쉬워 실무에서 디버깅·규정 준수 관점에서 유리합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Stanford NER (CRF 기반) — 연구/학계에서 널리 쓰임 (Finkel et al., 2005). 코드: Stanford NER 패키지(예: stanford-ner 3.9.2)로 모델 학습/태깅.<br>  코드 예시 (파이썬 sklearn-crfsuite 사용):<br>  <pre><code class="language-bash">pip install sklearn-crfsuite</code></pre><br>  <pre><code class="language-python">from sklearn_crfsuite import CRF<br>  crf = CRF(algorithm='lbfgs', c1=0.1, c2=0.1, max_iterations=100)<br>  crf.fit(X_train, y_train)       # X_train: list of token feature dicts<br>  preds = crf.predict(X_dev)</code></pre><br>  사용처: 연구·프로토타입, 일부 레거시 파이프라인에서 품사/개체명 인식에 사용.<br>- 사례: BiLSTM-CRF 패턴 — 논문/프레임워크에서 채택 (Huang et al. 2015). 구현: AllenNLP의 ConditionalRandomField 모듈, Flair의 SequenceTagger(CRF 출력층).<br>  실무 패턴: (1) 임베딩+BILSTM로 특성 추출, (2) CRF로 레이블 제약 적용, (3) L2 규제와 조기종료, (4) Viterbi 디버깅 로그 보관. 참조: Lafferty et al. 2001, Sutton & McCallum 2012.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A CRF models conditional probabilities of label sequences given inputs, producing globally-consistent sequence labels (e.g., NER, POS) useful in production for constrained outputs.</p>
+        <p>How it works: CRFs score entire label sequences y given input x via feature functions f_k(y_t, y_{t-1}, x, t) and weights w_k; P(y|x) ∝ exp(w·F(x,y)). Training maximizes conditional likelihood (regularized), using L-BFGS or SGD; inference uses Viterbi to find the highest-scoring path. The model enforces label transition constraints and lets overlapping input features influence joint predictions.<br>Practical flow: In classic ML pipelines engineers hand-craft features (orthography, gazetteers, prefix/suffix). In modern systems the CRF often sits on top of learned representations: e.g., BiLSTM-CRF (Huang et al. 2015, Lample et al. 2016) where BiLSTM provides token scores and CRF enforces valid tag sequences. CRFs remain valuable when data is limited or when explicit structure/constraints are required.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Stanford NER (CRF-based) — widely used in research (Finkel et al., 2005). Tools: Stanford NER jar (e.g., 3.9.2).<br>  Code:<br>  <pre><code class="language-bash"># install a Python wrapper<br>  pip install sklearn-crfsuite</code></pre><br>  <pre><code class="language-python">from sklearn_crfsuite import CRF<br>  crf = CRF(algorithm='lbfgs', c1=0.1, c2=0.1, max_iterations=100)<br>  crf.fit(X_train, y_train)<br>  preds = crf.predict(X_test)</code></pre><br>  Where used: prototyping, legacy production NLP pipelines, academic baselines.<br>- Case: BiLSTM-CRF in production research stacks — used in sequence tagging toolkits (AllenNLP's ConditionalRandomField, Flair's SequenceTagger with CRF). Pattern: use pretrained embeddings or transformers for features, add CRF as output layer to enforce transition constraints; regularize with c1/c2 or dropout and validate with Viterbi-decoded outputs. References: Lafferty et al. 2001; Huang et al. 2015; Sutton & McCallum 2012.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
