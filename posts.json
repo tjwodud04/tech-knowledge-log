@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contrastive Learning / 대비 학습",
+      "date": "2026-03-09",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-09-contrastive-learning.html",
+      "excerpt": "대비 학습은 서로 유사한(positive) 샘플을 끌어당기고 비유사한(negative) 샘플을 밀어내는 방식으로 표현을 학습합니다. 대규모 라벨 없는 데이터에서 강한 표현을 얻해 검색·추천·멀티모달 시스템에서 실무 가치가 큽니다."
+    },
+    {
       "title": "Conditional Random Fields (CRFs) for Sequence Labeling",
       "date": "2026-03-06",
       "category": "cs-fundamentals",
