@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Contrastive Learning / 대비 학습</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="대비 학습은 서로 유사한(positive) 샘플을 끌어당기고 비유사한(negative) 샘플을 밀어내는 방식으로 표현을 학습합니다. 대규모 라벨 없는 데이터에서 강한 표현을 얻해 검색·추천·멀티모달 시스템에서 실무 가치가 큽니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Contrastive Learning / 대비 학습</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-09</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대비 학습은 서로 유사한(positive) 샘플을 끌어당기고 비유사한(negative) 샘플을 밀어내는 방식으로 표현을 학습합니다. 대규모 라벨 없는 데이터에서 강한 표현을 얻해 검색·추천·멀티모달 시스템에서 실무 가치가 큽니다.</p>
+        <p>작동 원리: 대표적 손실은 InfoNCE/NT-Xent로, 배치 내의 positive 쌍(예: 동일 이미지의 두 augmentation)과 나머지 샘플을 negative로 사용해 확률을 최대화합니다. 기술적 요소로는 데이터 증강(strong augmentations), temperature(τ) 하이퍼파라미터, 큰 배치 또는 메모리 뱅크/모멘텀 인코더(MoCo)가 있습니다. <br>실무 고려: 대형 배치(또는 분산 샘플링)로 negative 다양성을 확보하고, mixed-precision, multi-GPU, LARS/AdamW 최적화가 일반적입니다. CLIP(OpenAI)은 이미지↔텍스트 대비 학습을 통해 강력한 제로샷 분류·검색을 제공했고, MoCo(Meta/Facebook)와 SimCLR(Google) 논문·리포지토리는 많은 실무 패턴을 규정했습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: OpenAI CLIP(이미지-텍스트 대비 학습)<br>코드: Hugging Face의 CLIP 구현 사용 예 (transformers>=4.20, torch>=1.12)<br><pre><code class="language-bash">pip install transformers[torch] accelerate faiss-cpu<br>python -m torch.distributed.run --nproc_per_node=8 train_clip.py --per_device_train_batch_size 64 --learning_rate 1e-4</code></pre><br>실제 사용처: CLIP은 검색·콘텐츠 분류(예: 이미지 검색 엔진)에서 제로샷 모델로 활용됩니다.<br>사례: MoCo v2 (Facebook AI)<br>코드 스니펫(Pytorch InfoNCE):<br><pre><code class="language-python"># logits: [batch, 1+K] , labels = 0<br>loss = torch.nn.CrossEntropyLoss()(logits/temperature, torch.zeros(batch, dtype=torch.long).to(device))</code></pre><br>실무 패턴: Faiss(대규모 임베딩 검색), momentum encoder(모델 안정성), 대규모 augmentations 파이프라인(Albumentations/torchvision), 학습 후 L2 정규화 + ANN 인덱싱을 조합하세요.<br>참고: SimCLR(2020, Google), MoCo (2019/2020, Facebook), CLIP (2021, OpenAI) 리포지토리에서 구현/하이퍼파라미터 확인.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Contrastive learning trains representations by pulling positive pairs together and pushing negatives apart. It's key for self-supervised pretraining used in retrieval, recommendation, and multimodal systems in production.</p>
+        <p>How it works: The common loss is InfoNCE / NT-Xent: for each anchor, maximize similarity with its positive (e.g., another augmentation) while minimizing similarity to negatives in the batch or memory bank. Practical ingredients include strong data augmentations, a temperature τ, large effective batch size (or memory bank/momentum encoder like MoCo), and careful optimizer settings. <br>Operational notes: production training uses multi-GPU distributed batches, mixed precision, and ANN libraries (FAISS) for serving. CLIP (OpenAI) is a prominent multimodal contrastive model used for zero-shot tasks; SimCLR (Google) and MoCo (Facebook/Meta) provide reference training recipes and tricks.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: OpenAI CLIP (image-text contrastive)<br>Code: Hugging Face / transformers CLIP training (transformers>=4.20, torch>=1.12)<br><pre><code class="language-bash">pip install transformers[torch] accelerate faiss-cpu<br>python -m torch.distributed.run --nproc_per_node=8 train_clip.py \<br>  --per_device_train_batch_size 64 --learning_rate 1e-4</code></pre><br>Used in: image search / zero-shot labeling pipelines.<br>Case: MoCo v2 (Facebook AI Research)<br>Code snippet (PyTorch InfoNCE):<br><pre><code class="language-python"># logits shape [B, 1+K], positive at index 0<br>loss = F.cross_entropy(logits/temperature, torch.zeros(B, dtype=torch.long, device=device))</code></pre><br>Production patterns: after pretraining, L2-normalize embeddings and index with FAISS (IVF/PQ) for low-latency retrieval; use momentum encoder or large negative pools for stability; tune temperature and augmentation strength. See SimCLR (ICML 2020), MoCo (CVPR/ECCV 2020), CLIP (OpenAI 2021) for proven configs and GitHub implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
