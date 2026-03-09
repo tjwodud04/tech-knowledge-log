@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning",
+      "date": "2026-03-10",
+      "category": "papers",
+      "url": "posts/papers/2603/2026-03-10-paper.html",
+      "excerpt": "SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning"
+    },
+    {
       "title": "Contrastive Learning / 대비 학습",
       "date": "2026-03-09",
       "category": "cs-fundamentals",
