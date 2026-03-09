@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Alejandra Perez, Anita Rau, Lee White, Busisiwe Mlambo, Chinedu Nwoye, Muhammad Abdullah Jamal, Omid Mohareri</div>
+        <div><strong>발행일 / Published:</strong> 2026-03-06</div>
+        <div><strong>Arxiv ID:</strong> 2603.06570</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>외과의사는 단순히 보는 것을 넘어서 해석한다. 전문가가 수술 장면을 관찰할 때, 어떤 기구가 사용되는지만 아는 것이 아니라 왜 그 기구가 선택되었는지, 어떤 위험을 초래하는지, 다음에 무엇이 일어날지를 이해한다. 현재의 수술용 AI는 이러한 질문에 답하지 못하는데, 그 이유는 수술적 추론을 명시적으로 담아내는 학습 데이터를 대규모로 주석 달기 어렵기 때문이다. 그러나 수술 강의 동영상에는 이미 바로 이런 것들이 들어 있다 — 교육을 위해 전문가가 내레이션으로 설명하는 의도, 근거, 예측이 그것이다. 본질적으로는 노이즈가 많고 비구조적이지만, 이러한 내레이션은 현재 수술용 AI에 결여된 추론을 담고 있다.</p>
+        <p>우리는 SUREON을 도입한다. SUREON은 수술 학술 동영상에서 이러한 학습 신호를 체계적으로 수집한 대규모 비디오 QA 데이터셋이다. SUREON은 안전 평가, 의사결정 근거, 예측을 포함한 12개의 질문 범주를 정의하며, 멀티에이전트 파이프라인을 통해 대규모로 감독 신호를 추출하고 구조화한다. 134,700개의 클립과 170개의 수술 절차 유형에 걸쳐 SUREON은 206,800개의 QA 쌍과 전문가 검증을 거친 354개의 벤치마크 예제를 제공한다.</p>
+        <p>이 감독 신호가 수술적 추론 능력으로 얼마나 전이되는지를 평가하기 위해 두 모델을 제시한다: 감독 학습 기반의 미세조정으로 적응된 비전-언어 모델 SureonVLM과, Group Relative Policy Optimization으로 학습된 추론 모델 SureonVLM-R1이다. 두 모델은 수술에 관한 복잡한 질문에 답할 수 있으며, 더 큰 범용 모델들보다 월등히 우수하다. SUREON 벤치마크에서 84% 이상의 정확도를 기록하는 동시에 표준 수술 인지 과제에서도 범용 모델들을 능가한다. SureonVLM-R1의 정성적 분석은 시각적 문맥으로부터 수술 의도를 추론하는 등 명시적인 추론 행동을 드러낸다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Surgeons don't just see -- they interpret. When an expert observes a surgical scene, they understand not only what instrument is being used, but why it was chosen, what risk it poses, and what comes next. Current surgical AI cannot answer such questions, largely because training data that explicitly encodes surgical reasoning is immensely difficult to annotate at scale. Yet surgical video lectures already contain exactly this -- explanations of intent, rationale, and anticipation, narrated by experts for the purpose of teaching. Though inherently noisy and unstructured, these narrations encode the reasoning that surgical AI currently lacks. We introduce SUREON, a large-scale video QA dataset that systematically harvests this training signal from surgical academic videos. SUREON defines 12 question categories covering safety assessment, decision rationale, and forecasting, and uses a multi-agent pipeline to extract and structure supervision at scale. Across 134.7K clips and 170 procedure types, SUREON yields 206.8k QA pairs and an expert-validated benchmark of 354 examples. To evaluate the extent to which this supervision translates to surgical reasoning ability, we introduce two models: SureonVLM, a vision-language model adapted through supervised fine-tuning, and SureonVLM-R1, a reasoning model trained with Group Relative Policy Optimization. Both models can answer complex questions about surgery and substantially outperform larger general-domain models, exceeding 84% accuracy on the SUREON benchmark while outperforming general-domain models on standard surgical perception tasks. Qualitative analysis of SureonVLM-R1 reveals explicit reasoning behavior, such as inferring operative intent from visual context.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2603.06570" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2603.06570.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
