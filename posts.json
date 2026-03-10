@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Blind Source Separation (Cocktail-Party Problem)",
+      "date": "2026-03-11",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-11-blind-source-separation.html",
+      "excerpt": "블라인드 소스 분리는 혼합된 오디오(예: 회의, 스마트 스피커)에서 개별 화자를 분리하는 기술로, ASR, 회의 서비스, 보청기 등 실서비스의 품질을 좌우합니다."
+    },
+    {
       "title": "SUREON: A Benchmark and Vision-Language-Model for Surgical Reasoning",
       "date": "2026-03-10",
       "category": "papers",
