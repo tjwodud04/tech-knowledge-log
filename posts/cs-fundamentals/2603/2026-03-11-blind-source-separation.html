@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Blind Source Separation (Cocktail-Party Problem)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="블라인드 소스 분리는 혼합된 오디오(예: 회의, 스마트 스피커)에서 개별 화자를 분리하는 기술로, ASR, 회의 서비스, 보청기 등 실서비스의 품질을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Blind Source Separation (Cocktail-Party Problem)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-11</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>블라인드 소스 분리는 혼합된 오디오(예: 회의, 스마트 스피커)에서 개별 화자를 분리하는 기술로, ASR, 회의 서비스, 보청기 등 실서비스의 품질을 좌우합니다.</p>
+        <p>핵심 원리: 관측된 혼합 신호에서 각 소스의 통계적·스펙트럼적 특성을 이용해 분리합니다. 고전적 접근은 ICA(독립성 가정)나 NMF(비음수 행렬 분해)이고, 실시간·고성능 요구가 늘면서 시간영역/주파수영역의 딥러닝(Conv-TasNet, DPRNN, Deep Clustering 등)이 주류가 되었습니다.<br>기술적 흐름: (1) 시간/주파수 표현(STFT 또는 시간도메인 필터)을 계산, (2) 신경망으로 각 소스의 마스크/파형을 추정, (3) 마스크 기반 MVDR 빔포머나 직접 파형 재생성으로 복원합니다. 연구·제품에서는 전처리(WPE dereverberation), 다중마이크 빔포밍, 마스크 추정 + MVDR 결합 패턴이 널리 사용됩니다. 저지연 처리가 필요하면 Conv-TasNet/DPRNN 같은 시간영역 네트워크를 채택합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: SpeechBrain (오픈소스 연구·프로덕션 친화적)<br>코드:<br><pre><code class="language-bash">pip install speechbrain==0.5.14</code></pre><br><pre><code class="language-python">from speechbrain.pretrained import SepformerSeparation<br>sep = SepformerSeparation.from_hparams(source="speechbrain/sepformer-wsj02mix", savedir="./pretrained")<br>est_sources = sep.separate_file('mix.wav')</code></pre><br>어디서: SpeechBrain 허브의 SepFormer 모델(연구·프로토타입에서 실사용 전환에 유용).<br><br>- 사례: Asteroid (Conv-TasNet 사전학습 모델)<br>코드:<br><pre><code class="language-bash">pip install asteroid==0.4.3</code></pre><br><pre><code class="language-python">from asteroid.models import BaseModel<br>m = BaseModel.from_pretrained('JorisCos/ConvTasNet_Libri1Mix_sepclean')<br>m.separate_file('mix.wav', save_dir='out')</code></pre><br>어디서: Asteroid GitHub (Conv-TasNet, DPRNN 구현 및 라이브러리).<br><br>실무 패턴 / Best practices:<br>- 회의/스피커 시스템은 마이크 어레이 + 마스크 기반 MVDR(마스크는 NN으로 추정)를 결합해 안정적 성능 확보 (CHiME/DSB 연구 사례들).<br>- 실시간 서비스는 저지연 네트워크(Conv-TasNet, DPRNN) + 스트리밍 버퍼링/프레임화 적용.<br>- 파이프라인: WPE(잔향 제거) → 마스크 추정 → 빔포밍 → ASR. GPU와 낮은 지연 요구를 고려해 모델 경량화 및 양자화 사용.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Blind Source Separation (BSS) separates individual audio sources from mixtures (the cocktail‑party problem). It's critical in ASR, conferencing, voice assistants, and hearing aids for intelligibility and downstream accuracy.</p>
+        <p>Core idea: recover original sources from observed mixtures using statistical/structural cues. Classical algorithms include ICA and NMF; modern practice relies on deep learning (time‑domain Conv‑TasNet, DPRNN, deep clustering + mask inference). Typical pipelines estimate per‑source masks or waveforms and then reconstruct signals, often combining neural masks with classical beamformers (e.g., MVDR) for multi‑mic setups.<br>How it works technically: compute input features (STFT or raw waveform), feed frames or chunks into a neural separator to output masks or separated waveforms, and postprocess (inverse STFT or beamforming). For production you must address latency, microphone geometry (for beamforming), dereverberation (WPE), and streaming/online inference constraints.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case: SpeechBrain (research→prototype→production)<br>Code:<br><pre><code class="language-bash">pip install speechbrain==0.5.14</code></pre><br><pre><code class="language-python">from speechbrain.pretrained import SepformerSeparation<br>sep = SepformerSeparation.from_hparams(source='speechbrain/sepformer-wsj02mix', savedir='./pretrained')<br>est_sources = sep.separate_file('mix.wav')</code></pre><br>Where used: SpeechBrain model hub; SepFormer is used for research and rapid prototyping of separation pipelines.<br><br>Real-world case: Asteroid (Conv‑TasNet pretrained)<br>Code:<br><pre><code class="language-bash">pip install asteroid==0.4.3</code></pre><br><pre><code class="language-python">from asteroid.models import BaseModel<br>m = BaseModel.from_pretrained('JorisCos/ConvTasNet_Libri1Mix_sepclean')<br>m.separate_file('mix.wav', save_dir='out')</code></pre><br>Where used: Asteroid GitHub (implements Conv‑TasNet, DPRNN; used by researchers and engineers to reproduce papers like Luo & Mesgarani 2019).<br><br>Production patterns / best practices:<br>- Combine NN mask estimation with MVDR beamforming for multi‑mic arrays (CHiME/Kaldi recipes illustrate this). <br>- For low latency, use time‑domain networks (Conv‑TasNet/DPRNN) or streaming variants and quantize models for edge devices. <br>- Typical pipeline: WPE dereverb → mask/Waveform separation → beamforming → ASR/codec integration. GPU/edge inference planning and model compression are essential for deployment.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
