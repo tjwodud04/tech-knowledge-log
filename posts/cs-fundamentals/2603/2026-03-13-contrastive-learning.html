@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Contrastive Learning (InfoNCE) — Retrieval & Embeddings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="컨트라스티브 러닝(예: InfoNCE)은 쌍(positive/negative)을 이용해 표현 공간에서 유사도 구조를 학습하여 검색·임베딩 정확도를 높입니다. 프로덕션에서는 빠른 ANN 검색과 결합해 추천·검색·멀티모달 매칭에 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Contrastive Learning (InfoNCE) — Retrieval & Embeddings</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-13</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>컨트라스티브 러닝(예: InfoNCE)은 쌍(positive/negative)을 이용해 표현 공간에서 유사도 구조를 학습하여 검색·임베딩 정확도를 높입니다. 프로덕션에서는 빠른 ANN 검색과 결합해 추천·검색·멀티모달 매칭에 쓰입니다.</p>
+        <p>핵심은 같은 샘플의 두 뷰(augmentation, augmentation된 이미지/문장 또는 쿼리-문서 쌍)를 positive로, 나머지를 negative로 봐 유사도를 최대화(positive)·최소화(negative)하는 손실(예: InfoNCE/NT-Xent)을 최적화하는 것입니다. 수식으로는 p(+|i) = exp(sim(z_i,z_pos)/τ) / Σ_k exp(sim(z_i,z_k)/τ) 같은 softmax 기반 대조 손실이 자주 사용됩니다.<br>구현적 팁: 대규모 negative가 필요해 MoCo(moco v2)는 모멘텀 인코더 + 큐(queue)로 메모리 뱅크를 구현하고, SimCLR는 매우 큰 배치와 강한 augment를 사용합니다. CLIP(OpenAI)은 이미지-텍스트 쌍에 같은 contrastive objective를 적용해 멀티모달 임베딩을 학습했고, DPR(Facebook AI) 등은 쿼리-문서 비례 검색에 같은 아이디어를 사용합니다. 프로덕션은 보통 in-batch negatives, 하드 네거티브 샘플링, FAISS/Milvus로 ANN 인덱싱, 양자화/IVF로 대규모 서빙을 결합합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: SimCLR (Google Research, 2020)<br>코드: github.com/google-research/simclr (PyTorch) — 학습 예시<br><pre><code class="language-bash">python main.py --dataset imagenet --batch-size 1024 --lr 0.3</code></pre> <br>실무 패턴: 대규모 배치, 온더플라이 augment, 온-디스크 체크포인트(분산 학습)<br><br>사례: MoCo (Facebook/Meta)<br>코드: github.com/facebookresearch/moco — 모멘텀 인코더 + 큐 구현<br><br>사례: CLIP (OpenAI) — 이미지-텍스트 매칭으로 검색·필터링에서 활용<br>코드 예시 (Hugging Face):<br><pre><code class="language-python">from transformers import CLIPProcessor, CLIPModel<br>model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')<br>proc = CLIPProcessor.from_pretrained(...)<br>emb = model.get_text_features(**proc(texts, return_tensors='pt'))</code></pre> <br>프로덕션 패턴: FAISS (facebookresearch/faiss v1.7)로 IVF/PQ 인덱싱, 정기적 임베딩 재인덱싱, 배치 및 하드네거티브 기반 재학습(모니터링: recall@k, MRR).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Contrastive learning (e.g., InfoNCE) trains representations by pulling positives together and pushing negatives apart; it's widely used to produce embeddings for retrieval, recommendation, and multimodal matching in production.</p>
+        <p>Mechanically, you form positive pairs (two augmentations of the same image, query–doc pair, or image–caption) and many negatives. The InfoNCE/NT-Xent loss is common: p(+|i)=exp(sim(z_i,z_pos)/τ)/Σ_k exp(sim(z_i,z_k)/τ), where sim often is cosine. Large negative sets improve discrimination: SimCLR uses very large batch sizes as in-batch negatives; MoCo uses a momentum encoder plus a queue (memory bank) for many negatives; CLIP applies contrastive loss across image-text pairs at web scale.<br>In deployment, contrastive pretraining is followed by indexing (FAISS/Milvus), approximate search (IVF, PQ, HNSW), and periodic retraining with hard-negative mining. DPR (Dense Passage Retrieval) from Facebook uses similar bi-encoder contrastive training for QA retrieval. Key practical knobs: temperature τ, number/quality of negatives, augmentation or data curation, and ANN index configuration.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: SimCLR (Google Research, 2020)<br>Source: github.com/google-research/simclr<br>Command example:<br>python main.py --dataset imagenet --batch-size 1024 --base-lr 0.3<br>Production patterns: very large batch/in-batch negatives, distributed mixed-precision training (PyTorch 1.12+/2.0), strong augmentations.<br><br>Case: MoCo (Facebook/Meta)<br>Source: github.com/facebookresearch/moco — uses momentum encoder + queue for memory-efficient negatives<br><br>Case: CLIP (OpenAI) used for image-text retrieval<br>Code (Hugging Face transformers):<br><pre><code class="language-python">from transformers import CLIPProcessor, CLIPModel<br>m = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')<br>proc = CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')<br>inputs = proc(text=['a cat'], images=[image], return_tensors='pt')<br>emb = m.get_text_features(**inputs)</code></pre><br>Deployment tips: build FAISS index (faiss-cpu 1.7 / faiss-gpu), use IVF+PQ or HNSW for latency/size tradeoffs, monitor recall@k and refresh embeddings when distribution drifts.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
