@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contrastive Learning (InfoNCE) — Retrieval & Embeddings",
+      "date": "2026-03-13",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-13-contrastive-learning.html",
+      "excerpt": "컨트라스티브 러닝(예: InfoNCE)은 쌍(positive/negative)을 이용해 표현 공간에서 유사도 구조를 학습하여 검색·임베딩 정확도를 높입니다. 프로덕션에서는 빠른 ANN 검색과 결합해 추천·검색·멀티모달 매칭에 쓰입니다."
+    },
+    {
       "title": "Blind Source Separation (Cocktail-Party Problem)",
       "date": "2026-03-11",
       "category": "cs-fundamentals",
