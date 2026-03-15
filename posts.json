@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Griffin-Lim Algorithm (Phase Reconstruction for Audio/Vocoders)",
+      "date": "2026-03-16",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-16-griffin-lim algorithm.html",
+      "excerpt": "Griffin-Lim은 단일 채널의 스펙트럼 크기(앰플리튜드)만으로 시간 도메인 파형을 재구성하는 반복적 위상 추정 알고리즘으로, TTS/보코더의 빠른 프로토타이핑과 디버깅에서 널리 쓰입니다."
+    },
+    {
       "title": "Contrastive Learning (InfoNCE) — Retrieval & Embeddings",
       "date": "2026-03-13",
       "category": "cs-fundamentals",
