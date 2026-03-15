@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Griffin-Lim Algorithm (Phase Reconstruction for Audio/Vocoders)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Griffin-Lim은 단일 채널의 스펙트럼 크기(앰플리튜드)만으로 시간 도메인 파형을 재구성하는 반복적 위상 추정 알고리즘으로, TTS/보코더의 빠른 프로토타이핑과 디버깅에서 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Griffin-Lim Algorithm (Phase Reconstruction for Audio/Vocoders)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-16</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Griffin-Lim은 단일 채널의 스펙트럼 크기(앰플리튜드)만으로 시간 도메인 파형을 재구성하는 반복적 위상 추정 알고리즘으로, TTS/보코더의 빠른 프로토타이핑과 디버깅에서 널리 쓰입니다.</p>
+        <p>원리: STFT로 얻은 복소 스펙트럼의 위상 정보가 없을 때, Griffin-Lim은 초기 무작위 또는 제로 위상 추정에서 시작해 역STFT→재-STFT 사이클을 반복하면서 스펙트럼 크기 제약을 만족하도록 위상을 점진 갱신합니다(Griffin & Lim, 1984). 알고리즘은 최소 제곱 목적함수(원신호의 STFT와 재구성 STFT 사이 오차)를 반복적으로 줄입니다. <br>실무적 포인트: n_fft, hop_length, win_length, 윈도우 타입과 반복 횟수(n_iter)가 품질/지연을 결정합니다. 낮은 반복수는 금속성(phasiness) 아티팩트를 남기고, 높은 반복수(32~100)는 품질을 개선하지만 비용이 늘어납니다. 대부분의 생산 환경은 음질을 위해 신경 보코더(WaveNet, WaveGlow, ParallelWaveGAN 등)로 전환했지만, Griffin-Lim은 경량한 CPU 기반 대체 또는 디버깅 파이프라인으로 여전히 유용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Tacotron 데모(연구: Wang et al., 2017) 및 여러 오픈소스 TTS 파이프라인에서 멜-스펙트로그램→파형 변환의 기본 방법으로 사용<br>  코드:<br>  <pre><code class="language-python">import librosa<br>  # mel: (n_mels, T) 예측 멜 스펙트로그램<br>  S = librosa.feature.inverse.mel_to_stft(mel, sr=22050, n_fft=1024)<br>  y = librosa.griffinlim(S, n_iter=60, hop_length=256, win_length=1024)</code></pre><br>  (librosa >= 0.6; 권장 0.8.1)<br>- 사례: PyTorch/torchaudio에서 배치화된 변환<br>  코드:<br>  <pre><code class="language-python">import torch, torchaudio<br>  gl = torchaudio.transforms.GriffinLim(n_fft=1024, n_iter=60, hop_length=256)<br>  waveform = gl(magnitude_tensor)  # torchaudio &gt;= 0.7</code></pre><br>실무 패턴과 베스트 프랙티스:<br>- 개발/디버그용 또는 리소스 제약 시 사용; 프로덕션 음질은 신경 보코더로 대체<br>- STFT/ISTFT 파라미터를 학습/추론 파이프라인과 엄격히 일치시키기<br>- 품질 향상: n_iter 32~100, 충분한 n_fft(1024~2048), 적절한 윈도우/중첩 사용<br>참고: Griffin & Lim (1984), Tacotron (2017).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Griffin-Lim is an iterative phase-reconstruction algorithm that converts magnitude-only STFT (e.g., predicted spectrograms) back to time-domain audio; it's lightweight and often used for prototyping or fallback vocoding.</p>
+        <p>How it works: Starting from an initial complex spectrum (often random phase or zero phase), Griffin-Lim alternates inverse STFT to waveform and forward STFT to update phase while enforcing the target magnitude. Mathematically it performs projection onto the set of signals whose STFT magnitude matches the given spectrogram, iteratively reducing reconstruction error (Griffin & Lim, 1984). <br>Practical considerations: The main knobs are n_fft, hop_length, window, and n_iter. More iterations (typ. 32–100) improve perceptual quality but increase latency and CPU cost. Modern production TTS systems (Google Tacotron demos, NVIDIA demos) have moved to neural vocoders (WaveNet, WaveGlow, ParallelWaveGAN) for higher fidelity, but Griffin-Lim remains useful for fast CPU-only synthesis, debugging model outputs, or where licensing/size prohibits neural models.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Tacotron demo and many research/OSS TTS pipelines used Griffin-Lim for demo audio (Wang et al., 2017). Libraries provide battle-tested implementations.<br>  Code (librosa, recommended v0.8.1):<br>  <pre><code class="language-python">import librosa<br>  S = librosa.feature.inverse.mel_to_stft(mel_spec, sr=22050, n_fft=1024)<br>  y = librosa.griffinlim(S, n_iter=60, hop_length=256, win_length=1024)</code></pre><br>- Case: torchaudio transform (torchaudio >= 0.7) for batched GPU/CPU pipelines<br>  <pre><code class="language-python">import torch, torchaudio<br>  gl = torchaudio.transforms.GriffinLim(n_fft=1024, n_iter=60, hop_length=256)<br>  waveform = gl(mag_tensor)</code></pre><br>Production patterns:<br>- Use Griffin-Lim as a fallback or debug tool; migrate to neural vocoders (WaveNet by DeepMind, WaveGlow by NVIDIA, ParallelWaveGAN) for production speech services.<br>- Ensure STFT params match end-to-end training/inference, tune n_iter for latency/quality tradeoff, and pre/post-process (pre-emphasis, denoising) to reduce artifacts.<br>References: Griffin & Lim (1984); Tacotron (2017); librosa/torchaudio docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
