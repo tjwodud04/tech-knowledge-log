@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "A Generative Model of Conspicuous Consumption and Status Signaling",
+      "date": "2026-03-17",
+      "category": "papers",
+      "url": "posts/papers/2603/2026-03-17-paper.html",
+      "excerpt": "A Generative Model of Conspicuous Consumption and Status Signaling"
+    },
+    {
       "title": "Griffin-Lim Algorithm (Phase Reconstruction for Audio/Vocoders)",
       "date": "2026-03-16",
       "category": "cs-fundamentals",
