@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Beamforming & Microphone-Array Signal Processing",
+      "date": "2026-03-18",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-18-beamforming-microphone-array.html",
+      "excerpt": "빔포밍은 여러 마이크 입력을 공간적으로 합성해 특정 방향의 신호를 증폭하고 간섭·잡음을 억제하는 기술로, 음성인식·회의·스마트스피커의 원거리 음성 캡처에서 필수적입니다."
+    },
+    {
       "title": "A Generative Model of Conspicuous Consumption and Status Signaling",
       "date": "2026-03-17",
       "category": "papers",
