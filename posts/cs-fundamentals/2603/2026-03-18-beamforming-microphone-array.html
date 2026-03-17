@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Beamforming & Microphone-Array Signal Processing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="빔포밍은 여러 마이크 입력을 공간적으로 합성해 특정 방향의 신호를 증폭하고 간섭·잡음을 억제하는 기술로, 음성인식·회의·스마트스피커의 원거리 음성 캡처에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Beamforming & Microphone-Array Signal Processing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-18</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>빔포밍은 여러 마이크 입력을 공간적으로 합성해 특정 방향의 신호를 증폭하고 간섭·잡음을 억제하는 기술로, 음성인식·회의·스마트스피커의 원거리 음성 캡처에서 필수적입니다.</p>
+        <p>작동 원리: 기본적 빔포밍은 마이크 간 시간지연(도착차)을 보정해 동일 신호를 정렬한 뒤 합쳐 SNR을 높입니다(Delay-and-Sum). MVDR(최소분산왜곡무향)나 LCMV처럼 통계적 방법은 잡음 공분산 추정으로 특정 방향 신호는 유지하면서 잡음을 최소화합니다. 최근 연구·산업에선 신경망 기반 마스크 추정 후 MVDR를 적용하는 'mask-based MVDR'가 실무에서 널리 쓰입니다.<br>실무 고려사항: 실시간 환경에선 계산량·지연과 하드웨어(ARM DSP, FPGA) 제약이 중요합니다. 따라서 제품에서는 경량화된 시간도메인 비율-합성(beamform weights)이나 on-device filterbank + 서버 기반 NN 보정의 하이브리드 파이프라인을 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Amazon Alexa / Google Nest (far-field voice capture)<br>  코드: Kaldi/CHiME recipes에서 BeamformIt 사용 예<br>  예: beamformit/BeamformIt -f scp:wav.scp outdir/<br>  (CHiME Kaldi egs에서 다중 채널 전처리 파이프라인으로 사용)<br>- 사례: 연구·오픈소스 (mask-based MVDR)<br>  코드(프로토타입, Python):<br>  <pre><code class="language-python"># Delay-and-sum prototype (Python, librosa)<br>  import numpy as np, librosa<br>  X = [librosa.stft(x, n_fft=512) for x in signals]<br>  X = np.stack(X, -1)  # freq x frames x mics<br>  freqs = librosa.fft_frequencies(sr=sr, n_fft=512)[:,None]<br>  tau = compute_tdoa(doa, mic_positions)  # seconds<br>  steering = np.exp(-1j*2*np.pi*freqs*tau)<br>  Y = np.sum(X * steering[None,:,:], axis=2)<br>  y = librosa.istft(Y)</code></pre><br>  실무 패턴: WPE(역잔향)→NN 기반 마스크 추정→MVDR 적용(클라우드/서버 연산) 혹은 경량 DS on-device. Kaldi+BeamformIt은 CHiME/AMI 데이터셋 전처리(음성 인식 파이프라인)에 표준으로 쓰입니다.<br>참고: mask-based MVDR는 Google/학계의 음성분리 연구에서 채택됨(딥 마스크 추정 + 고전적 beamformer 결합).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Beamforming uses multi-microphone arrays to spatially filter sound—boosting signals from a desired direction while suppressing interference—critical for far‑field ASR, conferencing, and smart speakers.</p>
+        <p>How it works: The simplest is Delay-and-Sum (align channels by TDOA and sum). More advanced schemes use spatial covariance estimates (MVDR, LCMV) to minimize noise power while preserving target response. In modern systems, a neural network predicts time-frequency masks for target/noise and those masks are used to compute covariance matrices for mask-based MVDR (combining learning and classical beamforming).<br>Practical constraints: latency, compute (DSP vs. CPU/GPU), and array geometry matter. Production systems often pipeline dereverberation (WPE) → mask estimation (NN) → MVDR for best tradeoff, or run cheap DS on-device and heavier mask-MVDR in cloud.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Amazon Alexa, Google Nest (far-field capture in production)<br>  Code: BeamformIt (used in Kaldi CHiME/AMI recipes)<br>  Example command (BeamformIt):<br>  $ BeamformIt -f wav.scp -o outdir/<br>  (BeamformIt + Kaldi egs/chime scripts perform multichannel enhancement before ASR)<br>- Case: Research / prototyping with Python (pyroomacoustics, librosa)<br>  Code (delay-and-sum prototype):<br>  <pre><code class="language-python">import numpy as np, librosa<br>  X = [librosa.stft(x, n_fft=512) for x in signals]<br>  X = np.stack(X, -1)            # freq x frames x mics<br>  freqs = librosa.fft_frequencies(sr=sr, n_fft=512)[:,None]<br>  tau = compute_tdoa(doa, mic_positions)<br>  steering = np.exp(-1j*2*np.pi*freqs*tau)<br>  Y = np.sum(X*steering[None,:,:], axis=2)<br>  y = librosa.istft(Y)</code></pre><br>  Production patterns: on-device DS for low-latency wake-word, cloud/embedded NN+MVDR for robust ASR; Kaldi+BeamformIt are standard in CHiME/AMI benchmarks; academic papers introduce mask-based MVDR and neural beamformers used by Google/academic groups.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
