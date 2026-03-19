@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Part-of-Speech (POS) Tagging — Practical Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="POS 태깅은 문장 내 각 토큰에 품사 레이블을 붙이는 작업으로, 정보추출·의존성 파싱·의미분석 등 여러 프로덕션 NLP 파이프라인의 기초입니다. 정확한 태깅은 downstream 품질과 비용(모델 크기·지연)에 직접 영향을 미칩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Part-of-Speech (POS) Tagging — Practical Guide</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-20</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>POS 태깅은 문장 내 각 토큰에 품사 레이블을 붙이는 작업으로, 정보추출·의존성 파싱·의미분석 등 여러 프로덕션 NLP 파이프라인의 기초입니다. 정확한 태깅은 downstream 품질과 비용(모델 크기·지연)에 직접 영향을 미칩니다.</p>
+        <p>작동 원리: 전통적 접근은 HMM/CRF 같은 확률 모델로 토큰 간 의존성을 모델링했고(예: Toutanova & Manning 계열), 현대 접근은 문맥 임베딩(BiLSTM ± CRF, 이후 Transformer)으로 문맥을 포착합니다. BiLSTM-CRF(Huang et al. 2015, Lample et al. 2016)는 시퀀스 레벨 제약(태그 전이 규칙)을 유지하며 성능과 속도 균형이 좋아 산업표준으로 널리 쓰입니다. 최근엔 BERT계열로 fine-tune해 소량 데이터로 높은 정확도를 얻습니다.<br><br>실무 관점: 토크나이저 일관성이 핵심(예: spaCy의 토크나이저를 파이프라인 전반에 고정). OOV와 도메인 어휘는 서브워드/문자 레벨 특징이나 도메인 재학습으로 대응합니다. 지연·메모리 제한이 있으면 경량 모델(spaCy small models, quantized PyTorch)이나 CPU 최적화를 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: spaCy (production NLP library) 사용<br>  코드:<br>  <pre><code class="language-python"># spaCy v3.x 예시<br>  import spacy<br>  nlp = spacy.load('en_core_web_sm')<br>  doc = nlp('Apple released a new iPhone today.')<br>  for tok in doc:<br>      print(tok.text, tok.pos_, tok.tag_)</code></pre><br>  사용처: Explosion의 spaCy는 배치·API 서비스(검색 전처리, 엔티티 파이프라인)에서 널리 채택됨. 권장 패턴: 토크나이저 고정, 모델 리트레이닝 시 config reproducibility(spacy v3 config).<br><br>- 사례: Stanford Stanza / SyntaxNet<br>  코드:<br>  <pre><code class="language-python">import stanza<br>  stanza.download('en')<br>  nlp = stanza.Pipeline('en', processors='tokenize,pos')<br>  doc = nlp('Tweets require domain-specific models')<br>  print([[w.text,w.xpos] for s in doc.sentences for w in s.words])</code></pre><br>  사용처/출처: Stanford NLP toolkits (academic + 일부 프로덕션 연구). 트위터 특화 태깅은 Gimpel et al. (2011) 참조.<br><br>- 사례: 모델 아키텍처(논문)<br>  코드/설정: BiLSTM-CRF 구현은 AllenNLP 예제(configs for sequence tagging)나 HuggingFace Transformers에서 'token-classification' fine-tune으로 재현 가능. 실무 패턴: 모델 경량화(quantization, ONNX export), A/B 테스트로 태그셋·토크나이저 변경 영향 측정.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>POS tagging assigns a part-of-speech label to each token; it’s foundational for parsing, NER, intent classification and many production NLP flows. Tag accuracy affects downstream model quality and operational cost.</p>
+        <p>How it works: classical methods used HMMs/CRFs to capture label transitions (e.g., Toutanova & Manning). Modern pipelines use contextual encoders — BiLSTM(+CRF) became an industry staple (Huang et al., Lample et al.) for balancing accuracy and speed; Transformer fine-tuning (BERT) now yields higher accuracy for low-data regimes. Key engineering aspects are tokenization consistency, tagset design (universal vs language-specific), and OOV handling via character/subword features.<br><br>Practical trade-offs: choose BiLSTM-CRF or small Transformer for mid-latency APIs; quantize/export to ONNX for CPU inference; maintain identical tokenizer across training and inference to avoid distribution shift. Monitor downstream metrics (e.g., parser UAS) when changing POS models.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: spaCy in production (Explosion)<br>  Code:<br>  <pre><code class="language-python"># spaCy v3.x<br>  import spacy<br>  nlp = spacy.load('en_core_web_sm')<br>  doc = nlp('Netflix recommends titles based on metadata and user signals.')<br>  for tok in doc:<br>      print(tok.text, tok.pos_, tok.tag_)</code></pre><br>  Where used: spaCy is used in many services for fast POS/NER preprocessing. Production patterns: freeze tokenizer, use spacy train with reproducible config, export to pipeline for REST inference.<br><br>- Case: Stanford Stanza / SyntaxNet<br>  Code:<br>  <pre><code class="language-python">import stanza<br>  stanza.download('en')<br>  nlp = stanza.Pipeline('en', processors='tokenize,pos')<br>  doc = nlp('Short informal text often needs domain models')</code></pre><br>  Source: Stanford NLP toolkits; Google’s SyntaxNet/Parsey McParseface (research/production experiments).<br><br>- Case: BiLSTM-CRF / Transformers in research<br>  Code/commands: AllenNLP example configs for sequence tagging or HuggingFace Transformers <code>Trainer</code> with <code>--task_name token-classification</code> to fine-tune BERT. Best practices: quantize for CPU, measure downstream impact, and use domain-adaptive pretraining for specialized corpora.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
