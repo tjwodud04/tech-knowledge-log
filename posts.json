@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Part-of-Speech (POS) Tagging — Practical Guide",
+      "date": "2026-03-20",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-20-part-of-speech (pos) tagging.html",
+      "excerpt": "POS 태깅은 문장 내 각 토큰에 품사 레이블을 붙이는 작업으로, 정보추출·의존성 파싱·의미분석 등 여러 프로덕션 NLP 파이프라인의 기초입니다. 정확한 태깅은 downstream 품질과 비용(모델 크기·지연)에 직접 영향을 미칩니다."
+    },
+    {
       "title": "Beamforming & Microphone-Array Signal Processing",
       "date": "2026-03-18",
       "category": "cs-fundamentals",
