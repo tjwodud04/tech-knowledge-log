@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Speech Source Separation (Cocktail-Party Problem)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="음성 분리(speech-source-separation)는 혼합 음성에서 각 화자 또는 소리원을 분리하는 기술로, 회의 녹취, 통화 잡음 제거, 개인화 음성 인식 등 실무 시스템에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Speech Source Separation (Cocktail-Party Problem)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-23</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>음성 분리(speech-source-separation)는 혼합 음성에서 각 화자 또는 소리원을 분리하는 기술로, 회의 녹취, 통화 잡음 제거, 개인화 음성 인식 등 실무 시스템에서 필수적입니다.</p>
+        <p>작동원리: 전통적 접근은 STFT 기반의 시간-주파수 마스크(복소/실수 비율 마스크)와 빔포밍(MVDR) 같은 다중 마이크 기법을 결합합니다. 현대 딥러닝은 두 갈래로 발전했습니다. (1) 주파수-도메인: Deep Clustering(Hershey et al., 2016)과 Permutation Invariant Training(PIT, Yu et al., 2017)은 소스의 임베딩/페어링 문제를 해결합니다. (2) 시간-도메인: Conv-TasNet(Luo & Mesgarani, 2019), DPRNN(2020)은 직접 파형을 모델링해 낮은 지연과 우수한 SI-SDR 성능을 냅니다. 학습 손실로는 SI-SDR, PIT-SI-SDR, 마스크 MSE 등이 주로 쓰입니다.<br>실무적 고려사항: 멀티채널 환경에서는 neural-mask + MVDR(마스크로 추정한 공간 템플릿으로 빔포밍)을 병용해 안정적 성능을 얻습니다. 온디바이스 적용시 causal 모델, 작은 파라미터(예: Conv-TasNet small)와 VoiceFilter-Lite 스타일의 개인화 임베딩을 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google VoiceFilter / VoiceFilter-Lite (개인화 음성 분리): Google Research 논문과 모바일 구현을 기반으로 Assistant/On-device 필터링에 응용<br>  코드: (PyTorch 패턴 예)<br><pre><code class="language-python"># PIT 학습 루프(간단화)<br>import itertools<br>def pit_si_sdr_loss(est, ref):<br>    # est, ref: B x C x T<br>    perms = list(itertools.permutations(range(est.size(1))))<br>    losses = []<br>    for p in perms:<br>        l = sum(si_sdr(est[:,i], ref[:,p[i]]) for i in range(est.size(1)))<br>        losses.append(l)<br>    return min(losses)</code></pre><br>- 사례: Asteroid 오픈소스(Conv-TasNet, DPRNN 구현) — 실험/프로덕션 프로토타입에 널리 사용<br>  명령/환경:<br><pre><code class="language-bash">pip install asteroid==0.3.0 torch==1.10.0 soundfile<br>python -c "from asteroid.models import ConvTasNet; m=ConvTasNet.from_pretrained('mpariente/ConvTasNet_WHAM'); print(m)"</code></pre><br>실무 패턴: 다중 마이크엔 mask-based MVDR, 회의·스트리밍은 causal/low-latency 아키텍처, 사용자별 음성엔 임베딩 기반 개인화(VoiceFilter). 레퍼런스 논문: Deep Clustering (Hershey'16), PIT (Yu'17), Conv-TasNet (Luo'19), DPRNN (Luo'20), VoiceFilter (Wang et al.).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Speech source separation isolates individual speakers/sound sources from a mixture — essential for meeting transcription, teleconferencing, noise-robust ASR, and personalized voice assistants.</p>
+        <p>How it works: Classic pipelines use STFT-based TF masks and beamforming (e.g., MVDR) for multi-mic arrays. Modern deep learning splits into frequency-domain approaches (Deep Clustering, PIT) and time-domain end-to-end models (Conv-TasNet, DPRNN). Deep Clustering learns embeddings per TF bin and clusters them to assign sources; PIT solves label permutation by selecting the minimum-loss assignment across permutations. Time-domain Conv-TasNet models directly predict separated waveforms, optimizing SI-SDR for better perceptual separation and low latency. For multi-channel production, neural mask estimation + MVDR beamforming is a common hybrid for robustness.<br>Practical constraints: production systems require causal/low-latency variants, quantized or distilled models for on-device (VoiceFilter-Lite style), and speaker-conditioning (speaker embeddings) for targeted separation.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Google VoiceFilter / VoiceFilter-Lite (targeted speaker extraction used in Assistant/on-device) — described in Google Research papers<br>  Code (PIT training sketch):<br><pre><code class="language-python"># simple PIT loss sketch (PyTorch)<br>import itertools<br>def pit_loss(est, ref):<br>    # est, ref: B x C x T<br>    perms = list(itertools.permutations(range(est.size(1))))<br>    losses = [sum(si_sdr(est[:,i], ref[:,p[i]]) for i in range(est.size(1))) for p in perms]<br>    return min(losses)</code></pre><br>- Case: Asteroid (open-source PyTorch toolkit) — implements Conv-TasNet, DPRNN, SepFormer and provides pretrained models used for research->prod prototyping<br>  Commands/Environment:<br><pre><code class="language-bash">pip install asteroid==0.3.0 torch==1.10.0 soundfile<br>python -c "from asteroid.models import ConvTasNet; m=ConvTasNet.from_pretrained('mpariente/ConvTasNet_WHAM'); print(m)"</code></pre><br>Production patterns: neural-mask + MVDR for multi-mic conferencing, causal/low-latency Conv-TasNet variants for streaming, speaker-conditioned models for personalization (VoiceFilter). Key refs: Hershey et al. (Deep Clustering), Yu et al. (PIT), Luo&Mesgarani (Conv-TasNet, DPRNN).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
