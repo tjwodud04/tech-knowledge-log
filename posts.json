@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Speech Source Separation (Cocktail-Party Problem)",
+      "date": "2026-03-23",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-23-speech-source-separation.html",
+      "excerpt": "음성 분리(speech-source-separation)는 혼합 음성에서 각 화자 또는 소리원을 분리하는 기술로, 회의 녹취, 통화 잡음 제거, 개인화 음성 인식 등 실무 시스템에서 필수적입니다."
+    },
+    {
       "title": "Part-of-Speech (POS) Tagging — Practical Guide",
       "date": "2026-03-20",
       "category": "cs-fundamentals",
