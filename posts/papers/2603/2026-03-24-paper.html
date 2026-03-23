@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Jingyang Lin, Jialian Wu, Jiang Liu, Ximeng Sun, Ze Wang, Xiaodong Yu, Jiebo Luo, Zicheng Liu, Emad Barsoum</div>
+        <div><strong>발행일 / Published:</strong> 2026-03-20</div>
+        <div><strong>Arxiv ID:</strong> 2603.20185</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>비디오 에이전트 모델들은 까다로운 비디오-언어 과제들을 발전시켜왔다. 그러나 대부분의 에이전트 방식은 여전히 밀집 샘플링된 비디오 프레임을 대상으로 탐욕적으로 파싱하는 데 크게 의존해 높은 계산 비용을 초래한다. 우리는 VideoSeek를 제안하는데, 이는 장기간의 비디오를 다루는 에이전트로서 비디오 논리 흐름을 활용해 전체 비디오를 전부 샅샅이 파싱하는 대신 답변에 결정적인 증거를 능동적으로 찾아나선다. 이러한 통찰 덕분에 모델은 훨씬 적은 수의 프레임만 사용하면서도 비디오 이해 능력을 유지하거나 오히려 향상시킬 수 있다. VideoSeek는 사고-행동-관찰 루프에서 작동하며, 다양한 수준의 세분화된 비디오 관찰을 수집하기 위한 잘 설계된 도구 모음을 갖추고 있다. 이 설계는 누적된 관찰을 대상으로 질의에 맞춘 탐색을 가능하게 하며, 실용적인 비디오 이해와 추론을 지원한다. 네 개의 도전적인 비디오 이해 및 추론 벤치마크에 대한 실험에서 VideoSeek는 이전의 비디오 에이전트들과 독립형 LMM들보다 훨씬 적은 프레임을 사용하면서도 높은 정확도를 달성했다. 특히 VideoSeek는 기본 모델인 GPT-5에 비해 LVBench에서 절대 10.2포인트 향상을 이루었고, 이때 사용한 프레임 수는 93%나 적었다. 추가 분석은 비디오 논리 흐름의 활용, 강력한 추론 능력, 그리고 도구 모음 설계의 상호 보완적 역할의 중요성을 강조한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Video agentic models have advanced challenging video-language tasks. However, most agentic approaches still heavily rely on greedy parsing over densely sampled video frames, resulting in high computational cost. We present VideoSeek, a long-horizon video agent that leverages video logic flow to actively seek answer-critical evidence instead of exhaustively parsing the full video. This insight allows the model to use far fewer frames while maintaining, or even improving, its video understanding capability. VideoSeek operates in a think-act-observe loop with a well-designed toolkit for collecting multi-granular video observations. This design enables query-aware exploration over accumulated observations and supports practical video understanding and reasoning. Experiments on four challenging video understanding and reasoning benchmarks demonstrate that VideoSeek achieves strong accuracy while using far fewer frames than prior video agents and standalone LMMs. Notably, VideoSeek achieves a 10.2 absolute points improvement on LVBench over its base model, GPT-5, while using 93% fewer frames. Further analysis highlights the significance of leveraging video logic flow, strong reasoning capability, and the complementary roles of toolkit design.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2603.20185" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2603.20185.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
