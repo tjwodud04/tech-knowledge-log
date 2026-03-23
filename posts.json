@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking",
+      "date": "2026-03-24",
+      "category": "papers",
+      "url": "posts/papers/2603/2026-03-24-paper.html",
+      "excerpt": "VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking"
+    },
+    {
       "title": "Speech Source Separation (Cocktail-Party Problem)",
       "date": "2026-03-23",
       "category": "cs-fundamentals",
