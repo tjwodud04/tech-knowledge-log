@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Softmax Temperature & Temperature Scaling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Softmax 온도(temperature)는 분포의 '샤프함'을 조절하고, 온도 스케일링(temperature scaling)은 예측 확률을 보정하는 간단하면서 실무에서 널리 쓰이는 기법입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Softmax Temperature & Temperature Scaling</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-25</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Softmax 온도(temperature)는 분포의 '샤프함'을 조절하고, 온도 스케일링(temperature scaling)은 예측 확률을 보정하는 간단하면서 실무에서 널리 쓰이는 기법입니다.</p>
+        <p>작동 원리: 소프트맥스에 온도 T를 적용하면 logits z를 z/T로 나눈 뒤 소프트맥스를 계산합니다. T>1이면 확률 분포가 평탄해지고(불확실성 증가), T<1이면 분포가 뾰족해집니다. 온도 스케일링(calibration)은 Guo et al. (ICML 2017)에서 제안된 방식으로, 학습된 모델의 logits에 단일 스칼라 T>0을 곱해 검증세트의 NLL을 최소화하여 확률을 재보정합니다. 실제 시스템에서는 분류 모델의 신뢰도(예: 의학·자율주행 알람)와 텍스트 생성의 탐색성(예: 언어모델 샘플링) 두 가지 관점에서 사용됩니다.<br><br>기술적 세부: 온도 파라미터는 모델 파라미터를 변경하지 않고 logits 앞에서만 적용합니다. 보정용 최적화는 보통 검증셋上에서 L-BFGS 또는 Adam으로 단일 스칼라를 학습합니다. 분류 보정용으로는 Expected Calibration Error(ECE)를 측정하고, 보정 후에는 ROC/AUCPR 같은 분류 지표와 함께 확인해야 합니다. 생성에서는 OpenAI API나 HuggingFace Transformers의 sampling temperature 파라미터로 바로 사용됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: 연구(Guo et al., ICML 2017) — 온도 스케일링 제안<br>  코드:<br>  <pre><code class="language-python"># PyTorch: Temperature scaling module<br>  import torch<br>  class Temperature(torch.nn.Module):<br>      def __init__(self):<br>          super().__init__(); self.T = torch.nn.Parameter(torch.ones(1))<br>      def forward(self, logits):<br>          return logits / self.T<br>  # 튜닝: 검증셋 NLL 최소화</code></pre><br>  출처: 공식 구현들이 GitHub에 다수 공개(예: "pytorch-temperature-scaling" 레포)<br><br>- 사례: 생성/서비스(예: OpenAI GPT API, Hugging Face Transformers)<br>  코드(사용 예):<br>  <pre><code class="language-python"># Hugging Face transformers sampling<br>  outputs = model.generate(input_ids, do_sample=True, temperature=0.7)</code></pre><br>  사용처: 텍스트 다양성 제어(OpenAI API 문서의 temperature 파라미터).<br><br>실무 패턴: 보정은 모델 고정 후 검증셋으로만 수행, T는 양수 스칼라만 허용, 보정 전후로 ECE와 다운스트림 지표 확인, 세분화(calibrate per-group)로 데이터 편향 완화. 모델 배포 시 온도 파라미터를 별도 컨피그로 관리해 A/B 테스트 가능.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Softmax temperature controls distribution sharpness; temperature scaling is a simple post-hoc calibration that improves predicted probabilities in production models.</p>
+        <p>How it works: Applying temperature T to logits z means computing softmax(z/T). T>1 softens probabilities (more uncertainty), T<1 sharpens them. Temperature scaling (Guo et al., ICML 2017) fits a single positive scalar T on a held-out validation set by minimizing negative log-likelihood, leaving model weights unchanged. This is widely used both for improving classifier calibration (confidence estimates in safety-critical services) and for controlling randomness in generative systems.<br><br>Technical details: Implement as a tiny module that divides logits by learned T before softmax. Optimization uses NLL on validation data; L-BFGS or Adam on a single parameter converges fast. Evaluate with calibration metrics such as ECE and reliability diagrams. For generation, the same temperature hyperparameter is exposed in APIs (e.g., OpenAI, Hugging Face) and affects sampling behavior rather than calibration.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Academic (Guo et al., ICML 2017) — proposed temperature scaling for calibration.<br>  Code:<br>  <pre><code class="language-python"># PyTorch temperature scaling (production-ready small module)<br>  import torch<br>  class Temperature(torch.nn.Module):<br>      def __init__(self):<br>          super().__init__(); self.T = torch.nn.Parameter(torch.ones(1))<br>      def forward(self, logits):<br>          return logits / self.T<br>  # Fit T on validation NLL; freeze base model weights.</code></pre><br>  Source: many GitHub implementations (search "temperature scaling pytorch").<br><br>- Case: Production generation (OpenAI API, Hugging Face Transformers)<br>  Code:<br>  <pre><code class="language-python"># HF Transformers sampling<br>  outputs = model.generate(input_ids, do_sample=True, temperature=0.8)</code></pre><br>  Where used: OpenAI/GPT-like services expose <code>temperature</code> to control diversity.<br><br>Production patterns: calibrate on a held-out validation set, ship T as config so rolling back is easy, monitor ECE and downstream accuracy, consider per-class or group-wise temperature for imbalance, and avoid re-training model weights when calibrating.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
