@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Softmax Temperature & Temperature Scaling",
+      "date": "2026-03-25",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-25-softmax-temperature-scaling.html",
+      "excerpt": "Softmax 온도(temperature)는 분포의 '샤프함'을 조절하고, 온도 스케일링(temperature scaling)은 예측 확률을 보정하는 간단하면서 실무에서 널리 쓰이는 기법입니다."
+    },
+    {
       "title": "VideoSeek: Long-Horizon Video Agent with Tool-Guided Seeking",
       "date": "2026-03-24",
       "category": "papers",
