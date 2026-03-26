@@ -419,6 +419,13 @@
       "category": "cs-fundamentals",
       "url": "posts/cs-fundamentals/2511/2025-11-10-ner.html",
       "excerpt": "NER은 자연어 처리에서 텍스트 내에서 이름, 장소, 날짜와 같은 고유 명사를 인식하는 기술"
+    },
+    {
+      "title": "BLEU & ROUGE — Practical NLG Evaluation",
+      "date": "2025-11-10",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-27-bleu / rouge (automatic evaluation metrics for nlg).html",
+      "excerpt": "BLEU와 ROUGE는 기계번역·요약 등 NLG(자연어생성) 시스템의 자동 평가 지표로, 빠른 반복 개발과 A/B 비교에 실무적으로 중요합니다."
     }
   ]
 }
