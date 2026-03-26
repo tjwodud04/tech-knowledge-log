@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>BLEU & ROUGE — Practical NLG Evaluation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BLEU와 ROUGE는 기계번역·요약 등 NLG(자연어생성) 시스템의 자동 평가 지표로, 빠른 반복 개발과 A/B 비교에 실무적으로 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>BLEU & ROUGE — Practical NLG Evaluation</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-27</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BLEU와 ROUGE는 기계번역·요약 등 NLG(자연어생성) 시스템의 자동 평가 지표로, 빠른 반복 개발과 A/B 비교에 실무적으로 중요합니다.</p>
+        <p>작동 원리: BLEU는 n-그램 정밀도(precision)를 기반으로 여러 참조(reference) 문장과의 n-그램 겹침 비율을 계산하고, 짧은 출력 페널티(Brevity Penalty)를 적용합니다. 일반적으로 BLEU-4(1~4그램)와 로그 평균을 사용합니다. ROUGE는 요약 평가에 특화되어 ROUGE-N(리콜 기반 n-그램), ROUGE-L(최장 공통 부분열, LCS) 등을 제공합니다. ROUGE는 보통 참조 대비 얼마나 많이 캡처했는지(리콜)에 중점을 둡니다.<br>실무 포인트: 두 지표는 코퍼스 수준(corpus-level) 점수가 더 안정적이며 문장 수준(sentence-level)은 노이즈가 큽니다. 토크나이제이션, 소문자화, 정규화(숫자/구두점 처리), 평활(smoothing) 방식에 따라 점수가 크게 달라지므로 sacreBLEU처럼 서명(sacred signature)을 남겨 재현성을 확보하세요. 또한 최신 연구·제품에서는 자동지표와 사람평가를 함께 사용합니다(예: 요약 품질, 상호참조 일관성 판단 등).</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Fairseq / Facebook AI Research에서 모델 개발 시 BLEU를 사용해 기계번역 모델을 빠르게 비교하고, Hugging Face와 Pegasus 논문에서 ROUGE를 요약 성능 평가에 사용<br>- 코드:<br><pre><code class="language-bash"># sacrebleu 설치 및 corpus-level BLEU (sacrebleu 2.3.1 호환 사용 예)<br>pip install sacrebleu==2.3.1<br>sacrebleu reference.txt -i hypothesis.txt -m bleu -b --tokenize=13<br># Hugging Face evaluate로 ROUGE<br>pip install evaluate<br>python - &lt;&lt;PY<br>import evaluate<br>rouge = evaluate.load('rouge')<br>refs = ['The cat is on the mat.']<br>hyps = ['Cat sits on mat.']<br>print(rouge.compute(predictions=hyps, references=refs))<br>PY</code></pre><br>- 실무 패턴:<br>  - 항상 동일한 토크나이저/평활 설정을 기록(sacrebleu signature)<br>  - 코퍼스 단위 평가 우선, 문장단위는 보조 지표로 사용<br>  - 자동 지표 한계(문체·사실성 판단 부족)를 보완하기 위해 소규모 인간평가를 병행<br>참고: Pegasus(2020)·BART(2019) 요약 논문과 Fairseq의 MT 파이프라인은 각각 ROUGE/BLEU를 표준 벤치마크로 사용합니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>BLEU and ROUGE are automatic metrics for NLG (MT, summarization) used for fast iteration, model selection, and A/B tests in production and research.</p>
+        <p>How it works: BLEU computes precision of overlapping n-grams between hypothesis and one-or-more references, applies a brevity penalty to penalize overly short outputs, and aggregates via geometric/log averages (BLEU-4 is common). ROUGE focuses on recall: ROUGE-N counts n-gram overlaps by recall, and ROUGE-L uses longest common subsequence (LCS) to assess fluency-preserving overlaps. Both operate at corpus-level for stability; sentence-level scores are noisy.<br>Practical details: Tokenization, case-normalization, punctuation handling, and smoothing methods change scores substantially. Use standardized tooling (sacrebleu for BLEU, Hugging Face evaluate or rouge-score for ROUGE) to ensure reproducibility. In production, teams combine automatic metrics with targeted human evaluation because BLEU/ROUGE poorly capture factuality, coherence, and style.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Used in FAIR/Fairseq for MT (BLEU) and in PEGASUS/BART papers for summarization (ROUGE)<br>- Code:<br><pre><code class="language-bash"># sacrebleu (example, compatible with sacrebleu v2.3.1)<br>pip install sacrebleu==2.3.1<br>sacrebleu ref.txt -i hyp.txt -m bleu -b --tokenize=13<br><br># Hugging Face evaluate for ROUGE<br>pip install evaluate<br>python - &lt;&lt;PY<br>import evaluate<br>rouge = evaluate.load('rouge')<br>refs = ['The quick brown fox jumps over the lazy dog.']<br>hyps = ['Quick brown fox jumped over lazy dog.']<br>print(rouge.compute(predictions=hyps, references=refs))<br>PY</code></pre><br>- Production patterns:<br>  - Record metric config (tokenizer, smoothing, version) — sacreBLEU signatures are widely used in papers and pipelines (Fairseq, OpenNMT examples).<br>  - Use corpus-level BLEU/ROUGE for model selection; validate with human annotation for quality aspects not covered by n-gram overlap (faithfulness, hallucination).<br>References: BLEU original paper (Papineni et al., 2002), ROUGE (Lin, 2004); sacreBLEU and Hugging Face evaluate are common implementations in industry/research.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
