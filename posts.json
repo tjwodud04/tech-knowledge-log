@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "NLG Evaluation: BLEU, ROUGE, BERTScore (practical guide)",
+      "date": "2026-03-30",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2603/2026-03-30-nlg-evaluation-metrics-bleu-rouge-bertscore.html",
+      "excerpt": "BLEU/ROUGE/BERTScore는 기계번역·요약·생성모델의 자동 평가 핵심 도구로, 프로덕션 모델 검증·모니터링에서 사람 검토를 보완합니다."
+    },
+    {
       "title": "Softmax Temperature & Temperature Scaling",
       "date": "2026-03-25",
       "category": "cs-fundamentals",
