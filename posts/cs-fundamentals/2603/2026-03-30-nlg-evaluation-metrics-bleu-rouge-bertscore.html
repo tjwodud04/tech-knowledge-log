@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>NLG Evaluation: BLEU, ROUGE, BERTScore (practical guide)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BLEU/ROUGE/BERTScore는 기계번역·요약·생성모델의 자동 평가 핵심 도구로, 프로덕션 모델 검증·모니터링에서 사람 검토를 보완합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>NLG Evaluation: BLEU, ROUGE, BERTScore (practical guide)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-03-30</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BLEU/ROUGE/BERTScore는 기계번역·요약·생성모델의 자동 평가 핵심 도구로, 프로덕션 모델 검증·모니터링에서 사람 검토를 보완합니다.</p>
+        <p>작동 원리: BLEU는 n-그램 정밀도와 길이 페널티(BP)를 결합해 시스템 출력과 참조간 n-그램 중복을 측정합니다(문서 수준 코퍼스-스코어가 안정적). ROUGE는 특히 요약에서 중복된 n-그램(ROUGE-N), 롱레스트 공통 부분(ROUGE-L)을 통해 정보 회수(Recall) 중심 지표를 제공합니다. BERTScore는 사전학습된 Transformer(예: BERT) 임베딩을 사용해 토큰간 의미적 유사도를 매칭하여 의미적 일치를 평가하므로 동의어·재표현에 강합니다.<br>실무 포인트: 일관된 토크나이저/소문자화, 참조 전처리, corpus-vs-sentence 집계 선택이 결과에 큰 영향을 줍니다. 프로덕션에서는 SacreBLEU(버전 표기 포함)로 재현 가능한 BLEU, google/rouge_score 혹은 pyrouge로 요약 평가, bert-score 패키지로 의미기반 점수를 병행해 사용합니다. 통계적 유의성은 paired bootstrap 또는 chrF와 함께 확인합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Hugging Face + Transformers 실험/CI<br>  코드:<br>  """<br>  # sacrebleu (reproducible)<br>  pip install sacrebleu==2.3.1<br>  python -c "import sacrebleu; refs=[['The cat.']]; hyps=['A cat.']; print(sacrebleu.corpus_bleu(hyps, refs))"<br><br>  # rouge (google-rouge)<br>  pip install rouge-score==0.1.2<br>  python -c "from rouge_score import rouge_scorer; s=rouge_scorer.RougeScorer(['rouge1','rougeL'], use_stemmer=True); print(s.score('A cat sleeps','The cat is sleeping'))"<br><br>  # bert-score<br>  pip install bert-score==0.3.11 transformers==4.30.0<br>  python -c "from bert_score import score; P=['A cat.']; R=['The cat.']; print(score(P,R,lang='en'))"<br>  """<br>  사용처/버전: Hugging Face 예제 실험/모니터링 파이프라인(Transformers 4.x, Evaluate/SacreBLEU 연동). 연구: BLEU (Papineni et al., 2002), ROUGE (Lin, 2004), BERTScore (Zhang et al., 2020).<br><br>실무 패턴:<br>- CI에 sacrebleu 서명 저장 및 기준화(validation set)<br>- 여러 메트릭 사용(정밀도/재현율/의미적 유사성) 및 부트스트랩 신뢰구간 보고<br>- 언어별 토크나이저 고정(특히 중국어/한국어)와 참조 버전 관리</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>BLEU, ROUGE, and BERTScore are standard automatic metrics for MT, summarization, and NLG; they are used in research and production monitoring to complement human evaluation.</p>
+        <p>How it works: BLEU computes corpus-level n-gram precision with a brevity penalty to penalize overly short outputs. ROUGE focuses on recall-like overlap measures—ROUGE-N for n-gram overlap and ROUGE-L for longest common subsequence—so it's favored in summarization. BERTScore maps tokens to contextual embeddings from pretrained Transformers (BERT/RoBERTa) and matches token embeddings with cosine similarity, yielding precision/recall/F1 that captures semantic similarity beyond surface n-grams.<br>Practical details: use reproducible implementations (sacrebleu for BLEU to lock tokenization and signatures), google/rouge_score or pyrouge for ROUGE, and the bert-score package for embedding-based scoring. Decide corpus vs sentence aggregation; report confidence intervals with paired bootstrap; maintain consistent tokenization and reference preprocessing in CI to avoid metric drift. BERTScore is more robust for paraphrase-heavy tasks but is costlier (GPU/embedding), so teams often run it on validation subsets.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Hugging Face / Transformer model eval (production experiments)<br>  Code:<br>  """<br>  # sacrebleu (reproducible)<br>  pip install sacrebleu==2.3.1<br>  python -c "import sacrebleu; refs=[[ 'The cat.']]; hyps=['A cat.']; print(sacrebleu.corpus_bleu(hyps, refs))"<br><br>  # rouge (google's rouge_score)<br>  pip install rouge-score==0.1.2<br>  python -c "from rouge_score import rouge_scorer; s=rouge_scorer.RougeScorer(['rouge1','rougeL'], use_stemmer=True); print(s.score('A cat sleeps','The cat is sleeping'))"<br><br>  # bert-score<br>  pip install bert-score==0.3.11 transformers==4.30.0<br>  python -c "from bert_score import score; P=['A cat.']; R=['The cat.']; print(score(P,R,lang='en'))"<br>  """<br>  Where used / references: BLEU (Papineni et al., 2002) widely used at Google/Microsoft for MT benchmarking; ROUGE (Lin, 2004) used in BART/T5 summarization papers and production pipelines; BERTScore (Zhang et al., 2020) used in academic evaluations and adopted in research-heavy teams for semantic validation. Production patterns: store metric signatures in CI (sacrebleu signature), run cheap n-gram metrics every commit and embedding-based metrics nightly, and compute paired-bootstrap significance for model comparisons.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
