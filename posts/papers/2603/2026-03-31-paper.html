@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Learning to Commit: Generating Organic Pull Requests via Online Repository Memory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learning to Commit: Generating Organic Pull Requests via Online Repository Memory">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Learning to Commit: Generating Organic Pull Requests via Online Repository Memory</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Mo Li, L. H. Xu, Qitai Tan, Ting Cao, Yunxin Liu</div>
+        <div><strong>발행일 / Published:</strong> 2026-03-27</div>
+        <div><strong>Arxiv ID:</strong> 2603.26664</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대형 언어 모델 기반 코딩 에이전트는 통제된 벤치마크에서 인상적인 성과를 내지만, 실제 유지보수자가 거부하는 풀 리퀘스트를 반복적으로 생성한다. 그 근본 원인은 기능적 오류가 아니라 유기성의 부족이다. 생성된 코드는 프로젝트 특유의 규약을 무시하고, 내부 API가 이미 제공하는 기능을 중복하며, 수년간의 개발 과정에서 축적된 암묵적인 아키텍처 제약을 위반한다. 단순히 에이전트에 최신 저장소 스냅샷을 보여주는 것만으로는 부족하다. 스냅샷은 코드베이스의 최종 상태만을 드러낼 뿐, 그 상태에 도달한 저장소 고유의 변경 패턴은 드러내지 않는다. 우리는 온라인 저장소 메모리를 통해 이 간극을 메우는 프레임워크인 커밋 학습을 소개한다. 엄격한 시간순 분할이 적용된 저장소를 주어지면, 에이전트는 이전 커밋들에 대해 지도 대조적 성찰을 수행한다. 즉 과거의 각 이슈를 맹목적으로 해결하려 시도하고, 자신의 예측을 정답 변경사항과 비교한 뒤 그 간극을 코딩 스타일, 내부 API 사용, 아키텍처적 불변성을 포착하는 재사용 가능한 패턴들의 지속적으로 확장되는 집합으로 증류한다. 새로운 풀 리퀘스트 설명이 도착하면 에이전트는 이 누적된 기술들을 조건으로 하여 생성하며, 일반적인 사전학습 편향이 아니라 프로젝트 자체의 진화에 뿌리를 둔 변경을 만든다. 평가는 스킬 구축 단계에서 볼 수 없었던 진정한 미래의 병합된 풀 리퀘스트를 대상으로 수행되며, 기능적 정합성, 코드 스타일 일관성, 내부 API 재사용률, 수정된 영역의 타당성 등 여러 차원을 포괄한다. 풍부한 커밋 기록을 가진 전문가 유지관리 저장소에 대한 실험은 온라인 저장소 메모리가 검증용으로 분리된 미래 작업들에 대한 유기성 점수를 효과적으로 향상시킨다는 것을 보여준다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Large language model (LLM)-based coding agents achieve impressive results on controlled benchmarks yet routinely produce pull requests that real maintainers reject. The root cause is not functional incorrectness but a lack of organicity: generated code ignores project-specific conventions, duplicates functionality already provided by internal APIs, and violates implicit architectural constraints accumulated over years of development. Simply exposing an agent to the latest repository snapshot is not enough: the snapshot reveals the final state of the codebase, but not the repository-specific change patterns by which that state was reached. We introduce Learning to Commit, a framework that closes this gap through Online Repository Memory. Given a repository with a strict chronological split, the agent performs supervised contrastive reflection on earlier commits: it blindly attempts to resolve each historical issue, compares its prediction against the oracle diff, and distils the gap into a continuously growing set of skills-reusable patterns capturing coding style, internal API usage, and architectural invariants. When a new PR description arrives, the agent conditions its generation on these accumulated skills, producing changes grounded in the project's own evolution rather than generic pretraining priors. Evaluation is conducted on genuinely future, merged pull requests that could not have been seen during the skill-building phase, and spans multiple dimensions including functional correctness, code-style consistency, internal API reuse rate, and modified-region plausibility. Experiments on an expert-maintained repository with rich commit history show that Online Repository Memory effectively improves organicity scores on held-out future tasks.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2603.26664" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2603.26664.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
