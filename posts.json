@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Learning to Commit: Generating Organic Pull Requests via Online Repository Memory",
+      "date": "2026-03-31",
+      "category": "papers",
+      "url": "posts/papers/2603/2026-03-31-paper.html",
+      "excerpt": "Learning to Commit: Generating Organic Pull Requests via Online Repository Memory"
+    },
+    {
       "title": "NLG Evaluation: BLEU, ROUGE, BERTScore (practical guide)",
       "date": "2026-03-30",
       "category": "cs-fundamentals",
