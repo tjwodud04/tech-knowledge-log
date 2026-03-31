@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Model Quantization — Practical Guide for Production",
+      "date": "2026-04-01",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-01-model-quantization.html",
+      "excerpt": "모델 양자화는 대형 신경망의 수치 정밀도를 줄여 메모리·지연·전력 소비를 절감하는 기법으로, 모바일·서버·온디바이스 추론에서 비용과 대기시간을 크게 개선합니다."
+    },
+    {
       "title": "Learning to Commit: Generating Organic Pull Requests via Online Repository Memory",
       "date": "2026-03-31",
       "category": "papers",
