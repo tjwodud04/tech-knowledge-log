@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Model Quantization — Practical Guide for Production</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="모델 양자화는 대형 신경망의 수치 정밀도를 줄여 메모리·지연·전력 소비를 절감하는 기법으로, 모바일·서버·온디바이스 추론에서 비용과 대기시간을 크게 개선합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Model Quantization — Practical Guide for Production</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-01</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>모델 양자화는 대형 신경망의 수치 정밀도를 줄여 메모리·지연·전력 소비를 절감하는 기법으로, 모바일·서버·온디바이스 추론에서 비용과 대기시간을 크게 개선합니다.</p>
+        <p>작동 원리: 양자화는 부동소수점(예: FP32)을 정수(INT8/INT4)로 매핑하는 과정입니다. 기본 방법은 균일(affine/symmetric) 양자화로, 값 범위를 scale과 zero-point로 변환합니다(quantize = round(x/scale)+zp). 중요한 선택지는 per-tensor vs per-channel 가중치 양자화, 대칭 vs 비대칭, 그리고 정수-전용 연산을 지원할지 여부입니다.<br>실전 흐름: (1) Post-Training Quantization(PTQ) — 사후 변환으로 빠르지만 정확도 손실 가능, min-max 또는 KL(엔트로피) 기반 캘리브레이션을 사용. (2) Quantization-Aware Training(QAT) — 학습 중 fake-quant 연산으로 정밀도 보존. (3) Advanced: GPTQ/Nguyen-style 후처리(4-bit/8-bit)로 대형 LLM을 실사용 가능한 메모리로 압축.<br>알고리즘/툴: TensorFlow Lite, PyTorch quantization (torch.quantization), ONNX Runtime의 quantize_dynamic/quantize_static, NVIDIA TensorRT의 INT8 캘리브레이션, 그리고 GPTQ(Frantar et al., 2023) 등이 산업 표준입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google/TensorFlow Lite (모바일) — TF Lite PTQ/QAT<br>코드:<br><pre><code class="language-python"># TF Lite PTQ 예시 (TF 2.10+)<br>converter = tf.lite.TFLiteConverter.from_saved_model('saved_model')<br>converter.optimizations = [tf.lite.Optimize.DEFAULT]<br>converter.representative_dataset = rep_data_gen<br>tflite_model = converter.convert()</code></pre><br>실무 패턴: 대표 입력(representative_dataset)으로 캘리브레이션. INT8은 하드웨어 호환성(ARM NN, Android NNAPI) 확인 필수.<br><br>- 사례: ONNX Runtime / Microsoft Azure (서버) — onnxruntime.quantization<br>코드:<br><pre><code class="language-python">from onnxruntime.quantization import quantize_dynamic, QuantType<br>quantize_dynamic('model.onnx','model.quant.onnx', weight_type=QuantType.QInt8)</code></pre><br>실무 패턴: 서버는 per-channel 양자화와 layer fusion(Conv+BN)를 적용해 추론 성능 극대화.<br><br>- 사례: NVIDIA TensorRT (자동차/데이터센터)<br>명령:<br><pre><code class="language-bash">trtexec --onnx=model.onnx --saveEngine=model.trt --int8 --calib=calib.cache</code></pre><br>실무 패턴: INT8 캘리브레이션 세트는 실제 분포와 일치시켜야 하며 드롭인 성능 검증 필요.<br><br>- 사례: Llama.cpp / GPTQ (로컬 LLM 실행)<br>출처: GPTQ 논문(Frantar et al., 2023) 및 Llama.cpp 구현에서 4-bit/8-bit 양자화로 수십GB 모델을 수GB로 축소해 로컬 추론 허용.<br>코드(예): community GPTQ 툴 사용하여 모델 양자화 후 ggml 로드.<br><br>Best practices:<br>- 먼저 PTQ로 비용·성능 확인, 필요 시 QAT로 복원<br>- per-channel로 가중치 양자화, 입력은 per-tensor 권장<br>- 하드웨어(ARM, x86, GPU, NPU)별 정밀도/연산형태(스토어/명령)를 검증</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Model quantization reduces numeric precision (e.g., FP32 → INT8/INT4) to cut memory, latency, and power, making large models feasible on mobile, edge, and cost-sensitive server deployments.</p>
+        <p>How it works: Quantization maps floating-point values to integers using scale and zero-point (affine) or symmetric schemes (q = round(x/scale)+zp). Key choices: per-tensor vs per-channel weight quantization, symmetric vs asymmetric, and integer-only inference. PTQ (post-training quantization) uses calibration data (min-max, KL/entropy) to set ranges quickly; QAT (quantization-aware training) inserts fake-quant ops during training to recover accuracy.<br>Algorithms/tools: Common implementations include TensorFlow Lite (PTQ/QAT), PyTorch quantization toolkit (static/dynamic/QAT), ONNX Runtime quantize_dynamic/quantize_static, NVIDIA TensorRT INT8 with calibration, and recent GPTQ (Frantar et al., 2023) methods for 4-bit/8-bit large-model compression. Production trade-offs revolve around accuracy vs latency/memory and hardware support (ARM NN, NNAPI, GPU Tensor Cores, NPUs).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Google / TensorFlow Lite (mobile)<br>Code:<br><pre><code class="language-python"># TF Lite PTQ (TF &gt;=2.8)<br>converter = tf.lite.TFLiteConverter.from_saved_model('saved_model')<br>converter.optimizations = [tf.lite.Optimize.DEFAULT]<br>converter.representative_dataset = rep_data_gen<br>tflite_model = converter.convert()</code></pre><br>Production patterns: representative_dataset for calibration; validate INT8 on target device (Android NNAPI, Mali, Apple NPU).<br><br>- Case: Microsoft Azure / ONNX Runtime (server)<br>Code:<br><pre><code class="language-python">from onnxruntime.quantization import quantize_dynamic, QuantType<br>quantize_dynamic('model.onnx','model.quant.onnx', weight_type=QuantType.QInt8)</code></pre><br>Production patterns: use per-channel weights, fuse Conv+BN before quantization, benchmark throughput/latency.<br><br>- Case: NVIDIA TensorRT (data center/embedded)<br>Command:<br><pre><code class="language-bash">trtexec --onnx=model.onnx --saveEngine=model.trt --int8 --calib=calib.cache</code></pre><br>Production patterns: build a representative calibration dataset; measure end-to-end accuracy and latency.<br><br>- Case: Llama.cpp & GPTQ (local LLM inference)<br>Source: GPTQ paper (Frantar et al., 2023) and community tools used to quantize LLaMA-style models to 4/5-bit for on-device use. Many deployments use ggml/llama.cpp to run quantized models locally.<br><br>References/versions: TensorFlow Lite (TF 2.8+), PyTorch quantization (1.10+), ONNX Runtime quantization APIs (1.15+), TensorRT (8.x), GPTQ community tools. Practical flow: start with PTQ → validate → if accuracy drops, use QAT or GPTQ-style methods.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
