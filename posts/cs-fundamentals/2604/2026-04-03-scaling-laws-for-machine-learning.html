@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Scaling Laws for Machine Learning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스케일링 법칙은 모델, 데이터, 계산량 사이의 성능 관계를 정량화해 대규모 시스템 설계 및 비용 최적화에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Scaling Laws for Machine Learning</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-03</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스케일링 법칙은 모델, 데이터, 계산량 사이의 성능 관계를 정량화해 대규모 시스템 설계 및 비용 최적화에 필수적입니다.</p>
+        <p>핵심: Kaplan et al.(2020)과 Hoffmann et al.(Chinchilla, 2022) 연구는 손실이 모델 파라미터 수와 학습 토큰 수의 거듭 감소 법칙을 따른다고 보고, 주어진 연산량(Compute)에 대해 최적의 모델/데이터 분배 규칙을 제시합니다. 실무에서 이는 '작은 모델 + 더 많은 데이터' 혹은 '큰 모델 + 적은 데이터' 중 비용-효율적 선택을 정하는 근거가 됩니다.<br><br>작동 방식: 경험적 스케일링 법칙은 L(N,D) ≈ A N^{-α} + B D^{-β} 형태로 근사되며, Chinchilla는 토큰 수 ≈ 20 × 파라미터(토큰/파라미터 약 20)를 권합니다. 이를 통해 주어진 FLOPs(또는 예산)에 대해 최적 파라미터 수 N*와 데이터량 D*를 계산합니다. 산업적 적용은 모델 병렬화(ZeRO, Megatron), 데이터 샤딩, 체크포인팅/스냅샷 빈도 조정과 결합해 대규모 학습 비용을 낮춥니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Used in OpenAI/EleutherAI/Meta research and communities<br>코드:<br># 간단한 계산 (Python)<br>model_params = 7e10  # 70B<br>tokens_needed = model_params * 20<br>print(int(tokens_needed))  # 1.4e12 tokens (Chinchilla rule)<br><br># Hugging Face + DeepSpeed 실행 예시 (PyTorch, Transformers v4.x, DeepSpeed 0.9+)<br># deepspeed --num_gpus=8 train.py --model_name_or_path mymodel --deepspeed ds_config.json<br><br># ds_config.json 예시 (요소)<br>{"zero_optimization": {"stage": 2}, "bf16": true, "train_batch_size": 2048}<br><br>실무 패턴:<br>- 사전학습: 충분한 토큰 확보(토큰/파라미터 규칙) 후 fine-tune<br>- 비용-효율성: ZeRO/OOM 오프로드(DeepSpeed), 모델 병렬화(Megatron-LM)<br>- 모니터링: 학습 손실 스케일링 추세로 언더/오버샘플링 진단<br>참고: Kaplan et al. 2020, Hoffmann et al. 2022 (Chinchilla), Megatron-LM, DeepSpeed, GPT-NeoX</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Scaling laws quantify how model size, dataset size, and compute affect performance, guiding cost-effective design of large ML systems.</p>
+        <p>Core: Kaplan et al. (2020) and Hoffmann et al. (Chinchilla, 2022) showed empirical power-law relations between loss, parameter count, and training tokens. In production this directs whether to invest budget into bigger models or more data and predicts diminishing returns.<br><br>How it works: The empirical form L(N,D) ≈ A N^{-α} + B D^{-β} is fit to pretraining runs. Chinchilla recommends roughly 20 training tokens per parameter for compute-optimal LM pretraining (tokens ≈ 20 × N). Practically teams compute N* and D* for fixed FLOPs and implement with model/data parallelism, ZeRO optimizer (state sharding), mixed precision, and dataset streaming to meet those targets while controlling memory and I/O.<br><br>Real-world Example:<br>Case: Used in OpenAI/EleutherAI/Meta research and production-scale training<br>Code:<br># Chinchilla token rule (Python)<br>N = 70_000_000_000<br>tokens = N * 20<br>print(tokens)  # 1.4e12 tokens<br><br># Launch pattern (Hugging Face Transformers v4.x + DeepSpeed 0.9+, PyTorch 1.12+)<br># deepspeed --num_gpus=64 train.py --model_name_or_path=my.model --deepspeed ds_config.json<br><br>ds_config.json snippet:<br>{"zero_optimization":{"stage":3}, "bf16":true, "train_batch_size":4096}<br><br>Production patterns: precompute optimal (N,D) via published scaling laws, use ZeRO/Megatron for memory, stream huge corpora (TFRecord/DS), checkpoint frequency trade-offs to balance restart time vs. storage. References: Kaplan et al. 2020; Hoffmann et al. 2022 (Chinchilla); Megatron-LM, DeepSpeed, GPT-NeoX.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div></div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
