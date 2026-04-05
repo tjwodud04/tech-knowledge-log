@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Room Impulse Response (RIR) & Reverberation Modeling",
+      "date": "2026-04-06",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-06-room-impulse-response-and-reverberation-modeling.html",
+      "excerpt": "룸 임펄스 응답(RIR)은 공간이 소리를 어떻게 반사·감쇠시키는지를 나타내며, 음성인식·음향 신호처리·가상오디오에서 필수적입니다. 실계 시스템에서는 데이터 증강, 빔포밍/역잔향 처리, 가상 오디오 렌더링에 직접 사용됩니다."
+    },
+    {
       "title": "Scaling Laws for Machine Learning",
       "date": "2026-04-03",
       "category": "cs-fundamentals",
