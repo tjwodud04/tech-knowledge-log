@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Room Impulse Response (RIR) & Reverberation Modeling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="룸 임펄스 응답(RIR)은 공간이 소리를 어떻게 반사·감쇠시키는지를 나타내며, 음성인식·음향 신호처리·가상오디오에서 필수적입니다. 실계 시스템에서는 데이터 증강, 빔포밍/역잔향 처리, 가상 오디오 렌더링에 직접 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Room Impulse Response (RIR) & Reverberation Modeling</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-06</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>룸 임펄스 응답(RIR)은 공간이 소리를 어떻게 반사·감쇠시키는지를 나타내며, 음성인식·음향 신호처리·가상오디오에서 필수적입니다. 실계 시스템에서는 데이터 증강, 빔포밍/역잔향 처리, 가상 오디오 렌더링에 직접 사용됩니다.</p>
+        <p>작동 원리: RIR은 LTI(선형 시불변) 시스템의 임펄스 응답으로 모델링되어, 깨끗한 신호를 시간 영역에서 컨볼루션하면 해당 공간에서 녹음된 소리를 시뮬레이션합니다. 기술적으로는 직접음·초기반사·잔향(늦은 반사)으로 분해하고 RT60(잔향시간)과 주파수 의존 감쇠를 파라미터화합니다. 구현 알고리즘: 이미지 소스법(Allen & Berkley, 1979)은 직육면체 룸의 반사 경로를 기하학적으로 합성하고, Habets의 통계적 RIR 생성기는 난수화된 흡음·지연을 사용해 대규모 데이터 증강에 적합합니다. GPU 가속 gpuRIR는 수천/수만 개 RIR을 빠르게 생성해 대규모 ASR 학습 파이프라인에 활용됩니다.<br><br>실무적 포인트: 초기 반사는 음질·공간성 판단에 중요하고, 늦은 잔향은 잡음으로 작용해 ASR 성능을 저하시킵니다. 그래서 실전 시스템은 실측 RIR(예: REVERB/CHiME 데이터)과 합성 RIR(이미지 소스·확률 모델)을 혼합해 학습·검증합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Kaldi 리포지토리와 ASR 파이프라인에서 데이터 증강<br>  코드:<br>  <pre><code class="language-bash"># Kaldi 내장 스크립트로 데이터 리버브(예: steps/data/reverberate_data_dir.py)<br>  steps/data/reverberate_data_dir.py --rir-set-params 'room_small,0.5,0.3' data/train data/train_reverb</code></pre><br>  사용처: Kaldi(음성 인식 학습) 레시피들에서 CHiME/REVERB 스타일 시뮬레이션에 널리 사용<br><br>- 사례: pyroomacoustics (오픈소스)로 이미지 소스법 시뮬레이션<br>  코드:<br>  <pre><code class="language-python">import pyroomacoustics as pra<br>  room = pra.ShoeBox([6,5,3], fs=16000, max_order=3, absorption=0.3)<br>  room.add_source([2,3,1.5], signal=audio)<br>  room.add_microphone_array(pra.MicrophoneArray([[4],[2],[1.5]], room.fs))<br>  room.compute_rir()<br>  room.simulate()</code></pre><br>  사용처: 연구/프로토타입(음원 분리·음장 렌더링), pyroomacoustics v0.7+ 문서 참조<br><br>- 사례: 대규모 합성은 gpuRIR(깃허브)나 Habets의 rir_generator를 사용해 AWS/온프레미스에서 병렬 생성<br>  실무 패턴: 실제·합성 RIR 혼합, RT60 분포 매칭, 마이크 배열/소스 위치 랜덤화, 노이즈와 함께 복합 증강</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A Room Impulse Response (RIR) models how a space filters and delays sound; it's core for far-field ASR, dereverberation, beamforming, and virtual acoustics. Production systems use RIRs to simulate realistic data and test acoustic algorithms.</p>
+        <p>How it works: Treat the room as an LTI system—convolving a dry signal with an RIR produces the reverberant recording. RIRs decompose into direct sound, early reflections (important for spatial cues), and late reverberation (diffuse decay characterized by RT60). Common algorithms: the image-source method (Allen & Berkley, 1979) computes reflection paths analytically for rectangular rooms; statistical approaches (Habets 2006) model late reverberation stochastically; GPU-accelerated generators (gpuRIR) produce millions of RIRs for large-scale model training.<br><br>Practical notes: Systems mix real measured RIRs (REVERB, CHiME corpora) with synthetic ones for robust ASR. Early-reflection modeling benefits beamformers and dereverb front-ends, while late reverberation modeling matters for augmentation diversity and generalization.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Kaldi ASR augmentation (used in many production/academic pipelines)<br>  Code:<br>  <pre><code class="language-bash"># Kaldi script to reverberate a data directory<br>  steps/data/reverberate_data_dir.py --rir-set-params 'room_small,0.5,0.3' data/train data/train_reverb</code></pre><br>  Where: Kaldi recipes for CHiME/REVERB-style training (open-source, widely reused)<br><br>- Case: pyroomacoustics for image-source RIR synthesis<br>  Code:<br>  <pre><code class="language-python">import pyroomacoustics as pra<br>  room = pra.ShoeBox([6,5,3], fs=16000, max_order=3, absorption=0.3)<br>  room.add_source([2,3,1.5], signal=audio)<br>  room.add_microphone_array(pra.MicrophoneArray([[4],[2],[1.5]], room.fs))<br>  room.compute_rir(); room.simulate()</code></pre><br>  Where: pyroomacoustics (v0.7+), used in research for source separation, beamforming, virtual audio<br><br>- Case: Large-scale training uses gpuRIR or Habets' rir_generator (research repos) to synthesize thousands of RIRs on GPU/cluster<br>  Production patterns: mix measured+synthetic RIRs, randomize RT60/microphone geometry, pair RIR augmentation with realistic noise and microphone response for best transfer to production systems.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
