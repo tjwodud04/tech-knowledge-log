@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Coupled Control, Structured Memory, and Verifiable Action in Agentic AI (SCRAT -- Stochastic Control with Retrieval and Auditable Trajectories): A Comparative Perspective from Squirrel Locomotion and Scatter-Hoarding",
+      "date": "2026-04-07",
+      "category": "papers",
+      "url": "posts/papers/2604/2026-04-07-paper.html",
+      "excerpt": "Coupled Control, Structured Memory, and Verifiable Action in Agentic AI (SCRAT -- Stochastic Control with Retrieval and Auditable Trajectories): A Com"
+    },
+    {
       "title": "Room Impulse Response (RIR) & Reverberation Modeling",
       "date": "2026-04-06",
       "category": "cs-fundamentals",
