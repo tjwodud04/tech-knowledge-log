@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "F0 Pitch Estimation: YIN / Cepstral / Autocorrelation Methods",
+      "date": "2026-04-08",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-08-f0-pitch-estimation-and-autocorrelation.html",
+      "excerpt": "F0(기본 주파수) 추정은 음성·음악 분석과 TTS/ASR/음성 코딩에서 핵심이다. YIN, 자명표(cepstrum), 자기상관(autocorrelation)은 잡음·배음 환경에서 신뢰 가능한 피치 추출에 널리 쓰인다."
+    },
+    {
       "title": "Coupled Control, Structured Memory, and Verifiable Action in Agentic AI (SCRAT -- Stochastic Control with Retrieval and Auditable Trajectories): A Comparative Perspective from Squirrel Locomotion and Scatter-Hoarding",
       "date": "2026-04-07",
       "category": "papers",
