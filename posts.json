@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Named Entity Recognition (NER)",
+      "date": "2026-04-10",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-10-named-entity-recognition.html",
+      "excerpt": "NER은 텍스트에서 사람, 장소, 조직, 날짜 등 실세계 개체를 자동으로 인식·분류하는 기술로, 검색, 지식그래프, 문서 분류 등 프로덕션 시스템에서 핵심 기능입니다."
+    },
+    {
       "title": "F0 Pitch Estimation: YIN / Cepstral / Autocorrelation Methods",
       "date": "2026-04-08",
       "category": "cs-fundamentals",
