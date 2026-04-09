@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Named Entity Recognition (NER)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NER은 텍스트에서 사람, 장소, 조직, 날짜 등 실세계 개체를 자동으로 인식·분류하는 기술로, 검색, 지식그래프, 문서 분류 등 프로덕션 시스템에서 핵심 기능입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Named Entity Recognition (NER)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-10</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>NER은 텍스트에서 사람, 장소, 조직, 날짜 등 실세계 개체를 자동으로 인식·분류하는 기술로, 검색, 지식그래프, 문서 분류 등 프로덕션 시스템에서 핵심 기능입니다.</p>
+        <p>작동 원리: NER은 시퀀스 라벨링 문제로 BIO/BILOU 같은 태깅 규약을 사용합니다. 전통적으로 HMM/CRF(예: Lafferty의 CRF) 기반 특징 엔지니어링이 쓰였고, 연구·생산은 BiLSTM-CRF(Lample et al., 2016)에서 Transformer(BERT, Devlin et al., 2018)로 이동했습니다. 실제 시스템에서는 서브워드 토크나이저(BPE/WordPiece)로 인한 스팬 정합(spans alignment) 문제를 해결해야 합니다.<br>운영 관점: 프로덕션에선 모델 압축(distillation), 온디맨드 배치 vs 스트리밍 인퍼런스, 불확실성 임계값(precision/recall trade-off) 조정, 엔티티 연결(entity linking)을 결합합니다. 오픈소스·클라우드(예: spaCy, Hugging Face Transformers, Google Cloud Natural Language, Amazon Comprehend)는 엔터프라이즈에서 바로 활용 가능한 파이프라인을 제공합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Hugging Face + BERT 기반 NER<br>코드:<br><pre><code class="language-python"># requires: transformers&gt;=4.0<br>from transformers import pipeline<br>nlp = pipeline("ner", model="dslim/bert-base-NER", tokenizer="bert-base-cased", grouped_entities=True)<br>print(nlp("Barack Obama was born in Hawaii."))</code></pre><br>사용처: dslim/bert-base-NER(Transformers hub), 연구/프로덕션에서 BERT 파인튜닝 기반 엔티티 추출에 사용<br>사례: spaCy v3 모델 학습<br>코드(명령):<br><pre><code class="language-bash"># spaCy &gt;=3.0<br>python -m spacy init config config.cfg --model en_core_web_trf<br>python -m spacy train config.cfg --output ./output --paths.train ./train.spacy --paths.dev ./dev.spacy</code></pre><br>실무 패턴: BIO 태그와 토큰-스팬 정합 처리, 엔티티 정규화+링크(knowledge base) 분리, 온프레미스 배치 추출과 경량 서빙(ONNX/TorchScript) 병행. 연구참조: Lample et al. 2016 (BiLSTM-CRF), Devlin et al. 2018 (BERT), Akbik et al. 2018 (Flair).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>NER finds and classifies real-world entities (people, locations, orgs, dates) in text; it's fundamental for search, knowledge graphs, document processing, and downstream ML features in production.</p>
+        <p>How it works: NER is a sequence-labeling task typically using BIO/BILOU schemes. Traditional systems used feature-engineered CRFs; modern pipelines use neural architectures such as BiLSTM-CRF and Transformers (BERT). Key engineering issues include subword tokenization alignment (WordPiece/BPE), span aggregation, and handling nested/overlapping entities.<br>Operational details: Production systems optimize for latency and accuracy via model distillation, quantization, batching, and caching. They integrate entity linking (KB resolution), confidence thresholds for downstream consumers, and monitoring for model drift. Popular toolchains in real deployments include spaCy, Hugging Face Transformers, and cloud services (Google Cloud Natural Language, Amazon Comprehend).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: BERT-based NER with Hugging Face<br>Code:<br><pre><code class="language-python"># requires: transformers&gt;=4.0<br>from transformers import pipeline<br>nlp = pipeline("ner", model="dslim/bert-base-NER", tokenizer="bert-base-cased", grouped_entities=True)<br>print(nlp("Barack Obama was born in Hawaii."))</code></pre><br>Used in: dslim/bert-base-NER on the Transformers Hub; common for fine-tuning BERT for NER in production.<br>Case: spaCy v3 training and serving<br>Code/commands:<br><pre><code class="language-bash"># spaCy &gt;=3.0<br>python -m spacy init config config.cfg --model en_core_web_trf<br>python -m spacy train config.cfg --output ./output --paths.train ./train.spacy --paths.dev ./dev.spacy</code></pre><br>Production patterns: handle token→span alignment for subword models, separate extraction and KB-linking stages, serve distilled/quantized models (ONNX/TorchScript) for low-latency APIs, and run periodic re-training using labeled logs. Research refs: Lample et al. 2016 (BiLSTM-CRF), Devlin et al. 2018 (BERT), Akbik et al. 2018 (Flair).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
