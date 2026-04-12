@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Scaling Laws for Neural Networks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스케일링 법칙은 모델 파라미터 수, 데이터 토큰 수, 계산량이 성능(예: 크로스엔트로피 손실)에 미치는 경험적 관계를 설명하며, 대규모 모델 설계·비용 최적화에 직접적 영향을 줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Scaling Laws for Neural Networks</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-13</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스케일링 법칙은 모델 파라미터 수, 데이터 토큰 수, 계산량이 성능(예: 크로스엔트로피 손실)에 미치는 경험적 관계를 설명하며, 대규모 모델 설계·비용 최적화에 직접적 영향을 줍니다.</p>
+        <p>작동 원리: 스케일링 법칙은 Kaplan et al. (2020) 등이 보고한 경험적 멱법칙(power law)입니다. 손실 L(N, D) ≈ A N^{-α_N} + B D^{-α_D} + C 형태로 근사하고, 계산량 C(=FLOPs)은 모델 크기 N과 토큰수 D에 따라 결정됩니다. Hoffmann et al. (2022, Chinchilla)는 동일한 계산 예산에서 모델 크기를 줄이고 더 많은 토큰으로 학습하는 것이 효율적이라고 제시해 ‘compute-optimal’ 비율(Tokens-per-param ≈ 20)을 권고했습니다.<br><br>실무 관점: 실 시스템에서는 스케일링 법칙을 통해 예산(C)을 주었을 때 최적의 파라미터 수와 데이터량을 추정해 하드웨어·비용 계획을 세웁니다. 대규모 트레이닝은 DeepSpeed ZeRO, FairScale, Hugging Face Accelerate 같은 도구와 NVidia A100/TPU v4 클러스터에서 실행되어 파라미터·메모리 제약을 해결합니다. 또한 로그-라인 피팅으로 α 계수를 추정해 향후 확장 효과를 예측합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: OpenAI/DeepMind 연구(예: Kaplan et al. 2020, Hoffmann et al. 2022)에서 스케일링 법칙으로 모델·데이터 설계 가이드 확보<br>- 사례: Microsoft DeepSpeed(ZeRO)로 대규모 모델을 실제 GPU 클러스터에 배치(프로덕션/연구) — DeepSpeed v0.8+, PyTorch 2.x<br><br>코드:<br><pre><code class="language-python"># 간단한 Chinchilla-style 추정(파라미터 N, 토큰 T 최적비례 추정)<br>compute_budget = 1e25  # FLOPs<br># 경험적 규칙: N_opt ~ sqrt(C) , T_opt ~ sqrt(C) =&gt; ratio ~ const<br>import math<br>N_opt = int(math.sqrt(compute_budget))<br>T_opt = int(math.sqrt(compute_budget))<br>print('N_opt', N_opt, 'T_opt', T_opt)</code></pre><br><br>DeepSpeed 실행 예 (CLI):<br><pre><code class="language-bash">deepspeed --num_gpus=8 train.py --deepspeed_config ds_config.json</code></pre> <br>(ds_config.json에 "zero_optimization": {"stage":3})<br><br>실무 패턴:<br>- 먼저 소형/중형 스윕으로 α 계수를 추정하고 예산 기반 N/T 설계를 계산<br>- ZeRO/FSDP로 메모리 병렬화, 데이터 파이프라인(Streaming dataset)으로 더 많은 토큰 처리<br>- 비용·성능 트레이드오프를 문서화해 클라우드 예산과 스팟 인스턴스 전략에 반영</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Scaling laws describe empirical power-law relations between model size, dataset size (tokens), compute, and performance; they guide cost-efficient design of large models in production and research.</p>
+        <p>How it works: Empirical scaling laws (Kaplan et al., 2020) fit loss as approximate power laws in parameters N and data D: L(N,D) ≈ a N^{-α_N} + b D^{-α_D} + const. From this, compute-optimal tradeoffs are derived because training FLOPs depend on N and tokens. Hoffmann et al. (2022, Chinchilla) re-evaluated earlier trends and showed that for a fixed compute budget, smaller models trained on more tokens can outperform larger undertrained models — motivating a practical tokens-per-parameter heuristic.<br><br>Practical mechanics: Engineers estimate exponents α by small-scale sweeps, then project optimal N and T for a given compute budget. In production, scaling laws inform procurement (GPUs/TPUs), dataset collection vs. model growth, and when to invest in infrastructure like ZeRO (DeepSpeed) or FSDP to enable larger N without OOMs. Tools: PyTorch 2.x, DeepSpeed v0.8+, Hugging Face Transformers v4.x, TPU v4 are common in these pipelines.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Research sources — Kaplan et al. 2020 (scaling laws), Hoffmann et al. 2022 (Chinchilla). Used by OpenAI/DeepMind to set training targets.<br>- Case: Microsoft/OSS — DeepSpeed (ZeRO) is used to train large models in production (DeepSpeed v0.8+, PyTorch 2.x).<br><br>Code:<br><pre><code class="language-python"># simple heuristic: compute-optimal rough estimate (Chinchilla-style)<br>compute = 1e25<br>import math<br>N_opt = int(math.sqrt(compute))  # rough proportional rule<br>T_opt = int(math.sqrt(compute))<br>print('N_opt',N_opt,'T_opt',T_opt)</code></pre><br>DeepSpeed launch (example):<br><pre><code class="language-bash">deepspeed --num_gpus=8 train.py --deepspeed_config ds_config.json<br># ds_config.json: {"zero_optimization": {"stage": 3}}</code></pre><br><br>Production patterns/best practices:<br>- Run small sweeps to fit α_N and α_D before extrapolating.<br>- Prefer streaming datasets and checkpointing to increase effective tokens.<br>- Use ZeRO/FSDP for memory scaling; monitor cost-per-accuracy and retrain vs bigger-model trade-offs.<br>References: Kaplan et al. 2020, Hoffmann et al. 2022, DeepSpeed docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
