@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Scaling Laws for Neural Networks",
+      "date": "2026-04-13",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-13-scaling-laws-for-neural-networks.html",
+      "excerpt": "스케일링 법칙은 모델 파라미터 수, 데이터 토큰 수, 계산량이 성능(예: 크로스엔트로피 손실)에 미치는 경험적 관계를 설명하며, 대규모 모델 설계·비용 최적화에 직접적 영향을 줍니다."
+    },
+    {
       "title": "Named Entity Recognition (NER)",
       "date": "2026-04-10",
       "category": "cs-fundamentals",
