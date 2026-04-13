@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Igor Jankowski</div>
+        <div><strong>발행일 / Published:</strong> 2026-04-10</div>
+        <div><strong>Arxiv ID:</strong> 2604.09523</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>다중 에이전트 강화학습(MARL) 정책이 사이버 워게임 시뮬레이션에서 운영 중인 보안 운영 센터(SOC)로 이전되는 과정은 본질적으로 Sim2Real 격차에 의해 병목이 발생한다. 기존 시뮬레이터들은 네트워크 프로토콜 물리를 추상화하고 동기 틱에 의존하며 실제의 잡음이 섞인 텔레메트리 대신 정제된 상태 벡터를 제공한다. 이러한 한계를 해결하기 위해, 우리는 네트워크 방어를 비동기적 연속시간 부분관측 준마르코프 결정과정(POSMDP)으로 재정식화한 고충실도 사이버 작전 시뮬레이터 NetForge_RL을 도입한다. NetForge는 제로 트러스트 네트워크 액세스(ZTNA) 제약을 강제하고 수비자가 NLP로 인코딩된 SIEM 텔레메트리를 처리하도록 요구한다. 특히 NetForge는 이중 모드 엔진을 통해 Sim2Real 격차를 본질적으로 연결하여, 모의 하이퍼바이저에서 고처리량의 MARL 학습을 가능하게 하고 Docker 하이퍼바이저에서 라이브 익스플로잇에 대한 제로샷 평가를 수행할 수 있게 한다. 이 연속시간 POSMDP를 해결하기 위해 우리는 연속시간 그래프 MARL(CT-GMARL)을 제안하며, 불규칙하게 샘플링된 경보를 처리하기 위해 고정 스텝 기반의 Neural Ordinary Differential Equations(ODEs)를 활용한다. 우리는 제안한 프레임워크를 이산 베이스라인(R-MAPPO, QMIX)과 비교 평가했다. 실험 결과 CT-GMARL은 수렴한 중앙값 Blue 보상 57,135를 달성했으며, 이는 R-MAPPO 대비 2.0배, QMIX 대비 2.1배의 향상이다. 무엇보다 CT-GMARL은 네트워크 유틸리티를 파괴하여 리스크를 단순히 최소화하는 '초토화(scorched earth)' 실패 모드를 피함으로써 가장 강한 베이스라인보다 12배 더 많은 침해된 서비스를 복구한다. 라이브 Docker 환경으로의 제로샷 전이에서 CT-GMARL 정책은 중앙값 보상 98,026을 달성하여 Sim2Real 연결을 검증한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The transition of Multi-Agent Reinforcement Learning (MARL) policies from simulated cyber wargames to operational Security Operations Centers (SOCs) is fundamentally bottlenecked by the Sim2Real gap. Legacy simulators abstract away network protocol physics, rely on synchronous ticks, and provide clean state vectors rather than authentic, noisy telemetry. To resolve these limitations, we introduce NetForge_RL: a high-fidelity cyber operations simulator that reformulates network defense as an asynchronous, continuous-time Partially Observable Semi-Markov Decision Process (POSMDP). NetForge enforces Zero-Trust Network Access (ZTNA) constraints and requires defenders to process NLP-encoded SIEM telemetry. Crucially, NetForge bridges the Sim2Real gap natively via a dual-mode engine, allowing high-throughput MARL training in a mock hypervisor and zero-shot evaluation against live exploits in a Docker hypervisor. To navigate this continuous-time POSMDP, we propose Continuous-Time Graph MARL (CT-GMARL), utilizing fixed-step Neural Ordinary Differential Equations (ODEs) to process irregularly sampled alerts. We evaluate our framework against discrete baselines (R-MAPPO, QMIX). Empirical results demonstrate that CT-GMARL achieves a converged median Blue reward of 57,135 - a 2.0x improvement over R-MAPPO and 2.1x over QMIX. Critically, CT-GMARL restores 12x more compromised services than the strongest baseline by avoiding the "scorched earth" failure mode of trivially minimizing risk by destroying network utility. On zero-shot transfer to the live Docker environment, CT-GMARL policies achieve a median reward of 98,026, validating the Sim2Real bridge.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2604.09523" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2604.09523.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
