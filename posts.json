@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL",
+      "date": "2026-04-14",
+      "category": "papers",
+      "url": "posts/papers/2604/2026-04-14-paper.html",
+      "excerpt": "Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL"
+    },
+    {
       "title": "Scaling Laws for Neural Networks",
       "date": "2026-04-13",
       "category": "cs-fundamentals",
