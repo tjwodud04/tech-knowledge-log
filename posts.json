@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Edit Distance & Word Error Rate (Levenshtein)",
+      "date": "2026-04-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-15-edit-distance-word-error-rate.html",
+      "excerpt": "편집 거리(Levenshtein)와 단어 오류율(WER)은 문자열 유사도와 음성 인식 성능 측정에 핵심적인 지표로, 검색, 교정, ASR 평가 등 실무 시스템에서 널리 사용됩니다."
+    },
+    {
       "title": "Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL",
       "date": "2026-04-14",
       "category": "papers",
