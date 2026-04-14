@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Edit Distance & Word Error Rate (Levenshtein)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="편집 거리(Levenshtein)와 단어 오류율(WER)은 문자열 유사도와 음성 인식 성능 측정에 핵심적인 지표로, 검색, 교정, ASR 평가 등 실무 시스템에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Edit Distance & Word Error Rate (Levenshtein)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-15</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>편집 거리(Levenshtein)와 단어 오류율(WER)은 문자열 유사도와 음성 인식 성능 측정에 핵심적인 지표로, 검색, 교정, ASR 평가 등 실무 시스템에서 널리 사용됩니다.</p>
+        <p>작동 원리: Levenshtein 편집 거리는 삽입/삭제/치환 연산의 최소 개수를 동적 계획법(Wagner-Fischer 알고리즘)으로 계산합니다. 시간복잡도는 O(n*m)이며, 긴 시퀀스에 대해서는 Ukkonen의 밴드 탐색이나 비트셋 최적화(pyfastleven, bit-parallel)로 가속합니다. 확장판인 Damerau-Levenshtein은 인접 문자 전치(transposition)를 하나의 연산으로 처리해 타이포 교정에 유리합니다.<br><br>실무 포인트: 음성 인식에서는 WER = (S + D + I) / N으로 정의하며, N은 정답 단어 수, S/D/I는 치환/삭제/삽입 수입니다. 대규모 로그에서 빠르게 집계하려면 병렬화, 캐싱(빈도 기반 후보 제한), 또는 Levenshtein 자동자 기반의 인덱스(Elasticsearch의 fuzziness)가 사용됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Kaldi ASR 툴킷에서 WER 집계<br>  코드: 'compute-wer --text --mode=all ref.txt hyp.txt' 또는 SCTK의 'sclite -r ref.txt -h hyp.txt -i rm' (Kaldi 예제 스크립트에서 호출)<br>  사용처: Kaldi (v5+), 많은 연구/생산 ASR 파이프라인에서 표준 채점 도구<br><br>- 사례: Elasticsearch의 퍼지 검색<br>  코드: '{ query: { match: { title: { query: "recieve", fuzziness: "AUTO" } } } }' (Elasticsearch 7.x 이상)<br>  사용처: 검색 서버에서 오타 관용(fuzzy matching) 구현, 프로덕션 검색 경험 향상<br><br>- 사례: 서브스트링 유사도 라이브러리<br>  코드(Python): 'from rapidfuzz import distance; distance.Levenshtein.distance("kitten", "sitting")'<br>  사용처: GitHub, 데이터 정제, 상품명 매칭 등에서 빠른 근사 비교(rapidfuzz, python-levenshtein)<br><br>실무 패턴: 대규모 로그는 샤딩/맵리듀스, banded 알고리즘 사용으로 성능 확보; WER 계산은 토큰화 규칙(case/ punctuation normalization)을 통일해 비교 일관성 확보. 참고: Levenshtein(1966), Ukkonen(1985), SCTK/sclite (NIST) 도구.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Edit distance (Levenshtein) and Word Error Rate (WER) measure string similarity and ASR accuracy; they are fundamental for spell-correction, fuzzy search, and speech-eval in production systems.</p>
+        <p>How it works: Levenshtein distance finds the minimal number of insertions, deletions, and substitutions to transform one string to another via dynamic programming (Wagner-Fischer). Complexity is O(n*m); optimizations include banded DP (Ukkonen), bit-parallel algorithms, and Levenshtein automata for indexed fuzzy search. Damerau-Levenshtein adds adjacent transposition as a single op, improving typo handling.<br><br>Practical notes: WER = (S + D + I) / N, where N is reference word count. In production you need consistent tokenization (normalization of case, punctuation), and for scale apply pruning, candidate filtering, or index-based fuzzy lookup (e.g., Elasticsearch using automata) to avoid quadratic costs over huge corpora.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Kaldi ASR toolkits compute WER<br>  Code: 'compute-wer --text --mode=all ref.txt hyp.txt' or use SCTK 'sclite -r ref.txt -h hyp.txt -i rm'<br>  Where: Kaldi scripts (v5+), widely used in research and production ASR evaluation<br><br>- Case: Elasticsearch fuzzy matching in search<br>  Code: '{ query: { match: { title: { query: "recieve", fuzziness: "AUTO" } } } }' (Elasticsearch 7.x+)<br>  Where: Production search services to tolerate typos using Levenshtein-like automata<br><br>- Case: High-speed libraries for product matching<br>  Code(Python): 'from rapidfuzz import distance; distance.Levenshtein.distance("kitten", "sitting")'<br>  Where: rapidfuzz / python-levenshtein used in data-cleaning, de-duplication, and recommendation pipelines<br><br>Production patterns: normalize tokens before scoring, use banded/bit-parallel methods for long sequences, cache frequent comparisons, and prefer index-time fuzzy automata for low-latency search. References: Levenshtein 1966, Ukkonen 1985, NIST SCTK/sclite for WER.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
