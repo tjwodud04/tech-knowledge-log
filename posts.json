@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contrastive Representation Learning / 대조(대비) 표현 학습",
+      "date": "2026-04-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-17-contrastive-representation-learning.html",
+      "excerpt": "대조표현학습은 같은 샘플의 서로 다른 변형(뷰)을 가깝게, 다른 샘플은 멀게 학습하는 자기지도 방법으로, 레이블이 부족한 대규모 데이터에서 강력한 특성 표현을 얻어 검색, 추천, 분류 성능을 개선합니다."
+    },
+    {
       "title": "Edit Distance & Word Error Rate (Levenshtein)",
       "date": "2026-04-15",
       "category": "cs-fundamentals",
