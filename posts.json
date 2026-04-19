@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Adversarial Robustness",
+      "date": "2026-04-20",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-20-adversarial-robustness.html",
+      "excerpt": "적대적 견고성은 모델이 의도적으로 설계된 입력(작은 퍼텐셜 변경)에 의해 오작동하지 않도록 하는 기술로, 보안·자율주행·의료 등 실서비스에서 신뢰성과 안전을 확보하는 데 중요합니다."
+    },
+    {
       "title": "Contrastive Representation Learning / 대조(대비) 표현 학습",
       "date": "2026-04-17",
       "category": "cs-fundamentals",
