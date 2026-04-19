@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Adversarial Robustness</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="적대적 견고성은 모델이 의도적으로 설계된 입력(작은 퍼텐셜 변경)에 의해 오작동하지 않도록 하는 기술로, 보안·자율주행·의료 등 실서비스에서 신뢰성과 안전을 확보하는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Adversarial Robustness</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-20</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>적대적 견고성은 모델이 의도적으로 설계된 입력(작은 퍼텐셜 변경)에 의해 오작동하지 않도록 하는 기술로, 보안·자율주행·의료 등 실서비스에서 신뢰성과 안전을 확보하는 데 중요합니다.</p>
+        <p>핵심 원리: 입력 공간에서 작은 노이즈(ℓ_p 제약)를 추가한 공격(input perturbation)이 모델 예측을 크게 바꿀 수 있다는 관찰에서 출발합니다. 대응책은 크게(1) 적대적 학습(Adversarial Training) — 공격을 반복 생성해 모델이 그에 강해지도록 학습, (2) 검출/정규화 — 입력이나 내부 표현의 불일치로 공격을 탐지, (3) 인증된 방어(Verified/Certified Robustness) — 수학적으로 특정 노름 반경 내에서 예측 불변을 보장하는 방법(PGD, randomized smoothing)입니다.<br>실무 관점: Madry 등(2017)의 PGD 기반 적대적 학습은 실무에서 널리 쓰이며, 물리적 공격(예: 교통 표지 변조)은 자율주행 연구(예: Eykholt et al., 2018)에서 실제 문제로 입증되었습니다. 오픈소스 툴(IBM ART, Foolbox, CleverHans)은 공격·방어 파이프라인을 제공합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: Madry et al. (PGD adversarial training)<br>코드:<br><pre><code class="language-python"># PyTorch: PGD inner-loop (개념적)<br>def pgd_attack(model,x,y,eps=8/255,alpha=2/255,steps=7):<br>  x_adv = x + torch.rand_like(x)*1e-6<br>  for _ in range(steps):<br>    x_adv.requires_grad_()<br>    loss = F.cross_entropy(model(x_adv), y)<br>    grad = torch.autograd.grad(loss, x_adv)[0]<br>    x_adv = (x_adv + alpha*grad.sign()).clamp(x-eps, x+eps).detach()<br>  return x_adv<br># 학습 루프에서 x_adv로 손실 계산(모델: PyTorch &gt;=1.7, Python 3.8+)</code></pre><br>실무 패턴:<br>- ‘온더플라이’ 공격 생성으로 배치별 적대적 학습(메모리/속도 트레이드오프)<br>- 검증시에는 AutoAttack/CW/PGD 같은 여러 공격을 사용하여 과적합 방지<br>참조/툴: IBM Adversarial Robustness Toolbox (ART, github.com/Trusted-AI/adversarial-robustness-toolbox), Foolbox, Madry et al. (2017), Eykholt et al. (2018).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Adversarial robustness is ensuring models resist deliberately crafted small input perturbations that change predictions; it's critical for security-sensitive production systems (perception, fraud detection, medical AI).</p>
+        <p>Core idea: adversarial examples are small-norm perturbations (ℓ_p-bounded) that cause misclassification. Practical defenses fall into (1) adversarial training — augmenting training with adversarial examples (Madry et al., 2017 PGD), (2) detection & input transformations — e.g., denoising, randomized smoothing, (3) certified defenses — providing provable robustness guarantees for a perturbation radius via methods like randomized smoothing or interval bound propagation. Algorithmically, adversarial training solves a minimax: min_θ E_x [ max_{||δ||≤ε} loss(f_θ(x+δ), y) ], where inner max approximated by PGD/FW attacks.<br>In production, teams combine adversarial training with ensemble evaluation and robust augmentation; open-source libraries provide ready-to-run attacks/defenses.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: PGD adversarial training (Madry et al.) and toolkits<br>Code:<br><pre><code class="language-python"># conceptual PyTorch PGD (requires PyTorch&gt;=1.7, Python3.8+)<br>for x,y in loader:<br>  x_adv = pgd_attack(model,x,y,eps=8/255,alpha=2/255,steps=7)<br>  loss = criterion(model(x_adv), y)<br>  loss.backward(); optimizer.step()</code></pre><br>Case: IBM Adversarial Robustness Toolbox (ART)<br><pre><code class="language-bash">pip install adversarial-robustness-toolbox<br>python -c "from art.attacks.evasion import FastGradientMethod"</code></pre><br>Production patterns:<br>- Use multiple attacks (AutoAttack, PGD, CW) for validation<br>- Balance robustness vs. clean accuracy (curriculum or mixed batches)<br>- Deploy certified smoothing for high-assurance components (e.g., perception pipelines in autonomous-driving research such as Eykholt et al. 2018)<br>References: Madry et al. 2017, IBM ART (github.com/Trusted-AI/adversarial-robustness-toolbox), Foolbox/CleverHans.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
