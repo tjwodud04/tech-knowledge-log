@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>No Universal Courtesy: A Cross-Linguistic, Multi-Model Study of Politeness Effects on LLMs Using the PLUM Corpus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="No Universal Courtesy: A Cross-Linguistic, Multi-Model Study of Politeness Effects on LLMs Using the PLUM Corpus">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>No Universal Courtesy: A Cross-Linguistic, Multi-Model Study of Politeness Effects on LLMs Using the PLUM Corpus</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Hitesh Mehta, Arjit Saxena, Garima Chhikara, Rohit Kumar</div>
+        <div><strong>발행일 / Published:</strong> 2026-04-17</div>
+        <div><strong>Arxiv ID:</strong> 2604.16275</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>본 논문은 사용자 프롬프트의 공손함 정도에 따른 대형 언어 모델(LLM)의 반응을 탐구한다. Brown과 Levinson의 예의 이론과 Culpeper의 무례성 프레임워크를 기반으로, 세 언어(영어, 힌디어, 스페인어), 다섯 모델(Gemini-Pro, GPT-4o Mini, Claude 3.7 Sonnet, DeepSeek-Chat, Llama 3), 그리고 사용자 간의 세 가지 상호작용 이력(원본, 공손한, 무례한)에 걸쳐 실험을 진행했다. 본 표본은 다양한 유형의 프롬프트와 응답 쌍 22,500개로 구성되며, 다섯 수준의 공손함을 기준으로 여덟 가지 평가 요인(일관성, 명료성, 깊이, 응답성, 맥락 유지, 독성, 간결성, 가독성)에 따라 평가되었다. 결과는 모델 성능이 어조, 대화 이력, 언어에 의해 크게 좌우된다는 것을 보여준다. 공손한 프롬프트는 평균 응답 품질을 최대 약 11% 향상시키는 반면, 무례한 어조는 성능을 저하시켰지만 이러한 효과는 언어와 모델 전반에 걸쳐 일관되거나 보편적이지 않았다. 영어는 공손하거나 직접적인 어조에서 가장 좋은 성과를 보였고, 힌디어는 겸손하고 간접적인 어조에, 스페인어는 단호한 어조에 가장 적합했다. 모델별로는 Llama가 어조에 가장 민감하여 변동폭이 11.5%였고, GPT 계열은 적대적 어조에 상대적으로 더 강건한 모습을 보였다. 이 결과들은 공손함이 LLM 행동에 영향을 미치는 정량화 가능한 계산 변수임을 시사하지만, 그 영향은 보편적이지 않고 언어 및 모델에 따라 달라진다. 재현성과 후속 연구를 지원하기 위해, 우리는 또한 PLUM(발화의 예의 수준, 다국어)이라는 공개 코퍼스—세 언어와 다섯 공손함 범주에 걸쳐 인간 검증을 거친 프롬프트 1,500개—를 공개하고, 예의 이론에서 도출된 여섯 개의 반증 가능 가설을 데이터셋에 대해 실증적으로 평가한 형식적 보조 분석을 제공한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>This paper explores the response of Large Language Models (LLMs) to user prompts with different degrees of politeness and impoliteness. The Politeness Theory by Brown and Levinson and the Impoliteness Framework by Culpeper form the basis of experiments conducted across three languages (English, Hindi, Spanish), five models (Gemini-Pro, GPT-4o Mini, Claude 3.7 Sonnet, DeepSeek-Chat, and Llama 3), and three interaction histories between users (raw, polite, and impolite). Our sample consists of 22,500 pairs of prompts and responses of various types, evaluated across five levels of politeness using an eight-factor assessment framework: coherence, clarity, depth, responsiveness, context retention, toxicity, conciseness, and readability. The findings show that model performance is highly influenced by tone, dialogue history, and language. While polite prompts enhance the average response quality by up to ~11% and impolite tones worsen it, these effects are neither consistent nor universal across languages and models. English is best served by courteous or direct tones, Hindi by deferential and indirect tones, and Spanish by assertive tones. Among the models, Llama is the most tone-sensitive (11.5% range), whereas GPT is more robust to adversarial tone. These results indicate that politeness is a quantifiable computational variable that affects LLM behaviour, though its impact is language- and model-dependent rather than universal. To support reproducibility and future work, we additionally release PLUM (Politeness Levels in Utterances, Multilingual), a publicly available corpus of 1,500 human-validated prompts across three languages and five politeness categories, and provide a formal supplementary analysis of six falsifiable hypotheses derived from politeness theory, empirically assessed against the dataset.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2604.16275" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2604.16275.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
