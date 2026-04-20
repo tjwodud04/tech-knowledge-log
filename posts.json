@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "No Universal Courtesy: A Cross-Linguistic, Multi-Model Study of Politeness Effects on LLMs Using the PLUM Corpus",
+      "date": "2026-04-21",
+      "category": "papers",
+      "url": "posts/papers/2604/2026-04-21-paper.html",
+      "excerpt": "No Universal Courtesy: A Cross-Linguistic, Multi-Model Study of Politeness Effects on LLMs Using the PLUM Corpus"
+    },
+    {
       "title": "Adversarial Robustness",
       "date": "2026-04-20",
       "category": "cs-fundamentals",
