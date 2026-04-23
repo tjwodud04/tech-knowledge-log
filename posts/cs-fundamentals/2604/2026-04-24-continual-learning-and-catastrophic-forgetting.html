@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Continual Learning & Catastrophic Forgetting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="계속 학습(Continual Learning)은 모델이 새 데이터를 지속적으로 학습하면서 이전 지식을 잃지 않도록 하는 기술로, 프로덕션 시스템의 모델 업데이트·개인화·온디바이스 적응에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Continual Learning & Catastrophic Forgetting</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-24</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>계속 학습(Continual Learning)은 모델이 새 데이터를 지속적으로 학습하면서 이전 지식을 잃지 않도록 하는 기술로, 프로덕션 시스템의 모델 업데이트·개인화·온디바이스 적응에서 필수적입니다.</p>
+        <p>작동 원리: 연속적 분포 변화(데이터 드리프트) 상황에서 표준 SGD로만 학습하면 새 작업에 적응하면서 이전 작업의 성능이 급격히 떨어지는 'catastrophic forgetting'이 발생합니다. 대표적 대응 방식은 (1) 정규화 기반 방법: Elastic Weight Consolidation(EWC, Kirkpatrick et al. 2017)처럼 이전에 중요하다고 판단된 파라미터를 고정(또는 페널티 적용)하여 급격한 변화 억제, (2) 리플레이 기반 방법: 샘플(혹은 생성 모델로 만든 샘플) 버퍼를 섞어 재학습하여 분포 보존, (3) 구조적 확장: Progressive Networks 등으로 네트워크 확장 후 연결을 통해 이전 지식 보존.<br>실무 관점: 구글의 온디바이스/연합학습(Gboard, Federated Learning)에서는 로컬 업데이트·주기적 서버 집계에서 잊힘 방지를 위해 정규화+리플레이 전략을 혼합합니다. 오픈소스 라이브러리(ContinualAI/avalanche)는 연구·프로덕션 프로토타입에 쓰기 좋습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: EWC (논문: Kirkpatrick et al., 2017)<br>  코드:<br>  <pre><code class="language-python"># PyTorch: EWC 페널티 (간단화)<br>  loss = task_loss(output, target)<br>  ewc_loss = 0<br>  for name, param in model.named_parameters():<br>      ewc_loss += F[name] * (param - theta_star[name]).pow(2).sum()<br>  loss = loss + lambda_ * ewc_loss / 2</code></pre><br>  사용처: 연구·프로토타입에서 자주 재현 (PyTorch 1.8+ 호환)<br><br>- 사례: 리플레이 (iCaRL / 경험 리플레이)<br>  코드:<br>  <pre><code class="language-python"># 간단한 온라인 리플레이 버퍼<br>  buffer.append((x,y))<br>  batch = random.sample(buffer, k=min(len(buffer), B))<br>  train_on(batch + new_batch)</code></pre><br>  사용처: 클래스-증분 학습(iCaRL, Rebuffi et al. 2017), Avalanche 라이브러리(ContinualAI: https://github.com/ContinualAI/avalanche)<br><br>- 사례: 온라인/스트리밍 모델 업데이트 (Vowpal Wabbit)<br>  명령:<br>  <pre><code class="language-bash"># vw로 스트리밍 업데이트: 모델을 계속 덮어쓰기<br>  vw -d stream.train -f model.vw --loss_function logistic --learning_rate 0.5</code></pre><br>  사용처: 생산 서비스에서 실시간 개인화·랭킹(아마존류), VW v8+에서 널리 사용<br><br>실무 패턴: 리소스 제약(온디바이스)일땐 정규화+경량 리플레이, 서버 측이면 대규모 샘플 리플레이/생성모델 복원 사용. Avalanche로 실험 후 경량화해 프로덕션 푸시.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Continual learning enables models to learn from a stream of data without catastrophically forgetting previously learned tasks — crucial for production systems that require continuous adaptation and personalization.</p>
+        <p>How it works: When models train sequentially on non‑stationary data, naive SGD overwrites weights and causes catastrophic forgetting. Main technical strategies: (1) Regularization-based (e.g., Elastic Weight Consolidation, EWC) add quadratic penalties on changing important weights; (2) Replay-based stores or generates past examples and mixes them with new data during training; (3) Architectural approaches expand or isolate subnetworks (Progressive Networks) to preserve prior functions. Hybrid methods combine these (regularize important params + small replay buffer) to balance compute and memory.<br>In production: Google’s on-device/federated setups (e.g., Gboard adaptations using Federated Learning, McMahan et al. 2017) mitigate forgetting by combining local updates with server-side aggregation and constraints. Research-to-prod tooling includes Avalanche (ContinualAI) for experiments and Vowpal Wabbit for lightweight online updates in streaming systems.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: EWC (Kirkpatrick et al., 2017)<br>  Code:<br>  <pre><code class="language-python"># PyTorch: simplified EWC penalty<br>  loss = task_loss(output, target)<br>  ewc = sum(F[name] * (param - theta_star[name]).pow(2).sum()<br>            for name,param in model.named_parameters())<br>  loss = loss + lambda_ * ewc / 2</code></pre><br>  Where used: academic reproductions and prototyping (PyTorch 1.8+)<br><br>- Case: Replay / iCaRL (Rebuffi et al., 2017)<br>  Code:<br>  <pre><code class="language-python">buffer.append((x,y))<br>  batch = random.sample(buffer, k=min(len(buffer), B))<br>  train_on(batch + new_batch)</code></pre><br>  Where used: class-incremental learning experiments; Avalanche lib (pip install avalanche-lib, https://github.com/ContinualAI/avalanche)<br><br>- Case: Online updates in production (Vowpal Wabbit)<br>  Command:<br>  <pre><code class="language-bash">vw -d stream.train -f model.vw --loss_function logistic --learning_rate 0.5</code></pre><br>  Where used: low-latency personalization/ranking pipelines (VW v8+), supports streaming updates to reduce forgetting<br><br>Production patterns: use small replay + regularization on resource-limited devices; server-side replay or generative replay for large-scale services. Prototype in Avalanche, then optimize for latency/size before deployment.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
