@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>NLG Evaluation Metrics (BLEU, ROUGE, BERTScore, BLEURT, MoverScore)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="자연어 생성(NLG) 평가 지표는 모델 출력의 품질(정확성, 유창성, 의미 보존)을 자동으로 수치화해 프로덕션 파이프라인에서 모델 비교·모니터링에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>NLG Evaluation Metrics (BLEU, ROUGE, BERTScore, BLEURT, MoverScore)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-27</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>자연어 생성(NLG) 평가 지표는 모델 출력의 품질(정확성, 유창성, 의미 보존)을 자동으로 수치화해 프로덕션 파이프라인에서 모델 비교·모니터링에 필수적입니다.</p>
+        <p>핵심 지표들(BLEU/ROUGE)은 n-gram 중복 기반으로 빠르게 대규모 코퍼스 수준에서 성능을 비교합니다. 하지만 의미적 유사성이나 패럴프레이징에는 약하므로 임베딩 기반(BERTScore, MoverScore)이나 학습 기반(BLEURT) 지표가 보완합니다. 산업에서는 배치별(코퍼스) 점수와 샘플별(문장) 분포를 함께 모니터링하고, A/B 테스트·사람 평가와 정기 교차검증하여 자동 지표의 신뢰도를 보정합니다.<br><br>기술적으로는: BLEU는 정규화(토크나이즈, lowercasing), n-gram precision과 brevity penalty로 구성됩니다. ROUGE는 요약에서 recall 중심(ROUGE-L은 longest common subsequence). BERTScore는 레이어별 임베딩을 매칭해 F1을 계산하고, BLEURT는 세밀한 오류를 학습한 순위/회귀 모델입니다. 프로덕션에서는 sacrebleu(버전 고정)로 재현 가능한 BLEU, Hugging Face evaluate로 여러 지표 파이프라인화, 그리고 임베딩 캐싱으로 속도 최적화를 적용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google/지속적 MT 평가, WMT(공식)에서 BLEU 표준 사용(사전 토크나이제이션 기준)<br>  코드:<br>  <pre><code class="language-bash"># sacrebleu CLI (권장: sacrebleu==2.x 고정)<br>  echo "system output" &gt; hyp.txt<br>  echo "reference text" &gt; ref.txt<br>  sacrebleu ref.txt &lt; hyp.txt</code></pre><br>- 사례: Hugging Face Evaluate 라이브러리를 통한 CI 통합(오픈소스/스타트업에서 사용)<br>  코드:<br>  <pre><code class="language-python">pip install evaluate sacrebleu bert_score rouge-score<br>  import evaluate<br>  bleu = evaluate.load('sacrebleu')<br>  bert = evaluate.load('bertscore')<br>  preds = ['the cat is on the mat']<br>  refs = [['the cat is on the mat']]<br>  print(bleu.compute(predictions=preds, references=refs))<br>  print(bert.compute(predictions=preds, references=[r[0] for r in refs], lang='en', model_type='roberta-large'))</code></pre><br>- 실무 패턴: 지표 버전 고정(sacrebleu), 코퍼스-레벨과 샘플 분포 동시 모니터링, 자동 지표+사람 평가 혼합, 임베딩 모델 캐싱(throughput 최적화), 도메인별 재학습된 BLEURT/thresholding으로 알람 설정<br>참고: BLEURT는 Google Research(2020) 제안, BERTScore/MoverScore는 의미적 일치 평가에 널리 인용됩니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>NLG evaluation metrics quantify generated text quality (accuracy, fluency, semantic preservation), enabling model comparison, CI gating, and regression detection in production systems.</p>
+        <p>Classic metrics (BLEU/ROUGE) rely on n-gram overlap and are fast for corpus-level comparisons but miss semantic paraphrase. Embedding-based metrics (BERTScore, MoverScore) and learned scorers (BLEURT) capture meaning and finer errors. In practice, teams combine automatic metrics with periodic human evaluation and use metric calibration for specific domains.<br><br>Technically: BLEU computes n-gram precisions with a brevity penalty after standardized tokenization (sacrebleu enforces reproducibility). ROUGE focuses on recall and LCS for summarization. BERTScore aligns token embeddings (cosine) to get precision/recall/F1; BLEURT is a pre-trained regression model fine-tuned on human judgments. Production considerations include deterministic tokenization, metric/version pinning, embedding caching, and computing both corpus- and sentence-level statistics for drift detection.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Machine Translation (WMT / Google / Microsoft historically use BLEU for benchmarks)<br>  Code:<br>  <pre><code class="language-bash"># sacrebleu CLI (pin sacrebleu==2.x for reproducibility)<br>  echo "system output" &gt; hyp.txt<br>  echo "reference text" &gt; ref.txt<br>  sacrebleu ref.txt &lt; hyp.txt</code></pre><br>- Case: CI/monitoring with Hugging Face Evaluate (used by many startups and OSS projects)<br>  Code:<br>  <pre><code class="language-python">pip install evaluate sacrebleu bert_score rouge-score<br>  import evaluate<br>  bleu = evaluate.load('sacrebleu')<br>  bert = evaluate.load('bertscore')<br>  preds = ['the cat is on the mat']<br>  refs = [['the cat is on the mat']]<br>  print(bleu.compute(predictions=preds, references=refs))<br>  print(bert.compute(predictions=preds, references=[r[0] for r in refs], lang='en', model_type='roberta-large'))</code></pre><br>- Production patterns: pin metric implementations (sacrebleu version), normalize/tokenize consistently, combine automatic signals with small-scale human eval, cache embedding computations for BERTScore, retrain or fine-tune BLEURT on domain judgments for alerts. References: BLEURT (Google Research, 2020), BERTScore (Zhang et al.), MoverScore — all commonly used in research and industrial NLG pipelines.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
