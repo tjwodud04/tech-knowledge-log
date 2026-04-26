@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "NLG Evaluation Metrics (BLEU, ROUGE, BERTScore, BLEURT, MoverScore)",
+      "date": "2026-04-27",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-27-nlg-evaluation-metrics.html",
+      "excerpt": "자연어 생성(NLG) 평가 지표는 모델 출력의 품질(정확성, 유창성, 의미 보존)을 자동으로 수치화해 프로덕션 파이프라인에서 모델 비교·모니터링에 필수적입니다."
+    },
+    {
       "title": "Continual Learning & Catastrophic Forgetting",
       "date": "2026-04-24",
       "category": "cs-fundamentals",
