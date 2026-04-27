@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks",
+      "date": "2026-04-28",
+      "category": "papers",
+      "url": "posts/papers/2604/2026-04-28-paper.html",
+      "excerpt": "How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks"
+    },
+    {
       "title": "NLG Evaluation Metrics (BLEU, ROUGE, BERTScore, BLEURT, MoverScore)",
       "date": "2026-04-27",
       "category": "cs-fundamentals",
