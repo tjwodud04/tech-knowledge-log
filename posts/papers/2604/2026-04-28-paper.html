@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Longju Bai, Zhemin Huang, Xingyao Wang, Jiao Sun, Rada Mihalcea, Erik Brynjolfsson, Alex Pentland, Jiaxin Pei</div>
+        <div><strong>발행일 / Published:</strong> 2026-04-24</div>
+        <div><strong>Arxiv ID:</strong> 2604.22750</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>복잡한 인간 작업흐름에서 AI 에이전트의 폭넓은 도입은 대형 언어 모델(LLM) 토큰 소비의 급격한 증가를 초래하고 있습니다. 에이전트를 토큰을 많이 요구하는 작업에 배치할 때 자연스럽게 세 가지 질문이 제기됩니다: (1) AI 에이전트는 토큰을 어디에 사용하는가? (2) 어떤 모델이 토큰 효율성이 더 좋은가? (3) 에이전트는 작업 실행 전에 자신의 토큰 사용량을 예측할 수 있는가? 본 논문에서는 에이전트 기반 코딩 작업에서의 토큰 소비 패턴을 체계적으로 연구한 첫 번째 연구를 제시합니다. 우리는 SWE-bench Verified에서 8개 최첨단 LLM의 실행 궤적을 분석하고, 모델들이 작업 실행 전에 자신의 토큰 비용을 예측하는 능력을 평가합니다. 주요 발견은 다음과 같습니다. (1) 에이전트 작업은 특히 비용이 많이 들며, 코드 추론(code reasoning) 및 코드 채팅(code chat)보다 1000배 더 많은 토큰을 소비하고, 전체 비용은 출력 토큰보다 입력 토큰이 주도한다. (2) 토큰 사용량은 매우 가변적이고 본질적으로 확률적이며, 동일한 작업에 대한 실행 간 총 토큰 수가 최대 30배까지 차이 날 수 있고, 더 많은 토큰 사용이 더 높은 정확도로 이어지지 않는다. 오히려 정확도는 종종 중간 비용에서 최고치를 보이고 더 높은 비용에서는 포화된다. (3) 모델 간 토큰 효율성에 상당한 차이가 있어, 같은 작업에서 Kimi-K2와 Claude-Sonnet-4.5는 평균적으로 GPT-5보다 150만 개 이상의 토큰을 더 소비한다. (4) 인간 전문가들이 평가한 작업 난이도는 실제 토큰 비용과는 약하게만 정렬되어 있어, 인간이 인지하는 복잡도와 에이전트가 실제로 소모하는 계산적 노력 사이에 근본적인 간극이 있음을 드러낸다. (5) 최첨단 모델들은 자신의 토큰 사용량을 정확히 예측하지 못하며(약한~중간 수준의 상관관계로 최대 0.39), 체계적으로 실제 토큰 비용을 과소평가한다. 본 연구는 AI 에이전트의 경제학에 대한 새로운 통찰을 제공하며 이 방향의 후속 연구에 영감을 줄 수 있습니다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The wide adoption of AI agents in complex human workflows is driving rapid growth in LLM token consumption. When agents are deployed on tasks that require a significant amount of tokens, three questions naturally arise: (1) Where do AI agents spend the tokens? (2) Which models are more token-efficient? and (3) Can agents predict their token usage before task execution? In this paper, we present the first systematic study of token consumption patterns in agentic coding tasks. We analyze trajectories from eight frontier LLMs on SWE-bench Verified and evaluate models' ability to predict their own token costs before task execution. We find that: (1) agentic tasks are uniquely expensive, consuming 1000x more tokens than code reasoning and code chat, with input tokens rather than output tokens driving the overall cost; (2) token usage is highly variable and inherently stochastic: runs on the same task can differ by up to 30x in total tokens, and higher token usage does not translate into higher accuracy; instead, accuracy often peaks at intermediate cost and saturates at higher costs; (3) models vary substantially in token efficiency: on the same tasks, Kimi-K2 and Claude-Sonnet-4.5, on average, consume over 1.5 million more tokens than GPT-5; (4) task difficulty rated by human experts only weakly aligns with actual token costs, revealing a fundamental gap between human-perceived complexity and the computational effort agents actually expend; and (5) frontier models fail to accurately predict their own token usage (with weak-to-moderate correlations, up to 0.39) and systematically underestimate real token costs. Our study offers new insights into the economics of AI agents and can inspire future research in this direction.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2604.22750" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2604.22750.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
