@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Hidden Markov Models (HMM)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="숨겨진 마르코프 모델(HMM)은 관찰 가능한 시퀀스 뒤에 숨은 상태 시퀀스를 확률적으로 모델링해 시계열 추론·정렬·분류에 쓰이는 핵심 도구입니다. 생산시스템에서 음성인식, 유전자 서열 검색, 품사 태깅 등에 실무 적용이 많습니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Hidden Markov Models (HMM)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-04-29</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>숨겨진 마르코프 모델(HMM)은 관찰 가능한 시퀀스 뒤에 숨은 상태 시퀀스를 확률적으로 모델링해 시계열 추론·정렬·분류에 쓰이는 핵심 도구입니다. 생산시스템에서 음성인식, 유전자 서열 검색, 품사 태깅 등에 실무 적용이 많습니다.</p>
+        <p>작동 원리: HMM은 상태 전이확률 행렬 A, 상태별 관찰확률 B(또는 출력 분포), 초기 상태 분포 pi로 정의됩니다. 주요 알고리즘은 Viterbi(최적 상태 경로 디코딩), Forward-Backward(사후 확률 계산), Baum-Welch(EM 기반 파라미터 추정)입니다. 실무에서는 로그 확률로 연산해 언더플로우를 막고, 정규화·스무딩·정방향-후방향 벡터화로 성능을 끌어올립니다.<br><br>산업·학술 적용: 바이오인포매틱스의 profile HMM(예: HMMER)은 단백질 도메인 검색에서 표준이며(Sean Eddy), 음성인식 분야는 전통적으로 HMM+GMM, 이후 HMM+DNN(하이브리드)으로 발전해 Kaldi와 같은 툴킷에서 사용됩니다. 실무에서는 작은 상태 수의 해석 가능 모델이 필요할 때 HMM을 선택하고, 대규모 음성/텍스트는 DNN 또는 end-to-end로 보완합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: HMMER (profile HMM) — 생물정보학 도메인 검색<br>- 출처: HMMER (Eddy), 권장 버전 예: v3.3.2<br>- 명령:<br><pre><code class="language-bash"># 서열 데이터에서 도메인 검색<br>hmmscan --tblout results.tbl Pfam-A.hmm seqs.fasta</code></pre> <br>- 사용처: UniProt/도메인 어노테이션 파이프라인에서 대규모 스캐닝<br><br>사례: Kaldi 음성 인식 — HMM + DNN 하이브리드<br>- 출처: Kaldi 오픈소스 (https://github.com/kaldi-asr/kaldi)<br>- 명령 예시(간단화):<br><pre><code class="language-bash"># 단일 작업 예: monophone 모델 학습<br>steps/train_mono.sh --nj 20 data/train data/lang exp/mono</code></pre> <br>- 사용처: 연구·기업 프로토타입에서 음성 디코딩 파이프라인 구성<br><br>코드: Python(pomegranate v0.14) 간단 HMM<br><pre><code class="language-python">from pomegranate import HiddenMarkovModel, NormalDistribution<br>model = HiddenMarkovModel()<br>model.add_states(NormalDistribution(0,1), NormalDistribution(5,1))<br>model.add_transition(model.start, model.states[0], 0.6)<br>model.add_transition(model.start, model.states[1], 0.4)<br># ... 전이/종료 추가<br>model.bake()<br>model.fit([sequence_list])<br>states = model.predict(sequence)</code></pre> <br>실무 패턴:<br>- 로그-스케일 계산, underflow 방지<br>- 모델 선택: BIC/AIC로 상태 수 결정<br>- 하이브리드: HMM 구조 + DNN 출력(음성)으로 성능 확장<br>- 프로덕션: 배치 스캔(hmmscan), 병렬화/스트리밍 디코딩(Kaldi)</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Hidden Markov Models (HMMs) model sequences by assuming observations are emitted from hidden states following Markovian transitions; they are widely used for temporal inference, alignment, and decoding in production systems like speech recognition and biosequence analysis.</p>
+        <p>How it works: An HMM is defined by transition matrix A, emission distributions B (discrete or continuous), and initial distribution pi. Core algorithms are Viterbi (most likely state path), Forward-Backward (posterior probabilities), and Baum–Welch (EM for parameter estimation). Practical implementations operate in log-space, use vectorized forward/backward passes, and incorporate smoothing and regularization to avoid degenerate estimates.<br><br>Real-system usage: Profile HMMs (HMMER) are standard for protein domain detection; speech stacks historically used HMM+GMM and later HMM+DNN hybrids (Kaldi) for production ASR. In modern pipelines HMMs still serve where interpretable state sequences or explicit timing constraints are needed; for large-scale neural systems they appear as alignment layers or priors.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: HMMER (profile HMM) for biosequence search<br>- Source: HMMER (Sean Eddy), common version: v3.3.2<br>- Command:<br><pre><code class="language-bash">hmmscan --tblout results.tbl Pfam-A.hmm seqs.fasta</code></pre><br>- Where used: UniProt/Pfam annotation pipelines for large-scale domain scanning<br><br>Case: Kaldi ASR — HMM + DNN hybrid<br>- Source: Kaldi repo (https://github.com/kaldi-asr/kaldi)<br>- Command example (typical training script):<br><pre><code class="language-bash">steps/train_mono.sh --nj 20 data/train data/lang exp/mono</code></pre><br>- Where used: research and production prototyping for ASR systems<br><br>Code: Python (pomegranate v0.14) quick HMM<br><pre><code class="language-python">from pomegranate import HiddenMarkovModel, NormalDistribution<br>m = HiddenMarkovModel()<br># add gaussian states, transitions, bake<br>m.fit([seqs])<br>path = m.predict(seq)</code></pre><br>Production patterns:<br>- Use log-probabilities, numerical stability, and vectorized Baum–Welch<br>- Model selection with AIC/BIC; regularize emissions<br>- Hybridize HMM structure with neural nets for emissions (Kaldi-style) or use HMMs for fast batch scanning (HMMER) when interpretability and domain models matter</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
