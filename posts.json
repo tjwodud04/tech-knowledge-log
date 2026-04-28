@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Hidden Markov Models (HMM)",
+      "date": "2026-04-29",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2604/2026-04-29-hidden-markov-models-hmm.html",
+      "excerpt": "숨겨진 마르코프 모델(HMM)은 관찰 가능한 시퀀스 뒤에 숨은 상태 시퀀스를 확률적으로 모델링해 시계열 추론·정렬·분류에 쓰이는 핵심 도구입니다. 생산시스템에서 음성인식, 유전자 서열 검색, 품사 태깅 등에 실무 적용이 많습니다."
+    },
+    {
       "title": "How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks",
       "date": "2026-04-28",
       "category": "papers",
