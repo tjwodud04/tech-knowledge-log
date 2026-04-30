@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Dynamic Time Warping (Sequence Alignment)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="동적 시간 왜곡(DTW)은 길이/속도가 다른 두 시계열을 비선형 정렬해 유사도를 계산하는 기법으로, 음성·오디오 정렬, 센서·행동 인식, 시계열 검색 등 실무 시스템에서 여전히 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Dynamic Time Warping (Sequence Alignment)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-01</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>동적 시간 왜곡(DTW)은 길이/속도가 다른 두 시계열을 비선형 정렬해 유사도를 계산하는 기법으로, 음성·오디오 정렬, 센서·행동 인식, 시계열 검색 등 실무 시스템에서 여전히 널리 쓰입니다.</p>
+        <p>작동 원리: DTW는 두 시계열의 비용 행렬(cost matrix)을 만들고 누적 최저 비용 경로를 찾는 동적 계획법입니다. 경로 제약으로 Sakoe–Chiba band(로컬 윈도우)나 Itakura parallelogram을 적용해 연산량을 줄이고 오버워핑을 방지합니다. 실무 관점에선 z-정규화(평균0·표준편차1)로 스케일을 맞춘 후 LB_Keogh 같은 하한을 사용해 후보를 빠르게 배제하는 것이 중요합니다.<br><br>알고리즘/옵션: 정확한 DTW는 O(N*M) 시간·공간 복잡도를 갖지만 FastDTW(근사, O(N))나 C-최적화(dtaidistance), 윈도우 제약(radius/w)으로 속도를 개선합니다. 거리 함수로는 유클리드, 코사인, 혹은 가중치 기반 거리를 사용하며, 다중 차원 시계열은 각 차원 합산 또는 코사인 거리로 확장합니다. 최근 대규모 검색엔진/분류 작업에서는 DTW 대신 Matrix Profile이나 딥러닝 임베딩으로 보완하는 패턴이 보입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: 오디오/음성 정렬 — librosa의 DTW (Spotify/오디오 처리 커뮤니티)<br>코드:<br><pre><code class="language-python">import librosa, librosa.display<br>y1,_=librosa.load('ref.wav',sr=16000)<br>y2,_=librosa.load('query.wav',sr=16000)<br>D,wp=librosa.sequence.dtw(X=librosa.feature.mfcc(y=y1,sr=16000).T,<br>                           Y=librosa.feature.mfcc(y=y2,sr=16000).T,backtrack=True)<br># librosa&gt;=0.8</code></pre><br>실무 패턴: MFCC나 스펙트로그램으로 피처 변환 후 z-정규화, Sakoe-Chiba (window) 적용, 경로 후반부 스무딩.<br><br>- 사례: 대규모 시계열 분류 — tslearn/fastdtw/dtaidistance (연구: UCR benchmark, Keogh 2002, FastDTW 2004)<br>코드:<br><pre><code class="language-python">from fastdtw import fastdtw<br>from scipy.spatial.distance import euclidean<br>dist,path=fastdtw(x,y,dist=euclidean,radius=5)<br># fastdtw~=0.3.4, tslearn&gt;=0.5 provides exact DTW &amp; window params</code></pre><br>실무 패턴: LB_Keogh로 후보 필터링, C-확장(dtaidistance)로 병렬화, 시계열 길이 다운샘플링/슬라이딩 윈도우로 메모리 제어.<br><br>참고: 원논문 Sakoe & Chiba 1978, Keogh LB_Keogh 2002, Salvador & Chan FastDTW 2007/2004 계열</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dynamic Time Warping (DTW) non-linearly aligns sequences of different length/tempo to compute similarity; it's widely used in audio alignment, sensor/gesture matching, and time-series retrieval in production and research.</p>
+        <p>How it works: DTW builds a cost matrix between two sequences and finds the minimum cumulative-cost path via dynamic programming. Practical implementations constrain warping with Sakoe–Chiba bands or Itakura constraints to avoid pathological alignments and to reduce complexity. Preprocessing like z-normalization and lower-bound pruning (LB_Keogh) are essential for scalable search and k-NN classification.<br><br>Algorithmic notes: Exact DTW is O(N*M) in time/space; production systems use approximations (FastDTW), C/Cython implementations (dtaidistance), or windowed DTW (radius/w) to scale. Distance metric can be Euclidean per frame, cosine, or weighted sums for multivariate series. In modern pipelines, DTW often complements feature extraction (MFCC, spectrograms) or is replaced by embedding comparisons for very large datasets (Matrix Profile, deep features).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Audio alignment — librosa (used broadly in music/audio engineering; community around Spotify tools)<br>Code:<br><pre><code class="language-python">import librosa<br>mfcc1=librosa.feature.mfcc(librosa.load('ref.wav',sr=16000)[0],sr=16000)<br>mfcc2=librosa.feature.mfcc(librosa.load('query.wav',sr=16000)[0],sr=16000)<br>D,wp=librosa.sequence.dtw(X=mfcc1.T,Y=mfcc2.T,backtrack=True)<br># librosa &gt;= 0.8</code></pre><br>Production patterns: extract robust frames (MFCC/log-mel), z-normalize per-file, apply Sakoe–Chiba window, and smooth alignment path.<br><br>- Case: Time-series classification/search — tslearn/fastdtw/dtaidistance (research: UCR Archive, Keogh LB_Keogh 2002, FastDTW)<br>Code:<br><pre><code class="language-python">from fastdtw import fastdtw<br>from scipy.spatial.distance import euclidean<br>dist,path = fastdtw(series_a, series_b, dist=euclidean, radius=5)<br># fastdtw ~0.3.4, tslearn &gt;=0.5 for exact &amp; windowed DTW</code></pre><br>Production patterns: use LB_Keogh for pruning, C-optimized libs (dtaidistance) for bulk pairwise distances, downsample/segment long series, and fallback to learned embeddings for extreme-scale systems.<br><br>References: Sakoe & Chiba 1978; Keogh LB_Keogh 2002; FastDTW/Salvador & Chan (approx.)</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
