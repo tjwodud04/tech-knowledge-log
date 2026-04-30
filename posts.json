@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Dynamic Time Warping (Sequence Alignment)",
+      "date": "2026-05-01",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-01-dynamic-time-warping-sequence-alignment.html",
+      "excerpt": "동적 시간 왜곡(DTW)은 길이/속도가 다른 두 시계열을 비선형 정렬해 유사도를 계산하는 기법으로, 음성·오디오 정렬, 센서·행동 인식, 시계열 검색 등 실무 시스템에서 여전히 널리 쓰입니다."
+    },
+    {
       "title": "Hidden Markov Models (HMM)",
       "date": "2026-04-29",
       "category": "cs-fundamentals",
