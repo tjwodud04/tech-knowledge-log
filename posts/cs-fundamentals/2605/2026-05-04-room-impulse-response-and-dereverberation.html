@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Room Impulse Response & Dereverberation (RIR / Reverberation)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="룸 임펄스 응답(RIR)은 실내에서 음원이 마이크에 도달할 때 직접음과 반사음의 시간·주파수 특성을 캡처한 필터이며, 현실 세계의 음성 시스템(ASR, 회의 녹음, 보이스 어시스턴트)에서 성능을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Room Impulse Response & Dereverberation (RIR / Reverberation)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-04</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>룸 임펄스 응답(RIR)은 실내에서 음원이 마이크에 도달할 때 직접음과 반사음의 시간·주파수 특성을 캡처한 필터이며, 현실 세계의 음성 시스템(ASR, 회의 녹음, 보이스 어시스턴트)에서 성능을 좌우합니다.</p>
+        <p>작동 원리: 실내 음향은 선형 시불변 시스템으로 근사되어 음원 신호 s(t)는 RIR h(t)와의 컨볼루션 x(t)=s(t)*h(t)+n(t)로 모델링됩니다. RIR은 직접음 도달 시간, 초기반사(조기반사) 및 잔향(후반반사)의 에너지 분포를 포함합니다. RIR을 얻는 방법은 실제 측정(일회성 펄스, 엉덩이 사인, ESS)과 시뮬레이션(이미지 소스법, ray-tracing)이 있습니다 — Allen & Berkley의 이미지 소스법은 실무에서 빠른 합성에 널리 쓰입니다.<br><br>역처리/디리버베레이션: 전통적 방법은 WPE(Weighted Prediction Error)를 이용한 선형 예측 기반 잔향 제거와 멀티마이크 빔포밍+WPE 파이프라인입니다(Nakatani 등). 최근에는 DNN 기반 스펙트럼 매핑, Conv-TasNet 스타일의 시간영역 네트워크, 또는 GAN 계열의 리버브-리스토어 모델이 널리 연구됩니다. 실무에서는 데이터 증강(예: Kaldi의 reverberate_data_dir.py)으로 모델을 RIR에 강건하게 만들거나, 실시간 애플리케이션에서 저지연 WPE/beamformer를 병행합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Kaldi (ASR 데이터 증강)<br>  코드:<br><pre><code class="language-bash"># Kaldi egs 스크립트로 방 시뮬레이션된 데이터 생성<br>steps/data/reverberate_data_dir.py --rir-set-parameters "min=0.2,max=0.5,rooms=sim" data/train data/train_reverb</code></pre><br>  사용처: Kaldi egs (ASR 트레이닝 데이터 확장)<br><br>- 사례: pyroomacoustics (RIR 합성) 및 nara_wpe (디리버브)<br>  코드:<br><pre><code class="language-python">import pyroomacoustics as pra<br>room = pra.ShoeBox([6,5,3])<br>room.add_source([2,1.5,1.0], signal=signal)<br>room.add_microphone_array(pra.MicrophoneArray([[4],[3.5],[1.2]], room.fs))<br>room.compute_rir(); rir=room.rir[0][0]</code></pre><br><pre><code class="language-python">from nara_wpe.wpe import wpe<br>enhanced = wpe(multi_channel_signal, taps=10, delay=3)</code></pre><br>  사용처: 연구/프로토타이핑 (pyroomacoustics GitHub, nara_wpe pip)<br><br>실무 패턴: 데이터 증강+멀티마이크 처리로 모델 강건화, 측정 RIR을 혼합해 도메인 갭 최소화, 실시간에서는 저지연 WPE나 스택드 빔포머를 사용. 참고: REVERB/CHiME 챌린지 논문과 Kaldi 레시피들이 산업적 레퍼런스.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Room Impulse Response (RIR) is the filter capturing direct and reflected sound from a source to a microphone; modeling and removing reverberation is crucial for far-field speech systems (ASR, conferencing, voice assistants).</p>
+        <p>How it works: Acoustics in a room are commonly approximated as a linear time-invariant system: observed x(t)=s(t)*h(t)+n(t), where h(t) is the RIR containing direct path, early reflections and late reverberation. RIRs are obtained by measurement (impulse, ESS sine sweep) or simulation (image-source method, ray tracing). The Allen & Berkley image-source method is often used in research and simulation pipelines because it efficiently synthesizes early reflections.<br><br>Dereverberation algorithms: Traditional approaches include WPE (Weighted Prediction Error), which models late reverberation as a predictable component and removes it via multichannel linear prediction (Nakatani et al.). Pipelines in production often combine beamforming (MVDR) with WPE. Modern ML approaches use supervised spectral mapping, time-domain networks (Conv-TasNet variants), or GANs trained on simulated + measured RIR-augmented corpora. In practice teams use simulated RIRs for data augmentation (Kaldi), pyroomacoustics for RIR generation, and nara_wpe for dereverb in Python-based workflows.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Kaldi (ASR data augmentation)<br>  Code:<br><pre><code class="language-bash"># Kaldi-style reverberation (example call)<br>steps/data/reverberate_data_dir.py --rir-set-parameters "min=0.2,max=0.5,rooms=sim" data/train data/train_reverb</code></pre><br>  Where used: Kaldi recipes for robust ASR training; REVERB/CHiME datasets use similar augmentation.<br><br>- Case: pyroomacoustics (image-source RIR) + nara_wpe (dereverb)<br>  Code:<br><pre><code class="language-python">import pyroomacoustics as pra<br>room=pra.ShoeBox([6,5,3])<br>room.add_source([2,1.5,1.0], signal=signal)<br>room.add_microphone_array(pra.MicrophoneArray([[4.,3.5,1.2]]).T, room.fs)<br>room.compute_rir(); rir=room.rir<br># apply rir to clean signal, then<br>from nara_wpe.wpe import wpe<br>enh = wpe(multi_channel_signal, taps=10, delay=3)</code></pre><br>  Where used: pyroomacoustics (GitHub) for prototyping; nara_wpe (pip) implements WPE used in research.<br><br>Production patterns: augment training with both measured and simulated RIRs, use multi-mic beamforming + WPE for far-field ASR (Google/Alexa/Azure public talks and CHiME/REVERB literature), and prefer low-latency variants for real-time devices. References: REVERB challenge, CHiME series, Nakatani WPE papers, Kaldi recipes.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
