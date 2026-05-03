@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Room Impulse Response & Dereverberation (RIR / Reverberation)",
+      "date": "2026-05-04",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-04-room-impulse-response-and-dereverberation.html",
+      "excerpt": "룸 임펄스 응답(RIR)은 실내에서 음원이 마이크에 도달할 때 직접음과 반사음의 시간·주파수 특성을 캡처한 필터이며, 현실 세계의 음성 시스템(ASR, 회의 녹음, 보이스 어시스턴트)에서 성능을 좌우합니다."
+    },
+    {
       "title": "Dynamic Time Warping (Sequence Alignment)",
       "date": "2026-05-01",
       "category": "cs-fundamentals",
