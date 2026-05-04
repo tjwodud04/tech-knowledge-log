@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Can Coding Agents Reproduce Findings in Computational Materials Science?",
+      "date": "2026-05-05",
+      "category": "papers",
+      "url": "posts/papers/2605/2026-05-05-paper.html",
+      "excerpt": "Can Coding Agents Reproduce Findings in Computational Materials Science?"
+    },
+    {
       "title": "Room Impulse Response & Dereverberation (RIR / Reverberation)",
       "date": "2026-05-04",
       "category": "cs-fundamentals",
