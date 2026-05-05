@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "N-gram Language Models & Smoothing",
+      "date": "2026-05-06",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-06-n-gram-language-models-and-smoothing.html",
+      "excerpt": "n-그램 언어 모델은 주변 단어(컨텍스트)의 빈도 기반 확률로 다음 토큰을 예측하는 전통적 기법으로, 대규모 음성인식·번역·검색 파이프라인에서 여전히 속도·메모리 측면에서 실무적 중요성이 큽니다."
+    },
+    {
       "title": "Can Coding Agents Reproduce Findings in Computational Materials Science?",
       "date": "2026-05-05",
       "category": "papers",
