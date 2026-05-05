@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>N-gram Language Models & Smoothing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="n-그램 언어 모델은 주변 단어(컨텍스트)의 빈도 기반 확률로 다음 토큰을 예측하는 전통적 기법으로, 대규모 음성인식·번역·검색 파이프라인에서 여전히 속도·메모리 측면에서 실무적 중요성이 큽니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>N-gram Language Models & Smoothing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-06</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>n-그램 언어 모델은 주변 단어(컨텍스트)의 빈도 기반 확률로 다음 토큰을 예측하는 전통적 기법으로, 대규모 음성인식·번역·검색 파이프라인에서 여전히 속도·메모리 측면에서 실무적 중요성이 큽니다.</p>
+        <p>작동 원리: n-그램은 P(w_i | w_{i-n+1}^{i-1})를 빈도에서 추정(MLE)합니다. 희소성 때문에 MLE는 0확률을 낳으므로 스무딩이 필요합니다. 대표적 기법은 Laplace(add-k), Good–Turing(빈도 재분배), Katz 백오프(낮은 빈도는 할인 후 하위 n-그램으로 백오프), 그리고 실무 표준인 Modified Kneser–Ney(컨텍스트 다양성 고려한 할인+보간)입니다. 구현 관점에서는 n-그램 집계, 할인량 계산(D count-of-counts), 백오프 가중치(alpha) 계산이 핵심입니다.<br>운영 이슈: 대규모 코퍼스에서는 ARPA 포맷 생성 → 바이너리화(메모리/쿼리 속도 개선), 카운트 컷오프(빈도 임계값)·가지치기(pruning), 정수 인코딩 및 양자화가 필요합니다. 검색·ASR처럼 실시간 요구가 강한 곳에서는 KenLM/SRILM 같은 C++ 라이브러리로 빌드한 바이너리 모델을 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: KenLM을 이용한 프로덕션 LM 빌드(많은 SMT/ASR 스택에서 사용)<br>코드:<br><pre><code class="language-bash"># 코퍼스로부터 5-그램 ARPA 생성<br>lmplz -o 5 &lt; corpus.txt &gt; model.arpa<br># 바이너리 변환(빠른 쿼리)<br>build_binary model.arpa model.klm</code></pre><br>Python 쿼리:<br><pre><code class="language-python">import kenlm<br>m = kenlm.LanguageModel('model.klm')<br>print(m.score('this is a test'))</code></pre><br>출처/사용처: KenLM(Heafield GitHub), SRILM, Kaldi(ASR 예전 파이프라인), Moses/Marian(통계·초기 신경 MT에서 LM 스코어링). 실무 패턴: Modified Kneser–Ney 디폴트, 빈도 컷오프, 바이너리 모델+메모리 맵핑, 필요시 interpolation으로 NNLM과 하이브리드 결합. 참고 논문: Chen & Goodman(1998) Modified Kneser–Ney.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>N‑gram LMs estimate next-token probabilities from counts of local context; despite neural dominance, they remain practical for fast, memory‑sensitive components (ASR, SMT rescoring, on-device features).</p>
+        <p>How it works: An n‑gram model uses P(w_i | w_{i-n+1}^{i-1}) estimated from counts. Naïve MLE gives zero probability to unseen n‑grams, so smoothing redistributes mass. Methods range from add‑k (Laplace) to Good‑Turing, Katz backoff (discount then backoff), and the production standard Modified Kneser–Ney (discounting + continuation probabilities). Implementation requires count aggregation, count‑of‑counts for discounts, computation of backoff/ interpolation weights, and efficient storage (ARPA → binary).<br>Operational details: For large corpora you prune low‑count entries, use count cutoffs, and quantize probabilities. Binary formats and memory‑mapping (KenLM) give fast lookups. In pipelines, n‑gram LMs are often used for fast rescoring, feature extraction, or as priors combined with neural models via interpolation.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: KenLM in MT/ASR stacks (widely used in Moses/Kaldi ecosystems)<br>Commands:<br><pre><code class="language-bash"># Build 5-gram ARPA and binary using KenLM<br>lmplz -o 5 &lt; corpus.txt &gt; model.arpa<br>build_binary model.arpa model.klm</code></pre><br>Python example:<br><pre><code class="language-python">import kenlm<br>model = kenlm.LanguageModel('model.klm')<br>print(model.score('this is a test'))</code></pre><br>Production patterns: default to Modified Kneser–Ney (Chen & Goodman 1998), use pruning/count cutoffs for memory, serve binary models with mmap, and hybridize with NNLMs via log‑linear interpolation or n‑best rescoring. Sources: KenLM (Heafield GitHub), SRILM toolkit, Kaldi recipes and Moses/Marian integrations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
