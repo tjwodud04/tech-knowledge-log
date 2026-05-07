@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Bloom Filters (확률적 자료구조: 블룸 필터)",
+      "date": "2026-05-08",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-08-probabilistic-data-structures-bloom-filters.html",
+      "excerpt": "블룸 필터는 적은 메모리로 집합 멤버십을 빠르게 테스트하는 확률적 자료구조로, 캐시/디스크 조회 감소와 분산 시스템의 네트워크 비용 절감에 실무적으로 유용합니다."
+    },
+    {
       "title": "N-gram Language Models & Smoothing",
       "date": "2026-05-06",
       "category": "cs-fundamentals",
