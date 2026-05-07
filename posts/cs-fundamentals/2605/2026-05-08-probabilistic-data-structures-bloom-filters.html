@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Bloom Filters (확률적 자료구조: 블룸 필터)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="블룸 필터는 적은 메모리로 집합 멤버십을 빠르게 테스트하는 확률적 자료구조로, 캐시/디스크 조회 감소와 분산 시스템의 네트워크 비용 절감에 실무적으로 유용합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Bloom Filters (확률적 자료구조: 블룸 필터)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-08</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>블룸 필터는 적은 메모리로 집합 멤버십을 빠르게 테스트하는 확률적 자료구조로, 캐시/디스크 조회 감소와 분산 시스템의 네트워크 비용 절감에 실무적으로 유용합니다.</p>
+        <p>비트 배열 m과 k개의 해시 함수를 사용해 항목 n을 삽입하면 해당 비트들을 1로 설정합니다. 멤버십 질의는 모든 k 위치가 1인지 검사해 '있을 수 있음' 또는 '확실히 없음'을 반환하며, 거짓긍정(false positive)은 허용되지만 거짓부정(false negative)은 없습니다. 확률 p는 약 p ≈ (1 - e^{-k n / m})^k 이고 최적 k = (m/n) ln 2입니다. 실무에서는 메모리/정확도 트레이드오프를 계산해 m과 k를 결정합니다.<br><br>확장성 문제는 Counting Bloom Filter(삭제지원), Scalable/Partitioned Bloom Filter(동적 확장), Cuckoo Filter(삭제 및 더 낮은 FP) 등으로 해결합니다. 또한 Bloom 필터는 비트단위 OR/AND로 합치거나 분산 캐시에서 로컬 체크 후 원격 조회를 줄이는 데 자주 쓰입니다. 주요 사례로는 HBase/Cassandra/Hadoop 계열의 SSTable 레벨 필터, Chrome Safe Browsing(프리픽스 집합), RedisBloom 모듈 등이 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: HBase에서 열패밀리 수준 Bloom 필터 설정 (HBase 2.4)<br>코드:<br><pre><code class="language-java">ColumnFamilyDescriptorBuilder cfd = ColumnFamilyDescriptorBuilder.newBuilder("cf".getBytes());<br>cfd.setBloomFilterType(BloomType.ROW);<br>admin.createTable(TableDescriptorBuilder.newBuilder(TableName.valueOf("tbl")).setColumnFamily(cfd.build()).build());</code></pre><br>설명: HBase/Hadoop 계열은 SSTable 읽기 시 I/O를 줄이기 위해 블룸 필터를 사용합니다.<br><br>- 사례: RedisBloom 모듈 (RedisBloom v2.x)<br>코드:<br><pre><code class="language-bash"># 모듈 설치 후<br>BF.RESERVE users 0.01 100000<br>BF.ADD users user:12345<br>BF.EXISTS users user:99999</code></pre><br>설명: RedisLabs의 RedisBloom은 실무에서 빠른 존재 체크/캐시 프리필터로 사용됩니다.<br><br>- 사례: 라이브러리 (Guava 31.x)<br>코드:<br><pre><code class="language-java">BloomFilter&lt;String&gt; bf = BloomFilter.create(Funnels.stringFunnel(Charset.forName("UTF-8")), 100000, 0.01);<br>bf.put("id:1");<br>bf.mightContain("id:2");</code></pre><br>실무 패턴: 예상 삽입량/목표 FP율로 생성, 주기적 리빌드(과도한 삽입 후), 필요시 Counting/Scalable 변종 사용. 참고: Bloom(1970), Broder & Mitzenmacher(2004) 서베이.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A Bloom filter is a space-efficient probabilistic data structure for set membership tests; it reduces disk/DB lookups and network calls in production by quickly filtering negatives with low memory cost.</p>
+        <p>A Bloom filter uses an m-bit array and k independent hash functions. To insert n items, set k bit positions per item. A membership test checks if all k bits are 1: if not, the item is definitely absent; if yes, it is probably present (possible false positive, no false negatives). False positive probability p ≈ (1 - e^{-k n / m})^k; optimal k ≈ (m/n) ln 2. Operators like bitwise OR/AND enable merge across partitions.<br><br>Practical variants: Counting Bloom Filters (support deletions), Scalable/Partitioned Bloom Filters (grow without full rebuild), and Cuckoo Filters (support deletion and often lower FP for similar space). Bloom filters are widely used as cache pre-filters and SSTable-level filters in distributed storage to avoid expensive I/O or cross-node lookups.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: HBase (and Bigtable-inspired stores) use Bloom filters per column family to reduce HDFS/SSTable reads.<br>Code (HBase 2.4):<br><pre><code class="language-java">ColumnFamilyDescriptorBuilder cfd = ColumnFamilyDescriptorBuilder.newBuilder("cf".getBytes());<br>cfd.setBloomFilterType(BloomType.ROW);<br>admin.createTable(TableDescriptorBuilder.newBuilder(TableName.valueOf("tbl")).setColumnFamily(cfd.build()).build());</code></pre><br>Production note: used in HBase/Hadoop to avoid disk seeks when looking up rows.<br><br>- Case: RedisBloom module (RedisLabs, RedisBloom v2.x)<br>Code:<br><pre><code class="language-bash"># create filter with 1% fp and capacity 100k<br>BF.RESERVE users 0.01 100000<br>BF.ADD users user:12345<br>BF.EXISTS users user:99999</code></pre><br>Production patterns: use Bloom as a fast negative cache before hitting DB, monitor FP growth, rebuild or use Scalable/Counting variants when over capacity.<br><br>- Case: Guava BloomFilter (Guava 31.x) for in-process pre-checks<br>Code:<br><pre><code class="language-java">BloomFilter&lt;String&gt; bf = BloomFilter.create(Funnels.stringFunnel(Charset.forName("UTF-8")), 100000, 0.01);<br>bf.put("id:1");<br>bf.mightContain("id:2");</code></pre><br>References: Bloom 1970; Broder & Mitzenmacher survey (2004); Chrome Safe Browsing and many distributed DBs adopt Bloom-like prefix/filters in production.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
