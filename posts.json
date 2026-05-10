@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Contrastive Learning for Text Representations / 텍스트 표현을 위한 대비학습",
+      "date": "2026-05-11",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-11-contrastive-learning-for-text-representations.html",
+      "excerpt": "대비학습(contrastive learning)은 텍스트 문장들을 임베딩 공간에서 유사도 기준으로 정렬해 검색·분류·군집 성능을 높이는 기법으로, 생산 시스템의 효율적인 Dense Retrieval과 임베딩 기반 서비스에서 핵심 역할을 합니다."
+    },
+    {
       "title": "Bloom Filters (확률적 자료구조: 블룸 필터)",
       "date": "2026-05-08",
       "category": "cs-fundamentals",
