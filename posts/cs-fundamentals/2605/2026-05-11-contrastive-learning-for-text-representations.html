@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Contrastive Learning for Text Representations / 텍스트 표현을 위한 대비학습</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="대비학습(contrastive learning)은 텍스트 문장들을 임베딩 공간에서 유사도 기준으로 정렬해 검색·분류·군집 성능을 높이는 기법으로, 생산 시스템의 효율적인 Dense Retrieval과 임베딩 기반 서비스에서 핵심 역할을 합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Contrastive Learning for Text Representations / 텍스트 표현을 위한 대비학습</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-11</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대비학습(contrastive learning)은 텍스트 문장들을 임베딩 공간에서 유사도 기준으로 정렬해 검색·분류·군집 성능을 높이는 기법으로, 생산 시스템의 효율적인 Dense Retrieval과 임베딩 기반 서비스에서 핵심 역할을 합니다.</p>
+        <p>작동 원리: 텍스트 대비학습은 '긍정 쌍'과 '부정 샘플'을 만들어 임베딩을 가깝게/멀게 학습합니다. 대표 손실은 InfoNCE(소프트맥스 기반)로, 온도 파라미터 τ와 정규화된 내적(sim(u,v)/τ)을 사용해 확률을 만듭니다. 주요 전략은 (1) 데이터 증강: dropout 기반 SimCSE(무감독)처럼 동일 문장을 서로 다른 드롭아웃 경로로 긍정 쌍을 생성, (2) 레이블 기반 supervised contrastive(같은 라벨들을 긍정), (3) in-batch negatives나 메모리 큐(MoCo 스타일)로 대규모 음성 샘플 제공, (4) 하드 네거티브 채굴(ANCE, DPR)으로 실제 검색 품질 향상.<br>실무 팁: 임베딩 L2 정규화, temperature(0.05~0.2) 튜닝, 큰 batch 또는 large negative pool, query/doc 별 인코더 분리(검색) 등이 핵심입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: SimCSE (Gao et al., 2021) 연구 및 코드; DPR (Karpukhin et al., 2020) — 페이스북 FAISS 기반 검색 파이프라인에서 in-batch 하드네거티브 활용; ANCE (Microsoft) — Bing에서 대규모 네거티브를 통해 문서 검색 정밀도 개선.<br>코드:<br><pre><code class="language-python"># sentence-transformers 기반 인-배치 대비학습 예시<br># requires: sentence-transformers==2.2.2 torch==1.13.1 transformers==4.31.0<br>from sentence_transformers import SentenceTransformer, InputExample, losses, models<br>model = SentenceTransformer('sentence-transformers/distilbert-base-nli-stsb-mean-tokens')<br>data = [InputExample(texts=[s,s_alt]) for s,s_alt in pairs]<br>train_loss = losses.MultipleNegativesRankingLoss(model)<br>model.fit(train_objectives=[(data, train_loss)], epochs=1, batch_size=64)</code></pre><br>실무 패턴:<br>- Retrieval: query/doc 별 인코더로 서빙, FAISS로 ANN 검색(DPR/ANCE 패턴)<br>- 학습: 큰 배치(또는 메모리 큐), 온도 튜닝, 하드네거티브 재샘플링<br>출처: SimCSE repo (GitHub), sentence-transformers docs, DPR/ANCE 논문·코드.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Contrastive learning for text trains embeddings so semantically similar texts are close and dissimilar ones are far — critical for dense retrieval, semantic search, and robust sentence embeddings in production.</p>
+        <p>How it works: Contrastive methods create positive and negative pairs and optimize an InfoNCE-like loss: p(pos|anchor) = exp(sim(a,p)/τ) / sum(exp(sim(a,all)/τ)). Common engineering choices: (1) augmentation — SimCSE (unsupervised) uses dropout-as-augmentation to produce positive pairs; (2) supervised contrastive uses labels to form positives; (3) in-batch negatives or a memory queue (MoCo-style) provide many negatives without storing them all; (4) hard negative mining (DPR/ANCE) improves retrieval precision. Practically, normalize embeddings, tune temperature τ (≈0.05–0.2), use large batch sizes or an explicit negative pool, and separate query/doc encoders for low-latency search.<br>Implementation notes: use MultipleNegativesRankingLoss (sentence-transformers) or custom InfoNCE loss; for retrieval combine with FAISS/ANN and periodically refresh negative pools.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case:<br>- Case: SimCSE (Gao et al., 2021) — unsupervised/supervised contrastive text embeddings; DPR (Karpukhin et al., 2020) — Facebook Dense Passage Retrieval; ANCE (Microsoft) — approximate nearest negative mining used in web-scale search.<br>Code:<br><pre><code class="language-python"># train contrastive embeddings with sentence-transformers<br># pip: sentence-transformers==2.2.2 transformers==4.31.0 torch==1.13.1<br>from sentence_transformers import SentenceTransformer, InputExample, losses<br>model = SentenceTransformer('sentence-transformers/distilbert-base-nli-stsb-mean-tokens')<br>train_examples = [InputExample(texts=[a,b]) for a,b in pairs]<br>loss = losses.MultipleNegativesRankingLoss(model)<br>model.fit([(train_examples, loss)], epochs=1, batch_size=128)</code></pre><br>Production patterns:<br>- Use FAISS for ANN indexing; refresh embeddings when indexing updates (DPR/ANCE pipelines).<br>- Combine supervised positives and mined hard negatives; monitor embedding drift and re-index.<br>Sources: SimCSE GitHub/paper, sentence-transformers docs, DPR/ANCE papers and open-source implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
