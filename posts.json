@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling",
+      "date": "2026-05-12",
+      "category": "papers",
+      "url": "posts/papers/2605/2026-05-12-paper.html",
+      "excerpt": "LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling"
+    },
+    {
       "title": "Contrastive Learning for Text Representations / 텍스트 표현을 위한 대비학습",
       "date": "2026-05-11",
       "category": "cs-fundamentals",
