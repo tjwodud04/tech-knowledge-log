@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Tong Zheng, Haolin Liu, Chengsong Huang, Huiwen Bao, Sheng Zhang, Rui Liu, Runpeng Dai, Ruibo Chen, Chenxi Liu, Tianyi Xiong, Xidong Wu, Hongming Zhang, Heng Huang</div>
+        <div><strong>발행일 / Published:</strong> 2026-05-08</div>
+        <div><strong>Arxiv ID:</strong> 2605.08083</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>테스트 시 스케일링(TTS)은 추론 중 추가 계산을 할당해 대형 언어 모델의 성능을 향상시키는 효과적인 접근법이 되었다. 그러나 기존의 TTS 전략들은 대부분 수작업으로 설계되어 왔다. 연구자들이 직관에 따라 추론 패턴을 직접 설계하고 휴리스틱을 튜닝하면서 계산 할당 공간의 많은 부분이 탐색되지 않은 채로 남아 있다. 우리는 설계 대상을 바꾸는 환경 기반 프레임워크 AutoTTS를 제안한다. 연구자가 개별 TTS 휴리스틱을 설계하는 대신, TTS 전략을 자동으로 발견할 수 있는 환경을 설계하도록 하는 것이다. AutoTTS의 핵심은 환경 구성에 있다. 발견 환경은 제어 공간을 다루기 쉽게 만들고 TTS 탐색을 위한 저렴하고 빈번한 피드백을 제공해야 한다. 구체적 구현으로서 우리는 너비–깊이(width–depth) TTS를 사전 수집된 추론 궤적과 프로브 신호 위에서의 컨트롤러 합성으로 정식화한다. 이 컨트롤러들은 언제 분기(branch), 계속, 프로브, 가지치기(prune), 중단할지를 결정하며 반복적인 LLM 호출 없이도 저렴하게 평가될 수 있다. 또한 탐색을 실용적으로 만들기 위해 베타(β) 파라미터화를 도입하고, 에이전트가 TTS 프로그램이 실패하는 이유를 진단하도록 도와 발견 효율을 높이는 세분화된 실행 트레이스 피드백을 도입했다. 수학적 추론 벤치마크에 대한 실험에서 발견된 전략들은 강력히 수작업으로 설계된 기준선들보다 정확도-비용 절충을 전반적으로 개선함을 보였다. 이들 전략은 미사용(held-out) 벤치마크와 다른 모델 규모로도 일반화되며, 전체 발견 비용은 단 $39.9와 160분에 불과했다. 데이터와 코드는 https://github.com/zhengkid/AutoTTS 에 오픈소스로 공개될 예정이다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Test-time scaling (TTS) has become an effective approach for improving large language model performance by allocating additional computation during inference. However, existing TTS strategies are largely hand-crafted: researchers manually design reasoning patterns and tune heuristics by intuition, leaving much of the computation-allocation space unexplored. We propose an environment-driven framework, AutoTTS, that changes what researchers design: from individual TTS heuristics to environments where TTS strategies can be discovered automatically. The key to AutoTTS lies in environment construction: the discovery environment must make the control space tractable and provide cheap, frequent feedback for TTS search. As a concrete instantiation, we formulate width--depth TTS as controller synthesis over pre-collected reasoning trajectories and probe signals, where controllers decide when to branch, continue, probe, prune, or stop and can be evaluated cheaply without repeated LLM calls. We further introduce beta parameterization to make the search tractable and fine-grained execution trace feedback to improve discovery efficiency by helping the agent diagnose why a TTS program fails. Experiments on mathematical reasoning benchmarks show that the discovered strategies improve the overall accuracy--cost tradeoff over strong manually designed baselines. The discovered strategies generalize to held-out benchmarks and model scales, while the entire discovery costs only $39.9 and 160 minutes. Our data, and code will be open-source at https://github.com/zhengkid/AutoTTS.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2605.08083" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2605.08083.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
