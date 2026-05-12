@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Amortized Analysis of Algorithms / 알고리즘의 평균적 비용 분석</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="암모티즈드 분석은 '어떤 연산이 드물게 비싸더라도 평균적으로는 싸다'를 정량화해 실무 시스템의 지연/성능 특성을 예측하는 방법입니다. 대규모 서비스에서 일시적 고비용 연산(리사이즈, 리해시 등)이 전체 지연을 어떻게 영향을 주는지 판단할 때 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Amortized Analysis of Algorithms / 알고리즘의 평균적 비용 분석</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-13</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>암모티즈드 분석은 '어떤 연산이 드물게 비싸더라도 평균적으로는 싸다'를 정량화해 실무 시스템의 지연/성능 특성을 예측하는 방법입니다. 대규모 서비스에서 일시적 고비용 연산(리사이즈, 리해시 등)이 전체 지연을 어떻게 영향을 주는지 판단할 때 중요합니다.</p>
+        <p>암모티즈드 분석은 aggregate, accounting, potential 세 가지 기법으로 연산 비용을 평균화합니다. 예를 들어 동적 배열(push/append)은 간혹 전체 복사를 하므로 개별 연산이 O(n)일 수 있지만 성장 팩터(예: 2배)를 사용하면 N회의 연속 연산에 대한 총비용이 O(N)이고, 따라서 한 번의 append는 평균 O(1)입니다. 해시 테이블 리사이즈도 비슷하며, 점진적(incremental) 리해시를 통해 단일 요청당 비용을 분산시켜 지연을 낮춥니다.<br><br>실무적으로는 런타임/DB/캐시 시스템에서 암모티즈드 거동을 고려해 성장 팩터와 리사이즈 전략을 선택합니다. 성장 계수(1.5 vs 2.0), 사전 reserve/rehash 호출, 백그라운드/증분 리해시 도입 여부가 시스템 응답성에 직접적인 영향을 줍니다. 연구 논문 및 교과서(CLR S/Tarjan)는 증거와 기법을 제공합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Java OpenJDK ArrayList (OpenJDK 17)<br>코드: (ArrayList.grow 부분)<br><pre><code class="language-java">int newCapacity = oldCapacity + (oldCapacity &gt;&gt; 1); // 1.5배 성장<br>elementData = Arrays.copyOf(elementData, newCapacity);</code></pre><br>사용처: JDK의 ArrayList 구현(Amazon, Google 서비스 등에서 라이브러리 컬렉션으로 널리 사용).<br><br>- 사례: C++ std::vector (libstdc++, libc++)<br>코드: push_back 반복 시 내부 버퍼는 보통 2배 성장하여 amortized O(1)<br><pre><code class="language-cpp">std::vector&lt;int&gt; v;<br>for(int i=0;i&lt;N;++i) v.push_back(i);</code></pre><br>사용처: LLVM, Chrome, 많은 C++ 서버에서 버퍼/버킷 구현에 사용.<br><br>- 사례: Redis incremental rehash (redis src/dict.c, Redis 7.x)<br>코드(단순화):<br><pre><code class="language-c">while(rehash_steps--) _dictRehashStep(d);</code></pre><br>사용처: Redis는 전체 리해시를 한 번에 하지 않고 명령 처리 중에 조금씩 수행해 지연을 분산시킵니다.<br><br>실무 패턴: 성장 팩터를 서비스 특성에 맞게 선택(메모리 vs CPU tradeoff), 필요 시 reserve()로 사전 할당, 증분/백그라운드 리사이징으로 p99 지연 제어. 참고: CPython listobject.c, OpenJDK ArrayList 소스, Redis dict.c에서 구현 예 확인.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Amortized analysis quantifies average cost per operation over sequences, letting engineers reason about occasional expensive operations (resizes, rehashes) that would otherwise break latency expectations in production.</p>
+        <p>Three common amortized techniques are aggregate, accounting, and potential methods. A canonical example is the dynamic array: individual append can trigger an O(n) copy, but with exponential growth (e.g., doubling) N appends cost O(N) total, giving amortized O(1) per append. Hash tables that reallocate/rehash have similar patterns; doing the work incrementally spreads the cost across many requests and reduces tail latency.<br><br>In practice, system designers pick growth factors, provide reserve/preallocate APIs, or implement incremental/background resizing to meet p50/p99 constraints. Theoretical foundations appear in CLRS and Tarjan's work, while applied source code in runtimes and DBs shows how these ideas map to production: growth factor choices trade memory for fewer copies, and incremental rehash avoids big pauses in in-memory stores.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: OpenJDK ArrayList (OpenJDK 17)<br>Code (grow logic):<br><pre><code class="language-java">int newCapacity = oldCapacity + (oldCapacity &gt;&gt; 1); // grow by 1.5x<br>elementData = Arrays.copyOf(elementData, newCapacity);</code></pre><br>Where used: Java services across industry use ArrayList; growth factor affects garbage and copy overhead.<br><br>- Case: C++ std::vector (libstdc++, libc++)<br>Code:<br><pre><code class="language-cpp">std::vector&lt;int&gt; v;<br>for(int i=0;i&lt;N;++i) v.push_back(i); // amortized O(1) push_back via doubling</code></pre><br>Where used: LLVM, Chrome, high-performance servers and libraries.<br><br>- Case: Redis incremental rehash (redis/src/dict.c, Redis 7.x)<br>Code (conceptual):<br><pre><code class="language-c">// called during normal command processing to do small rehash steps<br>while(rehash_steps--) _dictRehashStep(d);</code></pre><br>Where used: Redis avoids full-table pauses by performing rehash steps incrementally during client requests.<br><br>Production patterns: choose growth factor per memory/CPU tradeoff, prefer reserve() where spikes matter, and prefer incremental/background resizing (Redis, many DB internals) to control p99 latency. See OpenJDK 17 ArrayList, CPython listobject.c, Redis dict.c for concrete implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
