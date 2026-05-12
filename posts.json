@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Amortized Analysis of Algorithms / 알고리즘의 평균적 비용 분석",
+      "date": "2026-05-13",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-13-amortized-analysis-of-algorithms.html",
+      "excerpt": "암모티즈드 분석은 '어떤 연산이 드물게 비싸더라도 평균적으로는 싸다'를 정량화해 실무 시스템의 지연/성능 특성을 예측하는 방법입니다. 대규모 서비스에서 일시적 고비용 연산(리사이즈, 리해시 등)이 전체 지연을 어떻게 영향을 주는지 판단할 때 중요합니다."
+    },
+    {
       "title": "LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling",
       "date": "2026-05-12",
       "category": "papers",
