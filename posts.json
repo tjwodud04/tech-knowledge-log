@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Psychoacoustics & Perceptual Audio Features",
+      "date": "2026-05-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-15-psychoacoustics-and-perceptual-audio-features.html",
+      "excerpt": "사이코어쿠스틱스는 인간 청각 특성을 모델링해 '사람에게 들리는 것'을 중심으로 오디오를 처리하는 학문으로, 코덱·음악분석·품질평가 등 실무 시스템의 효율과 품질을 좌우합니다."
+    },
+    {
       "title": "Amortized Analysis of Algorithms / 알고리즘의 평균적 비용 분석",
       "date": "2026-05-13",
       "category": "cs-fundamentals",
