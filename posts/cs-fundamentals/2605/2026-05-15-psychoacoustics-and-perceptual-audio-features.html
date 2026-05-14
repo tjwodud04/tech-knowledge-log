@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Psychoacoustics & Perceptual Audio Features</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="사이코어쿠스틱스는 인간 청각 특성을 모델링해 '사람에게 들리는 것'을 중심으로 오디오를 처리하는 학문으로, 코덱·음악분석·품질평가 등 실무 시스템의 효율과 품질을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Psychoacoustics & Perceptual Audio Features</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-15</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>사이코어쿠스틱스는 인간 청각 특성을 모델링해 '사람에게 들리는 것'을 중심으로 오디오를 처리하는 학문으로, 코덱·음악분석·품질평가 등 실무 시스템의 효율과 품질을 좌우합니다.</p>
+        <p>핵심은 마스킹(temporal/tonal), 임계대역(critical bands: Bark/ERB), 주관적 크기(음량/롬바르트) 등 인간 청취의 비선형 특성을 이용해 불필요한 정보(가청하지 못하는 성분)를 제거하거나 가중치를 주는 것입니다. 예컨대 MP3/AAC 계열 코덱은 프레임별 마스킹 스펙트럼을 계산해 비트 할당을 최적화합니다.<br><br>기술적으로는 STFT/MDCT로 시간-주파수 분해 후 Bark/ERB 스케일 필터뱅크를 적용하고, 각 밴드에 대해 임계역치(masking threshold)와 Tonality 지표를 계산합니다. PESQ(P.862), PEAQ(ITU-R BS.1387) 같은 객관적 지표는 주관적 청취 평가를 근사해 CI에서 품질 회귀 테스트로 씁니다. 최근 딥러닝에서는 perceptual loss(예: mel/cox loss, learned cochlear features)를 사용해 주관적 품질을 직접 최적화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: 오디오 코덱(ISO MPEG, Fraunhofer libfdk_aac)에서의 마스킹 기반 비트 할당<br>코드:<br><pre><code class="language-bash"># FFmpeg + libfdk_aac 사용 (권장 라이선스 기반), FFmpeg 4.x 이상<br>ffmpeg -i in.wav -c:a libfdk_aac -b:a 128k out.aac</code></pre><br>- 사례: Spotify(구 Echo Nest)의 오디오 특성(밸런스·timbre 등)은 perceptual features 기반으로 분석되어 추천에 사용<br>- 사례: 품질 자동화(통신사/VoIP)는 PESQ(P.862)로 회귀 테스트 실행<br>코드 (python, librosa 0.9 / essentia 2.1):<br><pre><code class="language-python">import librosa<br>y, sr = librosa.load('in.wav', sr=44100)<br>mel = librosa.feature.melspectrogram(y,sr=sr,n_mels=64)<br># Essentia로 loudness<br># pip install essentia==2.1<br>from essentia.standard import Loudness<br>Loudness()(y)</code></pre><br>실무 패턴: 인코더 CI에 PEAQ/PESQ 기반 자동 게이트를 넣고, bitrate ladder에 perceptual tuning(ANCOVA, psychoacoustic params) 적용. 참조: MPEG-1/2/4 오디오 표준, ITU P.862/P.863.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Psychoacoustics models human hearing (masking, critical bands, loudness) to prioritize perceptually relevant audio content—vital for codecs, audio analysis, and objective quality metrics in production.</p>
+        <p>At core you convert audio to a time–frequency representation (STFT/MDCT), then project onto perceptual bands (Bark/ERB/Mel). Algorithms compute masking thresholds (tonal vs. non-tonal components), bandwise loudness, and perceptual weights used for bit allocation or feature extraction. Classic encoders (MP3/AAC) implement psychoacoustic models to drop inaudible components while preserving perceived quality.<br><br>Objective measures such as PESQ (ITU-T P.862) and PEAQ (ITU-R BS.1387) imitate subjective listening tests and are commonly used in CI and telecommunication. Modern ML systems use perceptual loss functions (mel-spectrogram L1/L2, learned cochlear front-ends, or differentiable loudness) when training generative or enhancement models to align with human perception.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: MPEG/AAC codecs (Fraunhofer libfdk_aac) use psychoacoustic bit allocation in production encoders<br>Code:<br><pre><code class="language-bash"># FFmpeg with libfdk_aac (FFmpeg &gt;=4.x)<br>ffmpeg -i in.wav -c:a libfdk_aac -b:a 128k out.aac</code></pre><br>- Case: Spotify (Echo Nest legacy) computes perceptual/timbre features for recommendation and metadata (production)<br>- Case: Telecom/VoIP QA uses PESQ/PEAQ for automated regression tests<br>Code (Python using librosa 0.9 and Essentia 2.1):<br><pre><code class="language-python">import librosa<br>y,sr = librosa.load('in.wav',sr=44100)<br>mel = librosa.feature.melspectrogram(y,sr=sr,n_mels=64)<br># Essentia for loudness<br>from essentia.standard import Loudness<br>Loudness()(y)</code></pre><br>Production patterns: include objective perceptual metrics in CI, expose psychoacoustic tuning (pre-echo control, tonality thresholds) as config knobs for bitrate ladders, and use perceptual losses for ML models. References: MPEG audio standards, ITU P.862/P.863, Essentia (MTG/UPF) implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
