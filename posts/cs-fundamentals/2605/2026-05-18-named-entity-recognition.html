@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Named Entity Recognition (NER)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NER은 텍스트에서 사람·기관·장소·시간 등 고유명사를 자동으로 인식·분류하는 기술로, 검색·지식그래프·고객지원 등 실무 시스템에서 핵심 전처리 단계로 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Named Entity Recognition (NER)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-18</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>NER은 텍스트에서 사람·기관·장소·시간 등 고유명사를 자동으로 인식·분류하는 기술로, 검색·지식그래프·고객지원 등 실무 시스템에서 핵심 전처리 단계로 사용됩니다.</p>
+        <p>작동 원리: NER은 일반적으로 시퀀스 라벨링 문제로 다뤄집니다. 입력은 토큰화(단어·서브워드), 라벨 스킴(BIO/BILOU)로 변환된 뒤 모델이 각 토큰에 엔티티 태그를 예측합니다. 전통적 파이프라인은 품사·의존구문·사전(가제트리어)을 활용한 CRF/Feature-based 모델이었고(Lafferty 2001 계열), 연구는 Lample et al. (2016)의 BiLSTM-CRF, 그리고 Devlin et al. (2019) BERT 기반의 미세조정(fine-tuning)으로 발전했습니다.<br>운영적 고려사항: 프로덕션에서는 서브워드 분할(WordPiece)로 인한 라벨 정렬, 실시간 지연(latency), 엔티티 정규화(앵커링/KB 링크), 드리프트 감지(F1/precision 변화) 등이 중요합니다. CoNLL-2003 같은 표준 데이터로 초기 성능을 체크하되, 도메인 라벨링(parallel annotation)과 active learning을 통해 레이블 편향을 줄입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Explosion의 spaCy (프로덕션 NLP 파이프라인)<br>  코드:<br>  <pre><code class="language-python"># spaCy v3.5 + en_core_web_trf (transformer 기반)<br>  import spacy<br>  nlp = spacy.load('en_core_web_trf')<br>  doc = nlp('Apple acquired Beats in 2014 .')<br>  for ent in doc.ents:<br>      print(ent.text, ent.label_)</code></pre><br>  실무 패턴: 엔티티 룰(EntitiyRuler)로 고정 패턴 보강, nlp.pipe로 배치 처리, model.to_onnx/torchscript로 서빙.<br><br>- 사례: Hugging Face Transformers (token-classification) used at scale<br>  코드:<br>  <pre><code class="language-python"># transformers v4.33<br>  from transformers import pipeline<br>  ner = pipeline('token-classification', model='dslim/bert-base-NER', grouped_entities=True)<br>  ner('Google opened a new office in Seoul .')</code></pre><br>  실무 패턴: subword-to-token 매핑, grouping 옵션으로 엔티티 합치기, GPU 배치 처리.<br><br>- 사례: AWS Comprehend / Amazon Comprehend Medical in production<br>  명령/사용법:<br>  <pre><code class="language-bash">aws comprehend detect-entities --text "Patient reports fever and cough" --language-code en</code></pre><br>  실무 패턴: 관리형 API로 빠른 통합, 개인정보 엔티티 마스킹, 모니터링을 통한 모델 교체 정책.<br><br>참고: Lample et al., 2016 (BiLSTM-CRF), Devlin et al., 2019 (BERT) 및 spaCy/HuggingFace 공식 문서.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>NER detects and classifies named entities (people, orgs, locations, dates) in text; it’s a foundational component for search, knowledge graphs, customer support automation, and analytics pipelines.</p>
+        <p>How it works: NER is framed as sequence labeling. Text is tokenized (word or subword), labels use schemes like BIO/BILOU, and a model predicts labels per token. Classic systems used feature-rich CRF models; modern pipelines use neural models—BiLSTM-CRF (Lample et al., 2016) and Transformer fine-tuning (BERT, Devlin et al., 2019). Key engineering issues include aligning subword predictions to original tokens, handling out-of-vocabulary entities, and doing entity linking/normalization to a KB.<br>Production details: pipelines optimize for latency (batching, ONNX/TorchScript), monitoring (per-entity F1 drift), and continuous improvement (active learning, human-in-the-loop). Training often starts with CoNLL-2003 or OntoNotes then adapts with domain-specific annotations.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: spaCy in production NLP stacks (Explosion)<br>  Code:<br>  <pre><code class="language-python"># spaCy v3.5 with transformer-backed model<br>  import spacy<br>  nlp = spacy.load('en_core_web_trf')<br>  doc = nlp('Amazon acquired Whole Foods in 2017.')<br>  print([(e.text,e.label_) for e in doc.ents])</code></pre><br>  Production patterns: use EntityRuler for deterministic matches, nlp.pipe for high-throughput, export to ONNX for low-latency serving.<br><br>- Case: Hugging Face Transformers token-classification (widely used in research & startups)<br>  Code:<br>  <pre><code class="language-python"># transformers v4.33<br>  from transformers import pipeline<br>  ner = pipeline('token-classification', model='dslim/bert-base-NER', grouped_entities=True)<br>  ner('Microsoft announced new Surface devices in October .')</code></pre><br>  Production patterns: map subword labels back to tokens, use grouped_entities to merge spans, optimize with mixed-precision and batching.<br><br>- Case: Amazon Comprehend / Comprehend Medical in production<br>  Command:<br>  <pre><code class="language-bash">aws comprehend detect-entities --text "Patient has hypertension" --language-code en</code></pre><br>  Production patterns: managed services for quick integration, preprocess to mask PHI, and implement drift alerts and periodic re-annotation.<br><br>References: Lample et al. 2016 (BiLSTM-CRF), Devlin et al. 2019 (BERT), spaCy/HuggingFace docs.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
