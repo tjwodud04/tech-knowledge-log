@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Named Entity Recognition (NER)",
+      "date": "2026-05-18",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-18-named-entity-recognition.html",
+      "excerpt": "NER은 텍스트에서 사람·기관·장소·시간 등 고유명사를 자동으로 인식·분류하는 기술로, 검색·지식그래프·고객지원 등 실무 시스템에서 핵심 전처리 단계로 사용됩니다."
+    },
+    {
       "title": "Psychoacoustics & Perceptual Audio Features",
       "date": "2026-05-15",
       "category": "cs-fundamentals",
