@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "A Generative AI Framework for Intelligent Utility Billing CO 2 Analytics and Sustainable Resource Optimisation",
+      "date": "2026-05-19",
+      "category": "papers",
+      "url": "posts/papers/2605/2026-05-19-paper.html",
+      "excerpt": "A Generative AI Framework for Intelligent Utility Billing CO 2 Analytics and Sustainable Resource Optimisation"
+    },
+    {
       "title": "Named Entity Recognition (NER)",
       "date": "2026-05-18",
       "category": "cs-fundamentals",
