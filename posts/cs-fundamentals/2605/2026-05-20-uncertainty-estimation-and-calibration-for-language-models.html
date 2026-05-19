@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Uncertainty Estimation & Calibration for Language Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="언어모델의 불확실성 추정과 캘리브레이션은 예측 신뢰도를 정량화해 실서비스(리스크 제어, 라우팅, 인간 검수)에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Uncertainty Estimation & Calibration for Language Models</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-20</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>언어모델의 불확실성 추정과 캘리브레이션은 예측 신뢰도를 정량화해 실서비스(리스크 제어, 라우팅, 인간 검수)에 필수적입니다.</p>
+        <p>핵심: 캘리브레이션(calibration)은 모델 확률(예: softmax)을 실제정확도와 일치시키는 작업이고, 불확실성 추정은 예측의 신뢰도를 수치적으로 표현합니다. 실무에서 과신(overconfidence) 문제는 자동화된 응답, 의학·법률 등 규제 영역에서 큰 위험을 초래합니다.<br><br>기술적 요약: 대표적 방법은 온도 스케일링(temperature scaling, Guo et al. 2017) — validation set에서 온도 T를 최적화해 logits/T에 softmax를 취함. 앙상블(Deep Ensembles, Lakshminarayanan et al. 2017)은 서로 다른 초기화로 여러 모델를 학습해 예측 평균과 분산으로 불확실성 추정. MC-Dropout(Gal & Ghahramani 2016)은 추론시 드롭아웃을 켜고 여러 샘플을 평균해 베이지안 근사. 다른 방법으로는 플랫 스케일링(Platt), 아이소토닉 회귀, 그리고 규범적 보증을 제공하는 conformal prediction이 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Hugging Face/Transformers 파이프라인, scikit-learn, 연구 코드<br>- 코드 (온도 스케일링, PyTorch, Transformers 4.30, PyTorch 2.1):<br><pre><code class="language-python"># simple temperature scaling eval<br>import torch, torch.nn.functional as F<br>logits = model(input_ids).logits<br>T = torch.tensor(1.2, requires_grad=True)<br>probs = F.softmax(logits / T, dim=-1)<br># optimize T on val set by minimizing NLL</code></pre><br>- 코드 (scikit-learn CalibratedClassifierCV, scikit-learn>=1.2):<br><pre><code class="language-python">from sklearn.calibration import CalibratedClassifierCV<br>clf = CalibratedClassifierCV(base_estimator, method='isotonic', cv=5)<br>clf.fit(X_val, y_val)</code></pre><br>- 사례: Deep Ensembles (research repo, Lakshminarayanan et al. 2017) — production pattern은 모델 수(3–10)와 예측 평균·분산 산출. 비용-정합성 고려: 실시간엔 온도 스케일링 + conformal wrapper, 배치엔 앙상블/MC-Dropout 사용.<br>- 베스트프랙티스: 검증셋으로 캘리브레이션, 모니터링(시간에 따른 캘리브레이션 drift), 불확실도 임계값으로 라우팅(human-in-loop).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Uncertainty estimation and calibration quantify a language model’s confidence; they are crucial in production for risk control, routing, and human-in-the-loop workflows.</p>
+        <p>Core: Calibration aligns model probabilities (softmax) with empirical accuracy; uncertainty estimation produces numeric confidence (e.g., predictive variance). Overconfident LMs can cause harmful automation in customer support, medical/financial domains, and search/result ranking.<br><br>How it works: Temperature scaling (Guo et al., 2017) finds scalar T on validation data minimizing NLL: softmax(logits/T). Deep Ensembles (Lakshminarayanan et al., 2017) train multiple models with different seeds and average logits; predictive variance is an uncertainty signal. MC-Dropout (Gal & Ghahramani, 2016) keeps dropout on at inference and aggregates samples as a Bayesian approximation. Alternatives include Platt/isotonic calibration, conformal prediction for guaranteed coverage, and Bayesian NNs or probabilistic libs (Pyro, TFP) for richer posteriors.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Transformers inference + temperature scaling (Hugging Face Transformers 4.30, PyTorch 2.1)<br>- Code (temperature scaling skeleton):<br><pre><code class="language-python"># apply temperature to logits<br>logits = model(**batch).logits  # (B, V)<br>T = torch.tensor(1.1)<br>probs = torch.softmax(logits / T, dim=-1)</code></pre><br>Optimize T on held-out data via NLL.<br>- Case: scikit-learn calibration API (scikit-learn>=1.2)<br><pre><code class="language-python">from sklearn.calibration import CalibratedClassifierCV<br>clf = CalibratedClassifierCV(base_estimator, method='isotonic', cv=5)<br>clf.fit(X_train, y_train)</code></pre><br>- Case: Deep Ensembles (research & production pattern) — run N model checkpoints (N=3–10), average logits and compute variance for uncertainty; used broadly in ML systems where compute allows it. Conformal prediction is applied in regulated domains to give formal error bounds.<br>- Production patterns: cheap calibration (temperature) for low-latency inference, ensembles/MC-Dropout for batch or high-risk paths, monitor calibration drift, and route low-confidence outputs to human review.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
