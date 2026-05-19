@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Uncertainty Estimation & Calibration for Language Models",
+      "date": "2026-05-20",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-20-uncertainty-estimation-and-calibration-for-language-models.html",
+      "excerpt": "언어모델의 불확실성 추정과 캘리브레이션은 예측 신뢰도를 정량화해 실서비스(리스크 제어, 라우팅, 인간 검수)에 필수적입니다."
+    },
+    {
       "title": "A Generative AI Framework for Intelligent Utility Billing CO 2 Analytics and Sustainable Resource Optimisation",
       "date": "2026-05-19",
       "category": "papers",
