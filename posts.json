@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Reinforcement Learning from Human Feedback (RLHF)",
+      "date": "2026-05-22",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-22-reinforcement-learning-from-human-feedback.html",
+      "excerpt": "RLHF는 모델 출력에 대해 사람의 비교·등급 피드백을 보상 신호로 바꿔 언어모델을 튜닝하는 기법으로, 실서비스에서 모델 정렬(alignment)과 안전성 개선에 핵심 역할을 합니다."
+    },
+    {
       "title": "Uncertainty Estimation & Calibration for Language Models",
       "date": "2026-05-20",
       "category": "cs-fundamentals",
