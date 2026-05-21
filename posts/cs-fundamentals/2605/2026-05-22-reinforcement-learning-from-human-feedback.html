@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Reinforcement Learning from Human Feedback (RLHF)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RLHF는 모델 출력에 대해 사람의 비교·등급 피드백을 보상 신호로 바꿔 언어모델을 튜닝하는 기법으로, 실서비스에서 모델 정렬(alignment)과 안전성 개선에 핵심 역할을 합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Reinforcement Learning from Human Feedback (RLHF)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-22</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>RLHF는 모델 출력에 대해 사람의 비교·등급 피드백을 보상 신호로 바꿔 언어모델을 튜닝하는 기법으로, 실서비스에서 모델 정렬(alignment)과 안전성 개선에 핵심 역할을 합니다.</p>
+        <p>작동 원리는 크게 두 단계입니다. 첫째, 인간 라벨러(또는 합성 정책)가 모델 출력 쌍에 대해 선호(비교) 레이블을 수집하고 이를 학습해 보상모델(reward model)을 만듭니다. 둘째, 생성 모델(policy)을 보상모델이 주는 보상을 최대화하도록 강화학습(PPO 등)으로 미세조정합니다. 실무에서는 KL-penalty로 참조 언어모델(reference model)과의 드리프트를 제어하고, 보상모델 과적합 방지를 위해 별도 검증셋과 보상 클리핑을 씁니다.<br><br>산업 적용에서 주의할 점은 라벨 품질·분포 편향과 보상 설계의 민감성입니다. 대규모 시스템(예: ChatGPT/InstructGPT)에서는 수만~수십만 건의 비교 라벨과 분산 학습(DeepSpeed, Accelerate)을 사용하며, 보상모델 업데이트 주기, 라벨러 지침, 안전성 히어스틱(콘솔리데이션/필터링)을 운영 파이프라인에 넣습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: OpenAI InstructGPT/ChatGPT 논문(2022) — PPO 기반 RLHF로 응답 선호를 최적화<br>코드: Hugging Face trl 패키지 예시 (실무에서 많이 사용)<br><pre><code class="language-python">from transformers import AutoModelForCausalLM, AutoTokenizer<br>from trl import PPOTrainer, PPOConfig<br><br>tokenizer = AutoTokenizer.from_pretrained('gpt2')<br>model = AutoModelForCausalLM.from_pretrained('gpt2')<br>config = PPOConfig(batch_size=4, ppo_epochs=4)<br>trainer = PPOTrainer(model, tokenizer, config=config)<br>queries = tokenizer(['Q1','Q2'], return_tensors='pt', padding=True)<br>responses = model.generate(queries['input_ids'])<br>rewards = reward_fn(queries, responses)  # reward model outputs<br>trainer.step(queries['input_ids'], responses, rewards)</code></pre><br>출처/프로젝트: GitHub 'huggingface/trl'·'carperai/trlx', OpenAI InstructGPT paper. 실무 패턴: KL 제약(reference LM), reward model 검증셋 분리, human-in-the-loop 라벨링 파이프(라벨 가이드라인·QC), 분산 학습(DeepSpeed/Accelerate) 및 mixed-precision으로 비용 절감. 보상모델 과적합 시 정책이 비생산적 문답을 생성하므로 정기적 재라벨링과 안전 평가가 필수.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>RLHF turns human preferences into a learned reward signal and uses RL (commonly PPO) to fine-tune a generative model—key for aligning LLMs to real-world user intent and safety needs.</p>
+        <p>How it works: collect pairwise or scalar human feedback on model outputs, train a reward model to predict preferences, then optimize the policy (the LM) with a policy-gradient RL algorithm (PPO is standard). Practical systems add a KL penalty to a reference model to prevent distributional drift, use reward clipping/normalization, and validate the reward model on held-out comparisons to avoid overfitting.<br><br>In production, pipelines include annotation UIs, QC for labeler consistency, automated pre-filters for unsafe outputs, and iterative retraining of the reward model. Scaling requires distributed training (DeepSpeed/Accelerate), mixed precision, and careful hyperparameter choices: KL coefficient, reward baseline, PPO clip epsilon, entropy bonus, and batch sizes—these all affect stability and cost.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: OpenAI InstructGPT / ChatGPT (OpenAI 2022) — RLHF with PPO + KL penalty<br>Code: example using Hugging Face trl (used in many open-source experiments)<br><pre><code class="language-python">from transformers import AutoModelForCausalLM, AutoTokenizer<br>from trl import PPOTrainer, PPOConfig<br><br>tokenizer = AutoTokenizer.from_pretrained('gpt2')<br>model = AutoModelForCausalLM.from_pretrained('gpt2')<br>cfg = PPOConfig(batch_size=8, ppo_epochs=4)<br>trainer = PPOTrainer(model, tokenizer, config=cfg)<br>inputs = tokenizer(['Prompt A','Prompt B'], return_tensors='pt', padding=True)<br>outs = model.generate(inputs['input_ids'])<br>rewards = reward_model.score(inputs, outs)<br>trainer.step(inputs['input_ids'], outs, rewards)</code></pre><br>Sources/tools: OpenAI InstructGPT paper (2022); Christiano et al. 'Deep RL from Human Preferences' (2017); Hugging Face 'trl' and CarperAI 'trlx' repos. Production patterns: KL-penalty to reference LM, human-in-the-loop labeling + QC, reward-model holdout and calibration, distributed training (DeepSpeed/Accelerate), and continuous monitoring for reward hacking and safety regressions.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
