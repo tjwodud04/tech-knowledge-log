@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Phonetics & Phonology Basics for Speech Systems",
+      "date": "2026-05-27",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-27-phonetics-and-phonology-basics.html",
+      "excerpt": "음성학(physiology/acoustics)과 음운론(음운 단위와 규칙)은 ASR/TTS/발화정렬 같은 실무 시스템에서 음향-문자 연결을 안정화하는 핵심입니다."
+    },
+    {
       "title": "Reinforcement Learning from Human Feedback (RLHF)",
       "date": "2026-05-22",
       "category": "cs-fundamentals",
