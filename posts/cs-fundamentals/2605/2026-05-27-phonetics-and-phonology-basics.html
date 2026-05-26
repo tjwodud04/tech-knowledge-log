@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Phonetics & Phonology Basics for Speech Systems</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="음성학(physiology/acoustics)과 음운론(음운 단위와 규칙)은 ASR/TTS/발화정렬 같은 실무 시스템에서 음향-문자 연결을 안정화하는 핵심입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Phonetics & Phonology Basics for Speech Systems</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-27</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>음성학(physiology/acoustics)과 음운론(음운 단위와 규칙)은 ASR/TTS/발화정렬 같은 실무 시스템에서 음향-문자 연결을 안정화하는 핵심입니다.</p>
+        <p>음성학은 음성 신호의 물리적·생리적 특성(성대진동, 포먼트, F0 등)을 다루고, 음운론은 의미 단위를 구분하는 음소(phoneme)와 음운 규칙(동화, 탈락 등)을 다룹니다. 실제 음성 시스템에서는 음성학적 특징(예: MFCC, filterbanks, F0, formants)과 음운적 표상이 결합되어 음성 인식의 입력·라벨을 구성합니다. 전통적 파이프라인은 G2P(grapheme-to-phoneme)로 사전을 만들고 HMM-GMM/TDNN(예: Kaldi)이나 end-to-end 모델(wav2vec 2.0 + CTC/seq2seq)로 매핑합니다.<br><br>현장 기술 포인트: 음향 전처리(MFCC/CMVN, voice activity detection), 강제정렬(forced alignment)으로 정밀 라벨 생성, IPA 기반/언어별 G2P로 다국어 확장. 저자원에서는 조음 특성(feature-based phonology)과 self-supervised 학습(wav2vec 2.0, Facebook AI 2020)을 조합하면 성능 향상에 도움이 됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Kaldi(ASR 연구·프로덕션)에서 MFCC/CMVN 파이프라인<br>코드:<br><pre><code class="language-bash"># Kaldi feature extraction (typical)<br>compute-mfcc-feats --config=conf/mfcc.conf scp:wav.scp ark:- | compute-cmvn-stats ark:- ark,scp:cmvn.ark,cmvn.scp</code></pre><br>- 사례: Montreal Forced Aligner(발화 정렬)로 대규모 라벨 생성<br>코드:<br><pre><code class="language-bash"># MFA align (example)<br>mfa align /data/corpus /models/english.dict /models/english_acoustic_model /output</code></pre><br>- 사례: wav2vec 2.0 (Facebook AI) self-supervised pretraining -> fine-tune for ASR<br>코드 (PyTorch/librosa):<br><pre><code class="language-python">import librosa<br>y, sr = librosa.load('utt.wav', sr=16000)<br>mfcc = librosa.feature.mfcc(y, sr, n_mfcc=13)</code></pre><br>실무 패턴: CMVN + VAD, lexicon-based G2P(Phonetisaurus/Epitran), forced-alignment로 고품질 트레이닝 라벨 확보, SpecAugment/augmentation으로 일반화. 참고: Kaldi repo, wav2vec 2.0 (FAIR), Montreal Forced Aligner docs.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Phonetics (acoustics/articulation) and phonology (phoneme inventories/rules) are foundational for robust ASR, TTS, forced alignment and multilingual pipelines.</p>
+        <p>Phonetics studies physical speech properties (voicing, formants, F0), while phonology models abstract units (phonemes, allophones, feature bundles). Practical systems extract acoustic features (MFCCs, filterbanks, pitch, formants) and map them to phonemic or graphemic targets. Classic pipelines use G2P to build lexica and HMM-GMM/TDNN (e.g., Kaldi) acoustic models; modern systems use self-supervised encoders (wav2vec 2.0) with CTC/seq2seq fine-tuning.<br><br>Key engineering points: feature normalization (CMVN), VAD, forced alignment to create timestamped phoneme labels, and IPA/G2P for language coverage. For low-resource languages, combining articulatory features and SSL pretraining often yields better generalization than naive grapheme-only models.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: Kaldi (production research) uses MFCC + CMVN feature pipelines<br>Code:<br><pre><code class="language-bash"># Kaldi feature extraction<br>compute-mfcc-feats --config=conf/mfcc.conf scp:wav.scp ark:- | compute-cmvn-stats ark:- ark,scp:cmvn.ark,cmvn.scp</code></pre><br>- Case: Montreal Forced Aligner (MFA) for large-scale forced alignment<br>Code:<br><pre><code class="language-bash"># MFA align (example)<br>mfa align /data/corpus /models/english.dict /models/english_acoustic_model /output</code></pre><br>- Case: wav2vec 2.0 (Facebook AI, 2020) pretrain -> fine-tune for ASR<br>Code (Python/librosa):<br><pre><code class="language-python">import librosa<br>y, sr = librosa.load('utt.wav', sr=16000)<br>mfcc = librosa.feature.mfcc(y, sr, n_mfcc=13)</code></pre><br>Production patterns: maintain lexicon + G2P (Phonetisaurus/Epitran) for robustness, use forced-alignment to label training sets, apply CMVN/VAD and SpecAugment, prefer SSL pretraining (wav2vec 2.0, HuBERT) for low-resource and multilingual deployments. Sources: Kaldi repo, wav2vec 2.0 (FAIR paper 2020), Montreal Forced Aligner.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
