@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Beamforming & Microphone Arrays for Far‑Field Audio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="마이크 배열과 빔포밍은 먼 거리(페어필드) 음성 수집에서 원하는 화자 신호를 증폭하고 잡음을 억제해 실운영 음성인식·컨퍼런스·스마트스피커 성능을 개선합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Beamforming & Microphone Arrays for Far‑Field Audio</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-05-29</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>마이크 배열과 빔포밍은 먼 거리(페어필드) 음성 수집에서 원하는 화자 신호를 증폭하고 잡음을 억제해 실운영 음성인식·컨퍼런스·스마트스피커 성능을 개선합니다.</p>
+        <p>작동 원리: 기본은 지연-합(delay-and-sum)으로, 목표 방향에서 오는 신호의 시간차를 보정해 마이크별 신호를 정합하고 평균을 냅니다. 고급 기법은 MVDR(Capon)이나 GSC로 공간 잡음 공분산을 이용해 원하는 방향은 보존하고 간섭을 억제합니다. 실무적 핵심은 배열 기하(선형/원형), 스티어링 벡터(주파수 의존), 실시간 공분산 추정, 그리고 반향/음성활성(VAD)과 결합한 파이프라인입니다.<br><br>왜 중요하나: Amazon Echo(7‑mic), Google Home, Microsoft Kinect 등은 하드웨어적 배열과 소프트웨어 빔포밍을 결합해 원거리 음성 인식 정확도를 크게 향상시켰습니다. 연구/대회(예: CHiME)와 Kaldi 레시피는 BeamformIt이나 MVDR 기반 전처리를 표준으로 사용합니다. 실무에서는 온라인(낮은 지연) vs 오프라인(최적화된 성능) 트레이드오프, 배열 교정 및 다화자 환경에서의 전처리 설계가 결정적입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Amazon Echo, Google Home, Microsoft Kinect(마이크어레이 + 빔포밍 사용)<br>  코드: 지연-합(파이썬, 다중 채널 wav 처리 예시)<br><pre><code class="language-python">import numpy as np<br># mic_signals: (M, N) array, delays (M,) in samples<br>aligned = np.zeros_like(mic_signals)<br>for m in range(mic_signals.shape[0]):<br>    aligned[m] = np.roll(mic_signals[m], -int(delays[m]))<br>output = aligned.mean(axis=0)</code></pre><br>  실제 활용: Kaldi CHiME 레시피에서 BeamformIt 사용(오프라인 다채널 정렬):<br><pre><code class="language-bash"># BeamformIt (외부 바이너리) 예시<br>BeamformIt config.txt wav.scp out_dir</code></pre><br>  실무 패턴: 마이크 캘리브레이션, VAD 기반 분할, WPE(역방향예측)로 반향 제거 후 MVDR 적용. 참고 프로젝트: pyroomacoustics (v0.8+), BeamformIt (Dan Ellis), Kaldi CHiME recipes.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Microphone arrays plus beamforming amplify a target speaker and suppress noise for far‑field audio, improving ASR, conferencing, and voice assistant reliability in production systems.</p>
+        <p>How it works: The simplest is delay‑and‑sum—compensate per‑mic time delays for a look direction then average. Frequency‑domain approaches estimate complex weights per bin: MVDR minimizes output power subject to preserving the steering vector; GSC separates blocking and adaptive noise cancellation. Key engineering pieces are array geometry (linear, circular), steering vector estimation (TOA/DoA), covariance matrix estimation (short/long windows), and integration with dereverberation (WPE) and VAD for robust operation.<br><br>Why it matters: In production, Amazon Echo (7‑mic), Google Home, and Microsoft Kinect combine hardware arrays with MVDR/GSC-like algorithms to reach usable far‑field ASR. Research datasets (CHiME) and Kaldi pipelines commonly use BeamformIt or MVDR preprocessing. Tradeoffs: online low‑latency beamforming vs. offline optimal beamforming, and multi‑speaker separation vs. single‑target enhancement.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world case: Used in Amazon Echo, Google Home, Microsoft Kinect; Kaldi CHiME pipeline uses BeamformIt/MVDR.<br>- Code (simple delay-and-sum align in Python):<br><pre><code class="language-python">import numpy as np<br># mic_signals: shape (M, N); delays in samples<br>aligned = np.stack([np.roll(mic_signals[m], -int(d))<br>                    for m,d in enumerate(delays)])<br>output = aligned.mean(axis=0)</code></pre><br>- Command (BeamformIt used in Kaldi CHiME recipes):<br><pre><code class="language-bash"># BeamformIt invocation (external binary)<br>BeamformIt conf/beamformit.cfg data/wav.scp exp/beamformed</code></pre><br>- Production patterns: calibrate array geometry, run WPE dereverberation -> covariance estimation during speech frames -> apply MVDR weights; prefer online recursive covariance updates for low latency. Tools/refs: pyroomacoustics (v0.8+), BeamformIt (Dan Ellis), Kaldi CHiME recipes, WPE papers and implementations.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
