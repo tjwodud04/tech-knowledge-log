@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Beamforming & Microphone Arrays for Far‑Field Audio",
+      "date": "2026-05-29",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2605/2026-05-29-beamforming-and-microphone-arrays-for-far-field-audio.html",
+      "excerpt": "마이크 배열과 빔포밍은 먼 거리(페어필드) 음성 수집에서 원하는 화자 신호를 증폭하고 잡음을 억제해 실운영 음성인식·컨퍼런스·스마트스피커 성능을 개선합니다."
+    },
+    {
       "title": "Phonetics & Phonology Basics for Speech Systems",
       "date": "2026-05-27",
       "category": "cs-fundamentals",
