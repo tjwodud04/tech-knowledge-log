@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Syntactic Dependency Parsing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="의존 구문 분석(dependency parsing)은 문장 내 단어들 간의 문법적 관계(주어-동사, 목적어-동사 등)를 트리/그래프 형태로 찾는 기술로, 정보추출·질의응답·기계번역의 전처리와 특징으로 실무에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Syntactic Dependency Parsing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-01</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>의존 구문 분석(dependency parsing)은 문장 내 단어들 간의 문법적 관계(주어-동사, 목적어-동사 등)를 트리/그래프 형태로 찾는 기술로, 정보추출·질의응답·기계번역의 전처리와 특징으로 실무에서 널리 사용됩니다.</p>
+        <p>작동 원리: 실무에서 쓰이는 알고리즘은 크게 전이(transition)-기반(예: arc-standard, arc-eager)과 그래프(graph)-기반(예: MST)으로 나뉩니다. 전이 기반은 스택과 버퍼 조작으로 O(n) 평균 속도를 내고 실시간 파이프라인에 적합한 반면, 그래프 기반(특히 non-projective 지원)은 모든 가능한 arc를 점수화해 Chu-Liu/Edmonds 같은 알고리즘으로 MST를 찾아 정확도를 높입니다. 현대의 SOTA는 BiLSTM으로 토큰 컨텍스트를 인코딩한 뒤 biaffine score(Dozat & Manning, 2017)로 head–dependent 점수를 구해 O(n^2) 연산으로 트리를 구성합니다.<br>운영 고려사항: 언어별 UD(Universal Dependencies) 트리뱅크로 사전학습/파인튜닝하고, 비문법/도메인 특화 텍스트는 라벨 스케마 재학습 또는 pseudo-projective 변환을 적용합니다. 실무에서는 경량 모델(spaCy)과 고정확 모델(Stanza/Stanford CoreNLP, Biaffine 구현)을 용도에 따라 혼합 배포합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google SyntaxNet (TensorFlow 기반, 2016)과 Stanford CoreNLP(코어 NLP 파이프라인) — 대규모 파이프라인의 전처리로 사용<br>  코드:<br>  <pre><code class="language-bash"># Stanford CoreNLP 서버 실행 (예: CoreNLP v4.x)<br>  java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000</code></pre><br>  <pre><code class="language-python"># spaCy v2/3 예시 (Explosion AI, 프로덕션 사용 사례 다수)<br>  pip install spacy==2.3.7<br>  python -m spacy download en_core_web_sm</code></pre><br>  <pre><code class="language-python">import spacy<br>  nlp = spacy.load('en_core_web_sm')<br>  doc = nlp('Amazon acquired Whole Foods in 2017.')<br>  for tok in doc:<br>      print(tok.text, tok.dep_, tok.head.text)</code></pre><br>- 사례: Dozat & Manning의 Deep Biaffine Parser (2017) — 많은 연구/프로덕션 파이프라인의 기준 모델<br>  코드: AllenNLP나 원저자 구현에서 BiLSTM+biaffine 구성 사용(학습: GPU, PyTorch 환경)<br>- 실무 패턴:<br>  - 경량 파서(spaCy)로 실시간 전처리, 정확도 필요시 배치로 Stanza/Dozat-Biaffine 사용<br>  - UD 트리뱅크로 도메인 파인튜닝, 비직교 언어는 MST/Chu-Liu 적용<br>  - 레이턴시/메모리 균형 위해 토크나이저/모델을 분리 배포</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dependency parsing finds grammatical relations between words (head–dependent) as a tree/graph. It's crucial in production pipelines for IE, QA, MT, and NLP feature extraction.</p>
+        <p>How it works: Practically, parsers split into transition-based (arc-standard, arc-eager) and graph-based (MST) methods. Transition models operate with a stack and buffer and can achieve near O(n) runtime—suitable for streaming pipelines. Graph-based parsers score all possible arcs and use algorithms like Chu-Liu/Edmonds to recover non-projective trees. Modern state-of-the-art uses BiLSTM encoders to produce contextualized token vectors and a biaffine scorer (Dozat & Manning, 2017) to compute head-dependent scores; decoding is typically O(n^2).<br>Operational notes: Use Universal Dependencies (UD) treebanks for pretraining and fine-tune for domain-specific text. Non-projective constructions may require MST decoding or pseudo-projective transforms. Production setups commonly mix lightweight parsers (spaCy) for low-latency needs and higher-accuracy models (Stanford Stanza, Biaffine implementations) for batch jobs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use case:<br>- Case: spaCy (Explosion AI) used in many production NLP systems for fast dependency parsing<br>  Code:<br>  <pre><code class="language-bash">pip install spacy==2.3.7<br>  python -m spacy download en_core_web_sm</code></pre><br>  <pre><code class="language-python">import spacy<br>  nlp = spacy.load('en_core_web_sm')<br>  doc = nlp('Google released BERT in 2018.')<br>  for tok in doc:<br>      print(tok.text, tok.dep_, tok.head.text)</code></pre><br>- Case: Stanford CoreNLP / Stanza (Stanford NLP Group) used in research and backend pipelines<br>  Code:<br>  <pre><code class="language-bash"># CoreNLP v4.x server<br>  java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000</code></pre><br>- Case: Deep Biaffine Parser (Dozat & Manning, 2017) — reference SOTA in many papers; implementations in AllenNLP/PyTorch<br>  Production patterns:<br>  - Use lightweight parser for real-time, heavyweight Biaffine for batch/analytics<br>  - Fine-tune on UD or in-domain annotated data; use MST or pseudo-projective fixes for non-projectivity<br>  - Monitor parse quality on domain data; fall back to heuristics if parse confidence low</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
