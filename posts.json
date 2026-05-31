@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Syntactic Dependency Parsing",
+      "date": "2026-06-01",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-01-syntactic-dependency-parsing.html",
+      "excerpt": "의존 구문 분석(dependency parsing)은 문장 내 단어들 간의 문법적 관계(주어-동사, 목적어-동사 등)를 트리/그래프 형태로 찾는 기술로, 정보추출·질의응답·기계번역의 전처리와 특징으로 실무에서 널리 사용됩니다."
+    },
+    {
       "title": "Beamforming & Microphone Arrays for Far‑Field Audio",
       "date": "2026-05-29",
       "category": "cs-fundamentals",
