@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Stateful Online Monitoring Catches Distributed Agent Attacks",
+      "date": "2026-06-02",
+      "category": "papers",
+      "url": "posts/papers/2606/2026-06-02-paper.html",
+      "excerpt": "Stateful Online Monitoring Catches Distributed Agent Attacks"
+    },
+    {
       "title": "Syntactic Dependency Parsing",
       "date": "2026-06-01",
       "category": "cs-fundamentals",
