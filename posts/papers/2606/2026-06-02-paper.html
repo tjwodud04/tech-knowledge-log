@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Stateful Online Monitoring Catches Distributed Agent Attacks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Stateful Online Monitoring Catches Distributed Agent Attacks">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Stateful Online Monitoring Catches Distributed Agent Attacks</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Davis Brown, Samarth Bhargav, Arav Santhanam, Kasper Hong, Ivan Zhang, Matan Shtepel, Steffi Chern, Alexander Robey, Eric Wong, Hamed Hassani</div>
+        <div><strong>발행일 / Published:</strong> 2026-05-29</div>
+        <div><strong>Arxiv ID:</strong> 2605.31593</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>언어 모델은 수천 건의 심각한 소프트웨어 취약점을 찾아낼 수 있으며, 에이전트들은 사이버 공격에 악용되는 사례가 점점 늘고 있다. 탐지를 피하기 위해 공격자들은 악용 행위를 분산시키는 경우가 많아, 유해한 작업을 여러 사용자 계정에 나누어 각 대화 기록이 무해해 보이게 만든다. 안전 모니터는 한 번에 하나의 에이전트 컨텍스트만 점수화하기 때문에 여러 계정에 걸쳐 집계되어야만 드러나는 악용에는 구조적으로 무감각하다. 우리는 이 격차가 실재함을 보여주기 위해, 우리가 아는 한 최초의 분산형 에이전트 공격을 구현했다. 이 다중 에이전트 구조는 제한된 컨텍스트를 가진 하위 에이전트들에 유해한 목적을 숨기면서도 어려운 사이버보안 과제를 완수하며, 표준 모니터에 의해 탐지되는 비율이 기존의 에이전트 공격들에 비해 5분의 1에 불과했다. 방어를 위해 우리는 상태를 유지하는 온라인 모니터를 개발했는데, 이는 실시간 클러스터링으로 다수의 에이전트 대화 기록에서 약한 의심 신호들을 수집하고, 누적된 경우에만 드물게 언어 모델로 에스컬레이션해 계정 간의 악용을 판별한다. 대규모 시뮬레이션된 데이터센터 트래픽을 이용한 평가에서 우리 모니터는 표준 모니터보다 페어토 우위를 보이며 분산 공격을 30% 더 일찍 탐지하고 사이버 악용이 가장 해로운 단계에 도달하기 전에 이를 표시했다. 중요하게도 이는 전체 사용자 트래픽의 약 99%에 대해 추가 지연이 무시할 만한 수준이다. 이 탐지 우위는 유지되나 정상 배경 트래픽이 매우 커질수록 좁아진다. 광범위한 레드팀 테스트를 거쳐 방어를 개선한 결과, 놀랍게도 적응형 공격자들이 계정 간에 공격 변형을 재사용하기 때문에 이 방법이 표준 탈옥(jailbreak)도 탐지한다는 사실을 발견했다. 우리의 결과는 개별 대화 기록이 아닌 사용자 그룹 전체를 대상으로 추론하는 새로운 종류의 안전 모니터를 향한 방향을 제시한다.</p>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Language models can find thousands of severe software vulnerabilities, and agents are increasingly being misused for cyberattacks. To avoid detection, attackers frequently distribute their misuse, splitting a harmful task across many user accounts so each individual transcript looks benign. Because safety monitors score only one agent context at a time, they are structurally blind to misuse that is only visible in aggregate, across many accounts. We show this gap is real by building, to our knowledge, the first distributed agent attack, a multi-agent scaffold that completes hard cybersecurity tasks while hiding the harmful objective across subagents with limited contexts, evading a standard monitor that catches it only a fifth as often as prior agent attacks. Towards a defense, we develop an online stateful monitor that uses real-time clustering to collect weak suspiciousness signals across many agent transcripts, and escalates only rarely to a language model that flags misuse across user accounts. In evaluations with large-scale simulated datacenter traffic, our monitor Pareto dominates standard monitors, catching distributed attacks 30% earlier and flagging cyber misuse before it reaches the most harmful stages. Crucially, this comes at negligible additional latency for ~99% of user traffic. This detection advantage persists but narrows as the benign background traffic grows very large. After an extensive red-teaming exercise, we improve the defense and surprisingly also find that it catches standard jailbreaks, since adaptive attackers reuse attack variants across accounts. Our results point toward a new class of safety monitors which reason over groups of users rather than isolated transcripts.</p>
+        
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2605.31593" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2605.31593.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
