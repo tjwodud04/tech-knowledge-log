@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Model Compression: Pruning, Quantization, Knowledge Distillation",
+      "date": "2026-06-03",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-03-model-compression.html",
+      "excerpt": "모델 압축은 대규모 모델을 경량화해 지연시간·메모리·전력 제약이 있는 프로덕션(온디바이스, 서버 인퍼런스)에서 효율적으로 운용하도록 하는 핵심 기술입니다."
+    },
+    {
       "title": "Stateful Online Monitoring Catches Distributed Agent Attacks",
       "date": "2026-06-02",
       "category": "papers",
