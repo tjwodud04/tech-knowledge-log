@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Model Compression: Pruning, Quantization, Knowledge Distillation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="모델 압축은 대규모 모델을 경량화해 지연시간·메모리·전력 제약이 있는 프로덕션(온디바이스, 서버 인퍼런스)에서 효율적으로 운용하도록 하는 핵심 기술입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Model Compression: Pruning, Quantization, Knowledge Distillation</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-03</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>모델 압축은 대규모 모델을 경량화해 지연시간·메모리·전력 제약이 있는 프로덕션(온디바이스, 서버 인퍼런스)에서 효율적으로 운용하도록 하는 핵심 기술입니다.</p>
+        <p>작동 원리: pruning은 중요도(예: 가중치 크기, 그래디언트, 구조적 중요도) 기준으로 파라미터를 제거하고 재학습해 정확도를 회복합니다(무작위 제거보다 magnitude/iterative pruning이 실무적). quantization은 부동소수점 연산을 저비용 정수형(예: int8)으로 근사하여 메모리·캐시·연산량을 줄입니다. Post-Training Quantization(PTQ)과 Quantization-Aware Training(QAT)이 있으며, QAT은 학습 중 양자화 오차를 모의해 정확도 손실을 최소화합니다. knowledge distillation은 큰 teacher 모델의 soft logits 또는 내부 표현을 작은 student가 모방하게 하여 성능 저하를 완화합니다(Temperature, KD loss 조합).<br><br>알고리즘/패턴: 실무에서는 단계적(수차례) pruning+fine-tune, structured pruning(채널/레이어 단위)로 하드웨어 친화성을 확보합니다. quantization은 calibration 데이터(PTQ)와 fake-quant(프레임워크 제공)를 사용해 배포 전 검증합니다. distillation은 라벨 손실과 KD 손실 가중치 제어, 중간층 피쳐 매칭을 병행하는 경우가 많습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: Google — MobileNet/Edge TPU에 int8 PTQ 적용 (TensorFlow Lite)<br>  코드:<br>  <pre><code class="language-bash">tflite_convert --saved_model_dir=saved_model \<br>    --output_file=model.tflite --optimizations=DEFAULT<br>  # runtime: TensorFlow Lite 2.5+, Edge TPU 툴체인 사용</code></pre><br>  실무 패턴: PTQ 후 온디바이스 검증(대표 입력 분포) 및 QAT로 재학습<br><br>- 사례: PyTorch pruning — torchvision 모델 경량화<br>  코드:<br>  <pre><code class="language-python">import torch.nn.utils.prune as prune<br>  prune.l1_unstructured(model.conv1, name='weight', amount=0.4)<br>  # torch&gt;=1.8</code></pre><br>  실무 패턴: magnitude→retrain(몇 epoch)→반복, structured pruning은 채널 단위로 하드웨어 가속에 유리<br><br>- 사례: Hugging Face DistilBERT (Sanh et al. 2019) — Transformer distillation<br>  코드:<br>  <pre><code class="language-python"># transformers fine-tune with KD loss (pseudo)<br>  student_logits = student(input)<br>  kd_loss = KLDivLoss(softmax(student_logits/T), softmax(teacher_logits/T))</code></pre><br>  도입처: 검색/챗봇/온디바이스 NLU에서 latency/비용 절감용으로 배포<br><br>참고: Meta의 FBGEMM, QNNPACK(quantized kernels), ONNX Runtime(quantization 1.15) 및 NVIDIA TensorRT(quant+prune 최적화)는 실제 서버·엣지 파이프라인에서 널리 사용됩니다.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Model compression reduces model size, latency and energy for production systems (on-device, server inference) via pruning, quantization, and knowledge distillation.</p>
+        <p>How it works: Pruning removes parameters based on importance (magnitude, gradient, or learned importance) and fine-tunes the sparse/structured model; iterative magnitude pruning and structured (channel/filter) pruning are common in production because they retain hardware-friendly layouts. Quantization maps floating-point weights/activations to lower bit-width (e.g., int8), using Post-Training Quantization (PTQ) or Quantization-Aware Training (QAT) to reduce accuracy loss; QAT inserts fake-quant nodes during training to simulate inference rounding. Knowledge Distillation trains a smaller student to mimic a larger teacher via softened logits (temperature scaling) and optionally intermediate feature matching.<br><br>Production patterns: apply gradual prune→retrain cycles, prefer structured pruning for GPU/accelerator throughput, calibrate PTQ with representative data, use QAT when PTQ accuracy is insufficient, and combine KD with pruning/quantization for best trade-offs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: Google — MobileNet on-device int8 via TensorFlow Lite<br>  Code:<br>  <pre><code class="language-bash">tflite_convert --saved_model_dir=saved_model \<br>    --output_file=model.tflite --optimizations=DEFAULT<br>  # TensorFlow Lite &gt;=2.5, calibrate with representative_dataset</code></pre><br>  Production patterns: PTQ + on-device validation; fall back to QAT if accuracy drops.<br><br>- Case: PyTorch pruning (torch>=1.8) used to shrink ResNet in server pipelines<br>  Code:<br>  <pre><code class="language-python">import torch.nn.utils.prune as prune<br>  prune.l1_unstructured(model.layer1, name='weight', amount=0.5)</code></pre><br>  Production patterns: iterative prune + fine-tune, prefer structured pruning for throughput.<br><br>- Case: DistilBERT (Sanh et al., 2019) — Hugging Face transformer distillation used in search/chat systems<br>  Code:<br>  <pre><code class="language-python"># KD loss sketch<br>  kd_loss = KLDivLoss()(F.log_softmax(s_logits/T), F.softmax(t_logits/T))<br>  loss = alpha*kd_loss + (1-alpha)*task_loss</code></pre><br>  Tools/infra: ONNX Runtime quantization (>=1.8), NVIDIA TensorRT 8.x, Meta's FBGEMM/QNNPACK kernels are widely used in production for quantized inference.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
