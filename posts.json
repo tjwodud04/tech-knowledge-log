@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Scaling Laws for Neural Networks",
+      "date": "2026-06-05",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-05-scaling-laws-for-neural-networks.html",
+      "excerpt": "스케일링 법칙은 모델 크기(파라미터 수), 데이터(토큰 수), 계산량(플롭스)이 성능(손실/정확도)에 미치는 법칙을 경험적으로 기술하며, 대규모 모델 설계·예산 배분에 실무적 가이드라인을 제공합니다."
+    },
+    {
       "title": "Model Compression: Pruning, Quantization, Knowledge Distillation",
       "date": "2026-06-03",
       "category": "cs-fundamentals",
