@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Scaling Laws for Neural Networks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스케일링 법칙은 모델 크기(파라미터 수), 데이터(토큰 수), 계산량(플롭스)이 성능(손실/정확도)에 미치는 법칙을 경험적으로 기술하며, 대규모 모델 설계·예산 배분에 실무적 가이드라인을 제공합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Scaling Laws for Neural Networks</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-05</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스케일링 법칙은 모델 크기(파라미터 수), 데이터(토큰 수), 계산량(플롭스)이 성능(손실/정확도)에 미치는 법칙을 경험적으로 기술하며, 대규모 모델 설계·예산 배분에 실무적 가이드라인을 제공합니다.</p>
+        <p>작동 원리: Kaplan et al. (2020)에서 언어모델의 손실은 모델 크기 N과 데이터량 D에 대해 대체로 멱법칙(power law)을 따릅니다(L ≈ a N^{-α} + b D^{-β}). Hoffmann et al. (Chinchilla, 2022)은 'compute-optimal' 경계를 도출해 주어진 계산 예산 C에서 N과 D의 최적 분배를 제시했습니다(실무적으로 토큰 수 ≈ 20 × 파라미터 수 권장으로 요약됨). 기술적으로는 작은 스케일 실험으로 지수를 회귀(로그-로그 선형회귀)하고 이를 바탕으로 대형 모델의 marginal return을 예측합니다.<br>실무 적용: 엔지니어는 예산(C)을 정하고, 경험적 지수로부터 손실 감소율을 예측해 모델 크기·데이터 크기를 선택합니다. 또한 학습 스케줄(학습률, 토큰 이터레이션), 체크포인트 빈도, 데이터 파이프라인(샤딩/토큰화)과 결합해 비용-효율을 최적화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- 사례: DeepMind (Chinchilla, 2022) — 70B 파라미터 모델을 약 1.4T 토큰으로 재설계해 compute-optimal 전략을 입증<br>  코드: 스케일링 지수 추정(예제)<br><pre><code class="language-python">import numpy as np<br># losses measured at different N, D<br>N = np.array([1e6, 1e7, 1e8])<br>L = np.array([2.0, 1.5, 1.2])<br>coef = np.polyfit(np.log(N), np.log(L), 1)<br>alpha = -coef[0]<br>print('alpha≈', alpha)</code></pre><br>  사용처: 모델/데이터 계획 수립 단계에서 실험 결과를 로그-로그 회귀로 외삽해 대규모 설계를 결정(DeepMind, OpenAI 연구실 전략).<br>- 사례: Hugging Face + DeepSpeed 실무: 스케일링 법칙으로 파라미터 대비 토큰 목표를 정하고 deepspeed config로 배치/accumulation 조정<br>  설정 예:<br><pre><code class="language-json">{"train_micro_batch_size_per_gpu":4, "gradient_accumulation_steps":8}</code></pre><br>프로덕션 패턴: 작은 스케일 실험 → 지수 추정 → compute-optimal (N,D) 산정 → 분산 학습(ZeRO/MP)으로 메모리/시간 효율화. 참고: Kaplan et al. 2020, Hoffmann et al. 2022 (Chinchilla).</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Scaling laws empirically relate model size (parameters), dataset size (tokens), and compute to performance (loss/accuracy) and provide practical rules for budgeting and architecture decisions in production ML systems.</p>
+        <p>How it works: Kaplan et al. (2020) showed language-model loss scales roughly as power laws with model size N and data D (L ≈ a N^{-α} + b D^{-β}). Hoffmann et al. (2022, "Chinchilla") derived the compute‑optimal frontier: for a fixed compute budget C you can trade N vs D to minimize loss. Practically, you run small-scale experiments, fit exponents with log–log linear regression, then extrapolate to pick N and D that maximize return on compute.<br>Technical notes: training compute for transformers scales approximately with N × D × per-token cost; fitting is done via linear regression on (log N, log L) and (log D, log L) to get α, β. Use these to predict marginal gains and to choose dataset size (Hoffmann suggests ≈20 tokens per parameter for compute-optimal regimes). Combine results with infrastructure constraints (GPU memory, IO, ZeRO/MP) when deploying.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Case: DeepMind (Chinchilla, 2022) — redesigned model/data (70B params, ~1.4T tokens) to demonstrate compute-optimal training<br>  Code: quick fit for α from small runs<br><pre><code class="language-python">import numpy as np<br>N = np.array([1e6,1e7,1e8])<br>L = np.array([2.0,1.5,1.2])<br>alpha = -np.polyfit(np.log(N), np.log(L), 1)[0]<br>print('alpha≈', alpha)</code></pre><br>  Where used: research-driven capacity planning at DeepMind/OpenAI to decide model vs data budgeting.<br>- Case: Production training stacks (Hugging Face, DeepSpeed, Megatron-LM)<br>  Code/Config: tune tokens-per-param and DeepSpeed run settings<br><pre><code class="language-json">{"train_micro_batch_size_per_gpu":4, "gradient_accumulation_steps":8}</code></pre><br>  Production patterns: run scaled-down ablations → fit scaling exponents → choose compute-optimal (N,D) → enable memory sharding (ZeRO), mixed-precision, data streaming. Key refs: Kaplan et al. 2020; Hoffmann et al. 2022 (Chinchilla).</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
