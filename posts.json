@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Model Calibration & Uncertainty Estimation",
+      "date": "2026-06-08",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-08-model-calibration-and-uncertainty-estimation.html",
+      "excerpt": "모델 캘리브레이션과 불확실성 추정은 예측의 신뢰도를 수치화해 운영 의사결정(알람, A/B 라우팅, 휴먼-인-루프)을 안전하게 만드는 핵심 기술입니다."
+    },
+    {
       "title": "Scaling Laws for Neural Networks",
       "date": "2026-06-05",
       "category": "cs-fundamentals",
