@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Model Calibration & Uncertainty Estimation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="모델 캘리브레이션과 불확실성 추정은 예측의 신뢰도를 수치화해 운영 의사결정(알람, A/B 라우팅, 휴먼-인-루프)을 안전하게 만드는 핵심 기술입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    
+    /* 코드 블록 스타일 */
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e06c75;
+    }
+    
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav>
+        <a href="/tech-knowledge-log/archive.html">Archive</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post-content">
+      <h1>Model Calibration & Uncertainty Estimation</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-08</div>
+      </div>
+
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>모델 캘리브레이션과 불확실성 추정은 예측의 신뢰도를 수치화해 운영 의사결정(알람, A/B 라우팅, 휴먼-인-루프)을 안전하게 만드는 핵심 기술입니다.</p>
+        <p>작동 원리: 캘리브레이션은 확률 예측 P(y|x)가 실제 빈도와 일치하도록 조정합니다. 전통적 방법으로는 Platt scaling(로지스틱 회귀에 기반), isotonic regression, temperature scaling(신경망에 자주 사용)이 있고, 불확실성 추정은 aleatoric/epistemic 분해(논문: Kendall & Gal 2017), MC Dropout(Gal & Ghahramani 2016), Deep Ensembles(Lakshminarayanan et al. 2017), Bayesian NN, 그리고 베타/디리클레트 기반 방법으로 수행됩니다. <br>실무 지표: Expected Calibration Error(ECE), Negative Log-Likelihood(NLL), Brier score, 신뢰도 다이어그램을 사용해 검증합니다. 프로덕션에서는 학습 후 검증셋으로 재캘리브레이션하고(절대 트레이닝 데이터로 안함), 모델 업데이트 때마다 재평가합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>사례: 온도 스케일링(Guo et al. 2017) 및 scikit-learn의 CalibratedClassifierCV 사용<br>코드:<br><pre><code class="language-python"># Temperature scaling (PyTorch, 간단버전)<br>def temperature_scale(model, logits, labels):<br>  T = torch.tensor(1.0, requires_grad=True)<br>  loss = lambda: F.cross_entropy(logits / T, labels)<br>  opt = torch.optim.LBFGS([T])<br>  opt.step(lambda: (loss(), None))<br>  return T.item()</code></pre><br>사례 사용처: Guo et al. 2017(온도 스케일링), MC Dropout은 Gal&Ghahramani 2016(연구/자율주행·의료 모델 불확실성 연구에 적용), scikit-learn CalibratedClassifierCV (sklearn>=0.24)과 TensorFlow Probability(tfp)에서 분포적 접근 제공.<br>실무 패턴: 검증셋으로 재캘리브레이션, ECE+NLL 모니터링, 임계값 결정에 불확실성 포함(휴먼-인-루프), 앙상블로 epistemic 감소.</div>
+      </section>
+
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Model calibration and uncertainty estimation quantify how reliable predicted probabilities are, crucial for safe production decisions like alerting, routing, or human-in-the-loop escalation.</p>
+        <p>How it works: Calibration aligns predicted probabilities P(y|x) with empirical frequencies. Common calibration algorithms include Platt scaling, isotonic regression, and temperature scaling for neural nets. Uncertainty estimation separates aleatoric (data) vs. epistemic (model) uncertainty; methods include MC Dropout (Gal & Ghahramani 2016), Deep Ensembles (Lakshminarayanan et al. 2017), Bayesian NNs and Dirichlet/heteroscedastic models (Kendall & Gal 2017).<br>Metrics and practice: evaluate with Expected Calibration Error (ECE), Negative Log Likelihood (NLL), Brier score and reliability diagrams. In production, always fit calibrators on a held-out validation set and re-calibrate after model updates; monitor ECE/NLL in CI.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Case: Temperature scaling (Guo et al. 2017) and scikit-learn calibration; MC Dropout for epistemic uncertainty<br>Code:<br><pre><code class="language-python"># scikit-learn calibration example (sklearn&gt;=1.0)<br>from sklearn.linear_model import LogisticRegression<br>from sklearn.calibration import CalibratedClassifierCV<br>clf = LogisticRegression().fit(X_train, y_train)<br>calibrated = CalibratedClassifierCV(clf, method='isotonic').fit(X_val, y_val)<br>probs = calibrated.predict_proba(X_test)</code></pre><br>MC Dropout (PyTorch): run multiple forward passes with dropout enabled (model.train()) and compute mean/std.<br>Used in: Guo et al. 2017 (calibration study), Gal & Ghahramani 2016 (MC Dropout), Deep Ensembles in research and production ML systems for robust uncertainty. Production patterns: calibrate on separate val set, track ECE/NLL in monitoring, prefer ensembles/MC for epistemic uncertainty when safety-critical.</div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p>
+  </footer>
+
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
