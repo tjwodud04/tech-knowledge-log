@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Agentopia: Long-Term Life Simulation and Learning in Agent Societies",
+      "date": "2026-06-09",
+      "category": "papers",
+      "url": "posts/papers/2606/2026-06-09-paper.html",
+      "excerpt": "Agentopia: Long-Term Life Simulation and Learning in Agent Societies"
+    },
+    {
       "title": "Model Calibration & Uncertainty Estimation",
       "date": "2026-06-08",
       "category": "cs-fundamentals",
