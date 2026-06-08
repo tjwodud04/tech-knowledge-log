@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Agentopia: Long-Term Life Simulation and Learning in Agent Societies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agentopia: Long-Term Life Simulation and Learning in Agent Societies">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Agentopia: Long-Term Life Simulation and Learning in Agent Societies</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Xintao Wang, Sirui Zheng, Hongqiu Wu, Weiyuan Li, Jen-tse Huang, Minghao Zhu, Can Zu, Qi Deng, Jiawei Wang, Qianyu He, Heng Wang, Xiaojian Wu, Yunzhe Tao</div>
+        <div><strong>발행일 / Published:</strong> 2026-06-05</div>
+        <div><strong>Arxiv ID:</strong> 2606.07513</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>인간은 사회적 삶으로부터 학습한다. 대규모 언어 모델(LLM) 기반 에이전트로 이 과정을 시뮬레이션하는 것은 유망한 연구 방향이며, 자연스러운 질문이 제기된다: LLM이 이러한 시뮬레이션된 사회적 경험으로부터 학습하여 인간 행동을 더 잘 이해하고 재현할 수 있는가? 그러나 이전의 에이전트 사회 시뮬레이션은 보통 수일 단위의 규모로 운영되어 사회적 상호작용의 깊이와 장기적 성장이 제한된다. </p>
+        <p>본 논문에서는 에이전트 사회에서의 장기 생애 시뮬레이션과 LLM 학습을 연구하며 두 가지 목표를 가진다: (1) 평생에 걸친 시뮬레이션에서 나타나는 사회적 행동을 탐구하고, (2) 수년간의 시뮬레이션된 사회적 경험을 통해 LLM에 인간형 능력, 특히 사회적 삶에서의 지능을 개발하는 것이다. </p>
+        <p>구체적으로, 우리는 Agentopia라는 다중 에이전트 사회에서의 장기 생애 시뮬레이션을 위한 포괄적 프레임워크를 제시한다. 이 환경에서 100명의 에이전트는 자율적으로 개인적 성장을 추구하고, 사회적 관계를 발전시키며, 10년의 시뮬레이션 기간 동안 그들의 욕구와 목표를 충족해 나간다. 우리는 인간의 웰빙을 반영하도록 라이프 리워드(life reward)를 정의하고, 이 보상을 이용해 리젝션 샘플링으로 LLM을 학습시킨다. </p>
+        <p>광범위한 실험 결과 에이전트들은 풍부한 자발적 사회적 행동을 보였으며, 라이프 리워드 기반 학습은 기반 LLM을 효과적으로 향상시켜 시뮬레이션 내 에이전트의 복지를 개선하였다. 또한 이 방식은 역할극 하위 벤치마크에도 일반화되어 성능이 15.6% 향상되는 것으로 나타났다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Humans learn from social life. Simulating this process with LLM-powered agents represents a promising research direction, raising a natural question: whether LLMs can learn from such simulated social experience to better understand and replicate human behavior. However, prior agent society simulations typically operate at the scale of days, limiting the depth of social interactions and long-term growth. In this paper, we study long-term life simulation and LLM learning in agent societies, with two goals: (1) investigating social behaviors that emerge from life-long simulation, and (2) developing anthropomorphic capabilities in LLMs, particularly intelligence in social life, through years of simulated social experience. Specifically, we present Agentopia, a comprehensive framework for long-term life simulation in multi-agent societies, where 100 agents autonomously pursue personal growth, develop social relationships, and fulfill their needs and goals over 10 simulated years. We define life reward to mirror human well-being, and leverage this reward to train LLMs via rejection sampling. Extensive experiments show that agents exhibit rich emergent social behaviors. Furthermore, life reward training effectively enhances the underlying LLM, which leads to improved agent well-being in simulation, and generalizes to downstream role-playing benchmarks with +15.6% improvement.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2606.07513" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2606.07513.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
