@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Transformer Architecture — Practical Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Transformer는 자기-어텐션으로 시퀀스 전체의 의존성을 병렬로 모델링해 대규모 언어·번역·검색 시스템에서 성능과 확장성을 확보한 핵심 아키텍처입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Transformer Architecture — Practical Guide</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-10</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Transformer는 자기-어텐션으로 시퀀스 전체의 의존성을 병렬로 모델링해 대규모 언어·번역·검색 시스템에서 성능과 확장성을 확보한 핵심 아키텍처입니다.</p>
+        <p>작동 원리: 핵심은 scaled dot-product self-attention으로, 입력 X에서 쿼리(Q), 키(K), 값(V)를 선형투영하고 Attention(Q,K,V)=softmax(QK^T/√d_k)V를 계산합니다. 멀티헤드(Multi-Head)로 서로 다른 표현 공간을 병렬로 학습하고, Residual + LayerNorm + Position-wise Feed-Forward로 안정화합니다. 인코더/디코더 스택은 기계번역(Google Translate 전환), 프리트레인/미세조정(BERT, GPT)등 다양한 태스크에 적용됩니다.<br>확장성/최적화: 표준 어텐션은 O(n^2) 메모리·연산이라 시퀀스 길이나 파라미터 수 증가 시 한계가 있어 Longformer,Reformer,Performer,Sparse Attention,FlashAttention,Sliding window, 그리고 모델 병렬(Megatron-LM)·ZeRO 같은 기법으로 실무에서 해결합니다. 실무 팁: mixed precision(AMP), gradient checkpointing, dynamic padding, efficient batching이 필수입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 코드/사례:<br>1) Hugging Face 추론(프로덕션 엔드포인트 예):<br>from transformers import AutoModelForSeq2SeqLM, AutoTokenizer<br>model = AutoModelForSeq2SeqLM.from_pretrained('t5-small')<br>tokenizer = AutoTokenizer.from_pretrained('t5-small')<br>inputs = tokenizer('translate English to German: How are you?', return_tensors='pt')<br>outputs = model.generate(**inputs, max_length=40)<br>print(tokenizer.decode(outputs[0], skip_special_tokens=True))<br>(사용처: Hugging Face Hub, production microservice)<br><br>2) PyTorch로 간단한 Scaled Dot-Product Attention (핵심 아이디어):<br>import torch<br>Q,K,V = map(lambda x: x.unsqueeze(0), (torch.randn(8,64), torch.randn(8,64), torch.randn(8,64)))<br>attn = torch.softmax((Q @ K.transpose(-2,-1))/ (64**0.5), dim=-1) @ V<br><br>참고: 원논문 "Attention is All You Need"(Vaswani et al., 2017), BERT(Devlin et al.), Megatron-LM, Fairseq, Longformer. 실무 패턴: 토크나이저와 토큰 길이 관리, AMP+BF16, ZeRO/TP+PP 병렬화, 모니터링(throughput/latency)을 항상 병행.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Transformers use self-attention to model global dependencies in sequences in parallel; they are the backbone of modern NLP, search, and many production ML systems.</p>
+        <p>How it works: The core is scaled dot-product self-attention: project inputs to Q,K,V and compute Attention(Q,K,V)=softmax(QK^T/√d_k)V. Multi-head attention learns multiple subspace projections in parallel; residual connections, LayerNorm, and position-wise feed-forward layers form the encoder/decoder blocks. Positional encodings inject order information. This enables high parallelism for training and strong contextual representations for downstream fine-tuning (BERT) or autoregressive generation (GPT).<br>Scaling and optimizations: Vanilla attention costs O(n^2) in time and memory; production systems mitigate this via sparse/linear attention (Longformer, Reformer, Performer), FlashAttention, sequence chunking, and large-scale parallelism (Megatron-LM, DeepSpeed ZeRO). Operational best practices: mixed precision (AMP/bfloat16), gradient checkpointing, careful batching/padding, and deployment as optimized kernels or model-parallel shards.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code & pointers:<br>1) Quick Hugging Face inference (used in APIs and services):<br>from transformers import pipeline<br>translate = pipeline('translation_en_to_de', model='t5-small')<br>print(translate('How are you?', max_length=40))<br>(Used: Hugging Face Hub, inference microservices)<br><br>2) Minimal PyTorch scaled-dot-product attention (core inner loop):<br>import torch<br>Q = torch.randn(1, 8, 64)  # (batch, heads, d_k)<br>K = torch.randn(1, 8, 64)<br>V = torch.randn(1, 8, 64)<br>scores = torch.matmul(Q, K.transpose(-2,-1)) / (64**0.5)<br>attn = torch.softmax(scores, dim=-1)<br>out = torch.matmul(attn, V)<br><br>References & production systems: Vaswani et al. (2017), BERT/GPT families, Google Translate migration, Fairseq (Meta), Megatron-LM (NVIDIA), Longformer (AllenAI), Hugging Face Transformers. Production patterns: serve quantized/fp16 frozen models for low latency, use model sharding + ZeRO for training, monitor throughput/latency and control max sequence length.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
