@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Mel-Spectrogram",
+      "date": "2026-06-12",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-12-mel-spectrogram.html",
+      "excerpt": "멜-스펙트로그램은 사람의 청각 특성을 반영한 주파수 축 변환으로, 음성/오디오 모델에서 입력 피처로 널리 사용됩니다. 실무에서는 모델 일관성, 계산 효율, 그리고 재현 가능한 전처리 파이프라인이 중요합니다."
+    },
+    {
       "title": "Transformer Architecture — Practical Guide",
       "date": "2026-06-10",
       "category": "cs-fundamentals",
