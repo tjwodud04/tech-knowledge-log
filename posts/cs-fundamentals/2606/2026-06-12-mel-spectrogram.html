@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Mel-Spectrogram</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="멜-스펙트로그램은 사람의 청각 특성을 반영한 주파수 축 변환으로, 음성/오디오 모델에서 입력 피처로 널리 사용됩니다. 실무에서는 모델 일관성, 계산 효율, 그리고 재현 가능한 전처리 파이프라인이 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Mel-Spectrogram</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-12</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>멜-스펙트로그램은 사람의 청각 특성을 반영한 주파수 축 변환으로, 음성/오디오 모델에서 입력 피처로 널리 사용됩니다. 실무에서는 모델 일관성, 계산 효율, 그리고 재현 가능한 전처리 파이프라인이 중요합니다.</p>
+        <p>멜-스펙트로그램은 원시 오디오를 STFT로 시간-주파수 변환한 뒤 멜 필터뱅크(사람 청각의 비선형 주파수 해상도)를 적용해 주파수 축을 압축한 행렬입니다. 보통 파워 스펙트럼(p=2)을 사용한 뒤 로그(또는 dB) 스케일을 적용해 동적 범위를 줄입니다. 핵심 파라미터는 sample_rate, n_fft, hop_length, win_length, n_mels, fmin/fmax이며, 이 값을 학습/추론 환경에서 동일하게 유지해야 모델이 일관된 입력을 받습니다.<br><br>실무적 세부사항으로는 pre-emphasis(고주파 강조), 정규화(utterance-wise mean-variance 또는 dataset-level), silence trimming, 그리고 음성 합성/인식에서의 역변환(그리핀-림즈, 멜-투-파워 네트워크) 처리가 있습니다. GPU 배치 처리를 위해 torchaudio/NVIDIA 구현을 사용하면 속도와 메모리 효율이 좋습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 — Google Tacotron2 (샘플: Tacotron2+WaveGlow)과 NVIDIA의 Tacotron2 구현에서 mel 스펙트로그램을 합성 모델의 입력/조건 벡터로 사용합니다(논문: “Natural TTS from Tacotron 2”). 오픈소스 예: librosa와 torchaudio 사용 코드:<br><br>Python (librosa):<br>import librosa, numpy as np<br>y, sr = librosa.load('audio.wav', sr=22050)<br>S = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=1024, hop_length=256, n_mels=80, fmin=80, fmax=8000)<br>logS = librosa.power_to_db(S, ref=np.max)<br><br>PyTorch (torchaudio, GPU):<br>import torchaudio<br>melspec = torchaudio.transforms.MelSpectrogram(sample_rate=22050, n_fft=1024, hop_length=256, n_mels=80, f_min=80, f_max=8000).to(device)<br>logS = torchaudio.transforms.AmplitudeToDB()(melspec(waveform))<br><br>실무 베스트프랙티스: 파라미터 고정, 로그 스케일 사용, 배치 단위 GPU 연산, 저장은 float32/numpy로, 학습시 데이터 증강(시간마스킹, 주파수마스킹) 적용. 참조: NVIDIA tacotron2 repo, Google Tacotron2 paper, librosa docs.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A mel-spectrogram is a time–frequency representation mapped to the mel scale to mimic human hearing; it’s a standard input for speech synthesis, ASR, and many audio ML systems. In production you need stable preprocessing and reproducible parameters.</p>
+        <p>Technically, a mel-spectrogram is computed by taking the STFT of an audio waveform, converting magnitudes (power) through a mel filterbank (triangular filters spaced on the mel scale), and typically applying a log or dB transform to compress dynamic range. Key parameters are sample_rate, n_fft, hop_length, win_length, n_mels, and fmin/fmax — these must be identical for training and inference to avoid domain shift.<br><br>Operational details include pre-emphasis filtering, silence trimming, per-utterance or dataset normalization, and optionally converting back to waveform (Griffin-Lim or neural vocoders like WaveGlow/WaveNet). For throughput, use GPU-accelerated libraries (torchaudio, NVIDIA implementations) and compute mel features in batches. Data augmentation patterns (SpecAugment: time/frequency masking) are common in production ASR pipelines.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples — Tacotron2 (Google/NVIDIA) uses mel-spectrograms as conditional inputs for neural vocoders (paper: "Natural TTS from Tacotron 2"). Open-source tools: librosa, torchaudio, TensorFlow’s tf.signal. Example code:<br><br># librosa<br>import librosa, numpy as np<br>y, sr = librosa.load('audio.wav', sr=22050)<br>S = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=1024, hop_length=256, n_mels=80, fmin=80, fmax=8000)<br>logS = librosa.power_to_db(S, ref=np.max)<br><br># torchaudio (GPU)<br>import torchaudio<br>m = torchaudio.transforms.MelSpectrogram(sample_rate=22050, n_fft=1024, hop_length=256, n_mels=80, f_min=80, f_max=8000).to(device)<br>db = torchaudio.transforms.AmplitudeToDB()<br>mel = db(m(waveform))<br><br>Production patterns: freeze preprocessing parameters, cache computed mels, use float32 storage, apply SpecAugment for robustness. References: Tacotron2 (Google), NVIDIA tacotron2 repo, librosa/torchaudio docs.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
