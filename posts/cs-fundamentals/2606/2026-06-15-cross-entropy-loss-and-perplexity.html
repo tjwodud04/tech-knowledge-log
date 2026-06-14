@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Cross-Entropy Loss & Perplexity</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="크로스엔트로피는 분류·언어모델 학습의 기본 손실이고, 퍼플렉시티는 언어모델의 확률 예측 품질을 직관적으로 보여줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Cross-Entropy Loss & Perplexity</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-15</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>크로스엔트로피는 분류·언어모델 학습의 기본 손실이고, 퍼플렉시티는 언어모델의 확률 예측 품질을 직관적으로 보여줍니다.</p>
+        <p>크로스엔트로피는 목표 분포(원-핫 레이블)와 모델의 예측 확률 분포 사이의 평균 음의 로그우도(negative log-likelihood)입니다. 실무에서는 torch.nn.CrossEntropyLoss처럼 내부에서 log-softmax + NLL을 합쳐 수치적으로 안정적으로 구현합니다. 토큰화된 텍스트에서는 패딩 토큰에 대해 ignore_index를 사용해 손실을 계산하며, label smoothing(예: GNMT, Vaswani et al.)을 적용해 과적합과 캘리브레이션을 개선합니다.<br><br>퍼플렉시티(perplexity)는 단위 토큰당 지수화된 평균 교차엔트로피로 정의됩니다: perplexity = exp(average_cross_entropy). 낮을수록 모델의 예측 확률 분포가 실제 관측값과 가깝습니다. 하지만 서브워드 토크나 어휘 크기에 따라 절대값 비교는 무의미하므로 동일한 토크나이저/어휘에서만 비교해야 합니다. 생산환경에서는 검증 세트 perplexity를 조기종료(Early Stopping), 모델 선택, 또는 트래픽 기반 드리프트 탐지 지표로 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드(파이토치) 및 활용 예시 — Hugging Face/transformers, fairseq, GNMT, DeepSpeech 등에서 동일 패턴을 사용합니다. 예: PyTorch에서 배치 손실 및 퍼플렉시티 계산<br><br>loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_id)<br>logits = model(input_ids)  # (B, T, V)<br>loss = loss_fn(logits.view(-1, V), labels.view(-1))<br>perplexity = torch.exp(loss)<br><br>데이터셋 전체 퍼플렉시티는 토큰 가중 평균(총 NLL 합 / 토큰수)로 계산해야 정확합니다. 대규모 생산 시스템에서는 label smoothing, mixed precision, gradient accumulation을 적용해 안정적 수렴을 도모합니다. 실무 팁: 1) 퍼플렉시티 하락이 생성 품질 향상과 항상 일치하지 않으므로 BLEU/ROUGE 또는 human eval과 병행, 2) 토큰화·어휘 일관성 유지, 3) 검증 시 패딩 제외 및 long-tail 토큰 분포 관찰.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Cross-entropy is the standard training loss for classifiers and language models; perplexity converts that loss into an interpretable score for probabilistic prediction quality.</p>
+        <p>Cross-entropy measures the average negative log-likelihood between the target distribution (one-hot labels) and model probabilities. In practice libraries like PyTorch implement it as log-softmax + negative log-likelihood for numerical stability. For sequence tasks you must mask padding tokens (ignore_index) and often use label smoothing (e.g., Vaswani et al., GNMT) to improve calibration and generalization.<br><br>Perplexity = exp(mean_cross_entropy_per_token). It represents how well a language model predicts the next token on average — lower is better. However, absolute perplexity depends on tokenization and vocabulary size (subword units change scale), so compare only across models using the same tokenizer. In production, validation perplexity is used for checkpoint selection, early stopping, drift detection, and quick offline evaluation of language models.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code and sources: Transformers (Hugging Face), fairseq (Facebook), GNMT (Google), DeepSpeech (Mozilla) use these patterns. Example PyTorch snippet used in training/validation loops:<br><br>import torch<br>loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_id)<br>logits = model(input_ids)  # shape (B, T, V)<br>loss = loss_fn(logits.view(-1, V), labels.view(-1))<br>perplexity = torch.exp(loss.detach())<br><br>For corpus-level perplexity compute token-weighted NLL: total_nll = sum(per-token nll); perplexity = exp(total_nll / total_tokens). Best practices in production: 1) keep tokenizer/vocab fixed when comparing, 2) mask padding and handle variable-length correctly, 3) use label smoothing and mixed precision for stable training, and 4) complement perplexity with task-specific metrics (BLEU/ROUGE, human eval) because lower perplexity doesn't always mean better generated outputs. References: "Attention Is All You Need" (Vaswani et al.), GNMT paper, Hugging Face docs.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
