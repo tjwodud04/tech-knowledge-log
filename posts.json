@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Cross-Entropy Loss & Perplexity",
+      "date": "2026-06-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-15-cross-entropy-loss-and-perplexity.html",
+      "excerpt": "크로스엔트로피는 분류·언어모델 학습의 기본 손실이고, 퍼플렉시티는 언어모델의 확률 예측 품질을 직관적으로 보여줍니다."
+    },
+    {
       "title": "Mel-Spectrogram",
       "date": "2026-06-12",
       "category": "cs-fundamentals",
