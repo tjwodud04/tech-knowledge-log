@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Connectionist Temporal Classification (CTC) for ASR",
+      "date": "2026-06-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-17-connectionist-temporal-classification-ctc.html",
+      "excerpt": "CTC는 프레임 단위 출력에 대해 라벨-프레임 정렬을 학습하지 않고도 시퀀스 레벨 확률을 계산하는 손실함수로, 실무에서는 경계 라벨이 없는 음성 데이터에서 빠른 모델 학습과 간단한 디코딩 파이프라인을 가능하게 합니다."
+    },
+    {
       "title": "AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition",
       "date": "2026-06-16",
       "category": "papers",
