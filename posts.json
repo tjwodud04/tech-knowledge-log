@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition",
+      "date": "2026-06-16",
+      "category": "papers",
+      "url": "posts/papers/2606/2026-06-16-paper.html",
+      "excerpt": "AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition"
+    },
+    {
       "title": "Cross-Entropy Loss & Perplexity",
       "date": "2026-06-15",
       "category": "cs-fundamentals",
