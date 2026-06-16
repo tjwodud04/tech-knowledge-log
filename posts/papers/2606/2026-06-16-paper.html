@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Jixuan Chen, Jianzhi Shen, Haoqiang Kang, Zhi Hong, Qingyi Jiang, Soham Bose, Yiming Zhang, Leon Leng, Amit Vyas, Lingjun Mao, Siru Ouyang, Kun Zhou, Lianhui Qin</div>
+        <div><strong>발행일 / Published:</strong> 2026-06-12</div>
+        <div><strong>Arxiv ID:</strong> 2606.14674</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대형 언어 모델(LLM) 기반 에이전트는 단일 모델 호출로 구성되기보다 추론, 메모리, 성찰, 행동 실행, 학습을 결합한 스캐폴딩된 시스템으로 점점 더 자주 구축되고 있다. 이러한 스캐폴드는 종종 성능을 향상시키지만, 긴밀하게 결합된 파이프라인에 포함되어 있어 구성 요소의 기여를 분리하거나 대안 설계를 비교하거나 모듈 상호작용이 에이전트 행동을 어떻게 형성하는지 이해하기 어렵게 만든다. 우리는 AgentSpec을 소개한다. AgentSpec은 체현된 에이전트를 지각, 메모리, 추론, 성찰, 행동 및 선택적 학습과 같은 표준화된 인터페이스를 가진 재사용 가능한 정책 컴포넌트들의 유형화된 조합으로 표현하는 모듈식 명세 프레임워크다. AgentSpec은 컴포넌트들 간 인터페이스를 표준화하여 통제된 조건에서 구성 요소를 교체하고 재조합할 수 있게 한다. 우리는 이 프레임워크를 DeliveryBench, ALFRED, MiniGrid, RoboTHOR에 걸쳐 구체화하고, 모델 백본 전반에서 추론, 메모리, 성찰 및 강화학습 모듈을 분석했다. 그 결과 에이전트 성능은 개별 모듈의 강점 자체보다는 스캐폴드 간의 호환성 및 상호작용 효과에 의해 좌우된다는 것을 보여준다. 특히 구조화된 다중 수준 메모리는 장기 상태 추적을 개선하고, 추론과 메모리는 환경에 따라 비일관적으로 상호작용하며, 성찰은 수정 효과와 비용 간의 균형을 나타내고, 강화학습으로 훈련된 정책은 배포 시점의 스캐폴드 구조에 맞춰 최적화되었을 때 가장 잘 조합된다. AgentSpec은 조합 가능한 LLM 에이전트를 연구하고 비교하며 설계하기 위한 통제된 기반을 제공한다. 코드와 베이스라인, 대화형 플레이그라운드는 공개되어 있다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LLM agents are increasingly built not as single model calls, but as scaffolded systems that combine reasoning, memory, reflection, action execution, and learning. While such scaffolds often improve performance, they are often embedded in tightly coupled pipelines, making it difficult to isolate component contributions, compare alternative designs, or understand how module interactions shape agent behavior. We introduce AgentSpec, a modular specification framework that represents embodied agents as typed compositions of reusable policy components with standardized interfaces. AgentSpec standardizes the interfaces among perception, memory, reasoning, reflection, action, and optional learning, enabling components to be swapped and recombined under controlled conditions. We instantiate this framework across DeliveryBench, ALFRED, MiniGrid, and RoboTHOR, and analyze reasoning, memory, reflection, and reinforcement-learning modules across model backbones. Our results show that agent performance is governed by scaffold compatibility and interaction effects rather than isolated module strength. In particular, structured multi-granularity memory improves long-horizon state tracking, reasoning and memory interact non-uniformly across environments, reflection trades off correction and cost, and RL-trained policies compose best when optimized with deployment-time scaffold structure. AgentSpec provides a controlled foundation for studying, comparing, and designing composable LLM agents. Our code, baselines and interactive playground are publicly available at https://agentspec-embodied.github.io.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2606.14674" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2606.14674.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
