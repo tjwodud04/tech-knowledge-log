@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Connectionist Temporal Classification (CTC) for ASR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CTC는 프레임 단위 출력에 대해 라벨-프레임 정렬을 학습하지 않고도 시퀀스 레벨 확률을 계산하는 손실함수로, 실무에서는 경계 라벨이 없는 음성 데이터에서 빠른 모델 학습과 간단한 디코딩 파이프라인을 가능하게 합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Connectionist Temporal Classification (CTC) for ASR</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-17</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>CTC는 프레임 단위 출력에 대해 라벨-프레임 정렬을 학습하지 않고도 시퀀스 레벨 확률을 계산하는 손실함수로, 실무에서는 경계 라벨이 없는 음성 데이터에서 빠른 모델 학습과 간단한 디코딩 파이프라인을 가능하게 합니다.</p>
+        <p>기술적 핵심은 'blank' 토큰과 프레임별 독립 가정 아래 가능한 모든 정렬(alignments)을 합산하는 것입니다. 네트워크는 T 타임스텝마다 문자(또는 서브워드) 확률분포를 출력하고, CTC는 주어진 타깃 시퀀스를 생성하는 모든 프레임 경로의 확률 합을 동적계획법(forward–backward)으로 계산해 로그우도 손실을 만듭니다. 실무에서는 RNN/CNN/Transformer 출력에 log-softmax를 적용해 안정성을 높이고, 길이 정보(input_lengths, target_lengths)를 정확히 넘겨야 합니다.<br><br>디코딩은 크게 greedy(프레임별 argmax → 반복 제거 → blank 제거)와 beam-search(언어모델과 결합한 shallow fusion 포함)으로 나뉩니다. CTC는 프레임 독립성 가정 때문에 음소 연속성이 약하거나 발화내 동시음성에 약할 수 있어, 실제 서비스에서는 CTC를 seq2seq/Attention 모델의 보조 손실로 병합하거나 RNN-T/graphemic models로 업그레이드하는 패턴이 자주 사용됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드<br>- Baidu DeepSpeech 1/2 (research): CTC 기반 음성인식(DeepSpeech papers, 2014/2015).<br>- Mozilla DeepSpeech (open-source): PyTorch/TensorFlow 구현에서 CTC 손실 채택.<br>- NVIDIA NeMo, ESPnet: CTC를 보조 손실 또는 힙 기반 디코더와 함께 사용.<br><br>PyTorch 최소 예제:<br><br>import torch<br>import torch.nn as nn<br><br>logits = torch.randn(50, 16, 30).log_softmax(2)  # T=50, B=16, C=30<br>targets = torch.randint(1, 30, (16, 20), dtype=torch.long)<br>input_lengths = torch.full((16,), 50, dtype=torch.long)<br>target_lengths = torch.randint(10, 20, (16,), dtype=torch.long)<br>loss_fn = nn.CTCLoss(blank=0, zero_infinity=True)<br>loss = loss_fn(logits, targets, input_lengths, target_lengths)<br><br>Greedy 디코딩(실무 기본):<br>- argmax → collapse repeats → remove blanks<br><br>Beam + LM(실무 권장): ctcdecode 패키지나 NeMo의 BeamSearchDecoder를 사용해 언어모델(kenlm)과 shallow fusion 적용.<br><br>Best practices: log-softmax 입력, zero_infinity=True, 정확한 길이 텐서 전달, CTC를 pretrain 또는 auxiliary loss로 사용, beam-size/LM weight 튜닝. 참고: Graves 2006/2008, Amodei et al. (Baidu DeepSpeech) 2015, NVIDIA NeMo/ESPnet 레시피.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>CTC is a sequence-level loss that lets models learn alignments implicitly by summing probabilities of all valid frame-to-label paths; it is widely used for fast ASR training when frame-level labels are unavailable.</p>
+        <p>The core idea: introduce a blank token and compute the probability of a target sequence by summing over all possible frame-wise alignments that reduce to that sequence (collapse repeats and remove blanks). This marginalization is computed efficiently with a forward–backward dynamic programming algorithm. Networks output per-frame class probabilities (usually log-softmax), and CTC assumes conditional independence of frames given the model outputs.<br><br>In practice, decoding choices matter: greedy decoding (argmax → collapse → drop blanks) is cheap and often used in production for low-latency, while beam search with an external language model (shallow fusion) yields much better WER for user-facing systems. Because of frame independence, CTC can struggle with long-range context; production systems often use CTC as a pretraining or auxiliary loss, or migrate to RNN-T/attention models when alignment complexity grows.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world usage and code<br>- Research/production: Graves (2006/2008) original papers; Baidu DeepSpeech (Amodei et al., 2015) used CTC end-to-end; Mozilla DeepSpeech, NVIDIA NeMo, and ESPnet include CTC examples.<br><br>Minimal PyTorch example:<br><br>import torch<br>import torch.nn as nn<br><br>logits = torch.randn(50, 16, 30).log_softmax(2)  # T=50, B=16, C=30<br>targets = torch.randint(1, 30, (16, 20), dtype=torch.long)<br>input_lengths = torch.full((16,), 50, dtype=torch.long)<br>target_lengths = torch.randint(10, 20, (16,), dtype=torch.long)<br>loss_fn = nn.CTCLoss(blank=0, zero_infinity=True)<br>loss = loss_fn(logits, targets, input_lengths, target_lengths)<br><br>Greedy decoding (production-friendly): take argmax per frame, collapse repetitions, drop blanks. For higher accuracy: use ctcdecode (pip install ctcdecode) or NeMo's BeamSearchDecoder with a KenLM language model and tune beam size and LM weight.<br><br>Production patterns and best practices: pass exact input/target lengths, use log-softmax logits, set zero_infinity to avoid NaNs, use CTC for fast pretraining or as an auxiliary loss, and prefer beam+LM (shallow fusion) for final user-facing models. See: Graves et al., DeepSpeech papers, NVIDIA NeMo and ESPnet repos for working recipes.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
