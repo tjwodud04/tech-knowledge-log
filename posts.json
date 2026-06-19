@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Prompt Engineering & In-Context Learning (P-E + ICL)",
+      "date": "2026-06-19",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-19-prompt-engineering-and-in-context-learning.html",
+      "excerpt": "프롬프트 엔지니어링과 인컨텍스트 러닝은 대형 언어모델(LLM)에서 입력 설계로 성능을 끌어내는 실무 기술로, 생산 시스템에서 모델 비용·정확도·안전성 최적화에 직접 연결됩니다."
+    },
+    {
       "title": "Connectionist Temporal Classification (CTC) for ASR",
       "date": "2026-06-17",
       "category": "cs-fundamentals",
