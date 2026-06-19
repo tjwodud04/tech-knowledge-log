@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Prompt Engineering & In-Context Learning (P-E + ICL)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="프롬프트 엔지니어링과 인컨텍스트 러닝은 대형 언어모델(LLM)에서 입력 설계로 성능을 끌어내는 실무 기술로, 생산 시스템에서 모델 비용·정확도·안전성 최적화에 직접 연결됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Prompt Engineering & In-Context Learning (P-E + ICL)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-19</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>프롬프트 엔지니어링과 인컨텍스트 러닝은 대형 언어모델(LLM)에서 입력 설계로 성능을 끌어내는 실무 기술로, 생산 시스템에서 모델 비용·정확도·안전성 최적화에 직접 연결됩니다.</p>
+        <p>작동 원리: 인컨텍스트 러닝(ICL)은 모델 파라미터를 수정하지 않고 입력(prompt)에 예시(example)를 포함해 모델이 해당 패턴을 '즉석 학습'하도록 하는 방식입니다. GPT-3 논문(Brown et al., 2020)이 대표적이며, few-shot/few-exemplar를 통해 분류·생성·추론 품질을 개선합니다. 프롬프트 엔지니어링은 시스템 메시지(지시문), 온도·토큰 제한, 체인 오브 스론트(Chain-of-Thought) 등 구성요소를 조작하여 응답의 정확성·일관성·안전성을 관리합니다.<br><br>기술적 세부: 실무에서는 고정 템플릿 + 동적 슬롯(예: PromptTemplate), 예시 선택 알고리즘(kNN retrieval, clustering-based exemplar selection), RAG(retrieval-augmented generation) 결합으로 문맥 창을 확장합니다. Prompt tuning/prefix-tuning(파라미터 효율적 튜닝)은 소량 파라미터만 학습해 프롬프트와 유사한 효과를 낼 수 있어 생산 환경에서 비용과 반복성을 확보합니다(참조: Li & Liang, 2021). 대규모 시스템은 메시지 컨텍스트 길이, 지연시간, 토큰비용을 고려해 exemplar 수를 조절합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드:<br>1) OpenAI ChatCompletion few-shot (생산 예시: 고객지원 자동화, GitHub Copilot-style 코드 보조 기본 아이디어)<br>python 예시:<br>import openai<br>messages = [<br>  {"role": "system", "content": "You are a concise technical assistant."},<br>  {"role": "user", "content": "Classify sentiment. Label as POS/NEG.\nText: I love this product."},<br>  {"role": "assistant", "content": "POS"},<br>  {"role": "user", "content": "Text: The server crashed frequently."}<br>]<br>resp = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)<br>print(resp['choices'][0]['message']['content'])<br><br>2) LangChain + retrieval (실무: 문서 기반 QA, LlamaIndex 사용 사례)<br>from langchain import PromptTemplate<br>from langchain.chains import RetrievalQA<br># PromptTemplate에 동적 example 삽입, 백엔드로 FAISS/RAG 연결<br><br>참고/출처: Brown et al., 2020 (GPT-3), Li & Liang, 2021 (Prefix-Tuning), 오픈소스 툴 LangChain, LlamaIndex. 운영 팁: exemplar selection을 자동화(kNN over embeddings), system 메시지로 정책·시나리오 고정, 토큰 한도에 따라 RAG로 긴 컨텍스트 처리.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Prompt engineering and in-context learning shape LLM behavior by controlling input examples and instructions; they’re central to production trade-offs (latency, cost, accuracy, safety).</p>
+        <p>Core idea: In-context learning (ICL) provides examples and instructions inside the model input so the model generalizes the pattern without parameter updates. The GPT-3 paper (Brown et al., 2020) demonstrated zero-/one-/few-shot capabilities. Prompt engineering refers to designing system messages, few-shot exemplars, temperature, and decoding strategies (top-p, beam width) to get reliable outputs.<br><br>How it works: Production systems use a few common building blocks—prompt templates with slots, automatic exemplar selection (kNN over embeddings, clustering), and retrieval-augmented generation (RAG) to exceed token-window limits by fetching relevant documents. For production tuning, teams adopt prompt-tuning or prefix-tuning (fine-tuning a small prompt prefix) to reduce inference-time variability while keeping costs lower than full model fine-tuning (see Li & Liang, 2021). Monitoring focuses on hallucination rates, instruction drift, and token-cost profiling.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples and code (used by companies and open-source projects):<br>1) OpenAI Chat Completions few-shot (used for support bots, code helpers)<br>Python example:<br>import openai<br>messages = [<br>  {"role": "system", "content": "You are a concise technical assistant."},<br>  {"role": "user", "content": "Label sentiment: 'I love this product' -> POS"},<br>  {"role": "assistant", "content": "POS"},<br>  {"role": "user", "content": "Label sentiment: 'The server crashed' ->"}<br>]<br>resp = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)<br>print(resp['choices'][0]['message']['content'])<br><br>2) LangChain + RAG (used in production by startups, search/QA pipelines):<br>from langchain import PromptTemplate, LLMChain<br># Build template, use kNN to fetch top-K docs, then format context into prompt<br><br>Sources: Brown et al., 2020 (GPT-3), Li & Liang, 2021 (Prefix-Tuning), LangChain, LlamaIndex. Best practices: automate exemplar selection via embedding similarity, keep a stable system message for policies, use RAG to handle long contexts, and log prompt/response pairs for drift analysis.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
