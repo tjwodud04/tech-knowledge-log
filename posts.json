@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Fine-tuning & Efficient Adaptation (LoRA, Adapter Tuning)",
+      "date": "2026-06-22",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-22-fine-tuning-efficient-adaptation.html",
+      "excerpt": "LoRA와 어댑터 튜닝은 전체 모델 가중치를 업데이트하지 않고 저비용으로 모델을 도메인/태스크에 맞추는 기법으로, 대형 언어모델을 프로덕션에 효율적으로 배포할 때 핵심 수단입니다."
+    },
+    {
       "title": "Prompt Engineering & In-Context Learning (P-E + ICL)",
       "date": "2026-06-19",
       "category": "cs-fundamentals",
