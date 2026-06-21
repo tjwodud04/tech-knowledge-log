@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Fine-tuning & Efficient Adaptation (LoRA, Adapter Tuning)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LoRA와 어댑터 튜닝은 전체 모델 가중치를 업데이트하지 않고 저비용으로 모델을 도메인/태스크에 맞추는 기법으로, 대형 언어모델을 프로덕션에 효율적으로 배포할 때 핵심 수단입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Fine-tuning & Efficient Adaptation (LoRA, Adapter Tuning)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-22</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LoRA와 어댑터 튜닝은 전체 모델 가중치를 업데이트하지 않고 저비용으로 모델을 도메인/태스크에 맞추는 기법으로, 대형 언어모델을 프로덕션에 효율적으로 배포할 때 핵심 수단입니다.</p>
+        <p>작동 원리: LoRA는 Transformer의 특정 가중치 행렬에 대해 저랭크 보정행렬(A·B)을 추가하고 오직 이 보정행렬만 학습합니다. 어댑터 튜닝은 각 레이어 내부에 작은 MLP 블록(어댑터)을 삽입해 이 블록만 업데이트합니다. 두 방법 모두 수백만→수천~수십만 파라미터만 학습해 저장·전송·앙상블이 쉬워집니다.<br><br>기술적 세부: LoRA는 학습 시 원래 가중치 W를 고정하고 W + BA를 사용합니다(랭크 r, 스케일 α). 어댑터는 down-proj (d→m)→nonlinearity→up-proj (m→d) 구조를 사용하며, 여러 태스크별 어댑터를 모델에 병렬·직렬로 추가해 멀티태스크를 처리합니다. 실무에서는 PEFT(Hugging Face), AdapterHub/adapter-transformers 라이브러리, bitsandbytes(8-bit)와 accelerate로 메모리/속도 최적화를 결합합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 + 코드<br>출처: LoRA (Hu et al., 2021), AdapterHub, Hugging Face PEFT (github.com/huggingface/peft).<br><br>LoRA 예 (Hugging Face PEFT):<br>from transformers import AutoModelForCausalLM, AutoTokenizer<br>from peft import LoraConfig, get_peft_model<br><br>model = AutoModelForCausalLM.from_pretrained('meta-llama/Llama-2-7b')<br>config = LoraConfig(r=8, lora_alpha=32, target_modules=['q_proj','v_proj'])<br>model = get_peft_model(model, config)<br># train only LoRA params with accelerate/bitsandbytes<br><br>Adapter 예 (Adapter-Transformers):<br>from transformers import AutoModelWithHeads, AutoTokenizer<br>from transformers.adapters import AdapterConfig<br>model = AutoModelWithHeads.from_pretrained('bert-base-uncased')<br>conf = AdapterConfig.load('pfeiffer', reduction_factor=16)<br>model.add_adapter('taskA', config=conf)<br>model.train_adapter('taskA')<br><br>실무 패턴: 기본 모델은 freeze, PEFT 체크포인트(작은 파일)만 배포, 여러 어댑터/LoRA를 런타임에 로드해 멀티테넌시·A/B 테스트. r, reduction_factor, lr, merge옵션을 실험해 성능·메모리 균형 조정.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LoRA and adapter tuning let you adapt large models by training small added parameters instead of full weights—critical for cost-efficient production fine-tuning, multi-tenant models, and fast iteration.</p>
+        <p>How it works: LoRA injects low-rank update matrices into selected weight projections (W + BA) and only trains A and B (rank r). Adapter tuning inserts small bottleneck MLPs inside layers (down-proj→nonlinearity→up-proj) and learns those blocks. Both reduce trainable parameters from billions to thousands–millions, enabling frequent, cheap fine-tuning and storage of many task-specific adapters.<br><br>Technical notes: Typical LoRA configs use r=4..16 and a scaling α; target_modules are often attention q/k/v projections. Adapters use reduction_factor (d→d/reduction_factor) and can be stacked or routed per task. In production, combine PEFT APIs (Hugging Face), AdapterHub, bitsandbytes 8-bit weights, and accelerate for memory and speed gains.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples + code<br>Sources: LoRA (Hu et al., 2021), AdapterHub (Pfeiffer et al.), Hugging Face PEFT (github.com/huggingface/peft), adapter-transformers (github.com/adapterhub/adapter-transformers).<br><br>LoRA (Hugging Face PEFT):<br>from transformers import AutoModelForCausalLM<br>from peft import LoraConfig, get_peft_model<br><br>model = AutoModelForCausalLM.from_pretrained('meta-llama/Llama-2-7b')<br>config = LoraConfig(r=8, lora_alpha=32, target_modules=['q_proj','v_proj'])<br>model = get_peft_model(model, config)<br># use accelerate + bitsandbytes to train only LoRA params<br><br>Adapter (Adapter-Transformers):<br>from transformers import AutoModelWithHeads<br>from transformers.adapters import AdapterConfig<br>model = AutoModelWithHeads.from_pretrained('bert-base-uncased')<br>conf = AdapterConfig.load('pfeiffer', reduction_factor=16)<br>model.add_adapter('taskA', config=conf)<br>model.train_adapter('taskA')<br><br>Production patterns: freeze base weights; keep small checkpoints per adapter/LoRA; load adapters dynamically for multi-tenant inference; tune r/reduction_factor and learning rates; monitor calibration when combining with retrieval or RLHF.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
