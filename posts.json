@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference",
+      "date": "2026-06-23",
+      "category": "papers",
+      "url": "posts/papers/2606/2026-06-23-paper.html",
+      "excerpt": "Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference"
+    },
+    {
       "title": "Fine-tuning & Efficient Adaptation (LoRA, Adapter Tuning)",
       "date": "2026-06-22",
       "category": "cs-fundamentals",
