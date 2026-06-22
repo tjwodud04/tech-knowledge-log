@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Huang Peng, Jiuyang Tang, Weixin Zeng, Hao Xu, Xiang Zhao</div>
+        <div><strong>발행일 / Published:</strong> 2026-06-18</div>
+        <div><strong>Arxiv ID:</strong> 2606.20245</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대형 언어 모델(LLM)은 광범위한 파라메트릭 지식과 문맥 내 학습 능력을 활용해 다양한 언어 기반 작업에서 높은 성능을 보이고, 입력 프롬프트로 제공되는 외부 정보를 통합할 수 있다. 그러나 외부 지식의 통합은 모델의 내부 파라메트릭 지식과 외부 정보 간뿐만 아니라 여러 외부 컨텍스트 상호 간에도 충돌을 일으킬 수 있다. 기존 접근법은 보통 모델이나 제공된 컨텍스트 중 하나만 신뢰할 수 있다고 가정해 두 소스 모두 오류를 포함할 가능성을 간과하고, 불일치를 적극적으로 해결하기보다는 한 소스를 우선시해 충돌을 회피하는 방식에 머문다. 이러한 한계를 극복하기 위해, 우리는 전통적인 이분법적 선택 패러다임을 넘어서 다중 에이전트 추론에 기반한 명시적 충돌 해결 메커니즘을 통합한 LLM 지식 충돌 해결을 위한 새로운 프레임워크 MACR을 제안한다. 구체적으로, 먼저 수정된 의미적 엔트로피 측정을 이용해 주어진 질의에 대한 LLM의 답변 신뢰도를 정량화하는 적응형 지식 평가 및 검색 방식을 제안한다. 이 신뢰도 추정에 따라 MACR은 모델의 내부 지식을 텍스트 표현으로 외부화하거나 내부 지식이 불충분할 때 관련 외부 지식을 검색하여 이후 추론을 위한 기본 컨텍스트를 생성한다. 그다음 세 가지 전문화된 에이전트가 각각 명시적 규칙을 유도하고 잠재적 충돌을 분석하며 모든 가용 컨텍스트에 걸친 불일치를 해결하는 유도적 다중 에이전트 추론 프레임워크를 도입한다. 실험 결과 MACR은 여러 벤치마크에서 최첨단 기법들을 크게 능가하며, 명시적 충돌에 대한 해석 가능한 해결 방안도 제공함을 보였다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Large language models (LLMs) have achieved strong performance across a wide range of language-based tasks by leveraging both extensive parametric knowledge and in-context learning ability, enabling them to incorporate external information provided in the input prompt. However, the integration of external knowledge can introduce conflicts, not only between the model's internal parametric knowledge and the external information, but also among multiple pieces of external contexts. Existing approaches typically assume that either the model or the provided context is reliable, overlooking the possibility that both sources may contain errors, and avoid conflicts by privileging one source over the other, rather than actively resolving inconsistencies. To address these limitations, we propose a novel framework MACR for LLM knowledge conflict resolution that moves beyond the conventional binary choice paradigm and incorporates an explicit conflict-resolution mechanism based on a multi-agent reasoning approach. Specifically, we first propose an adaptive knowledge assessment and retrieval approach that employs a modified semantic entropy measure to quantify an LLM's confidence in its answer to a given query. Based on this confidence estimation, MACR either externalizes the model's internal knowledge as textual representations or retrieves relevant external knowledge when internal knowledge is insufficient, generating basic contexts for subsequent reasoning. Then we introduce an inductive multi-agent reasoning framework with three specialized agents that, respectively, induce explicit rules, analyze potential conflicts, and resolve inconsistencies across all available contexts. Empirical results demonstrate that MACR significantly outperforms state-of-the-art baselines across benchmarks, while also providing interpretable resolutions of explicit conflicts.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2606.20245" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2606.20245.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
