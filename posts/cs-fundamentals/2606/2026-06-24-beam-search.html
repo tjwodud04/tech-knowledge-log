@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Beam Search (Decoding for Sequence Models)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Beam search는 생성 모델(번역, 요약, 음성인식)에서 가능한 출력 시퀀스들을 탐색해 높은 점수의 후보들을 유지하는 탐욕적 탐색 기법으로, 실무에서는 속도·품질 균형을 맞추기 위해 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Beam Search (Decoding for Sequence Models)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-24</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Beam search는 생성 모델(번역, 요약, 음성인식)에서 가능한 출력 시퀀스들을 탐색해 높은 점수의 후보들을 유지하는 탐욕적 탐색 기법으로, 실무에서는 속도·품질 균형을 맞추기 위해 널리 사용됩니다.</p>
+        <p>작동 원리: 매 단계에서 상위 B개의 부분 시퀀스(beam)를 유지하고 다음 토큰 후보들로 확장해 전체 점수가 높은 B개로 다시 가지치기(prune)합니다. 점수는 로그 확률 합이며, 보통 길이 정규화(length normalization), 길이 벌점(length penalty), 조기 중단(early stopping)을 적용합니다. 복잡도는 대체로 O(B * V) per step(V는 어휘 크기)이므로 배치화와 캐시(키·값 캐시)를 통해 GPU에서 최적화합니다.<br><br>변형/실전 팁: 다양성 촉진(Diverse Beam Search), 제약된 디코딩(lexically-constrained decoding; Hokamp & Liu 2017), 샘플링-빔 하이브리드, 그리고 빔 크기(4~8 권장) 조정이 일반적입니다. 대형 LM에서는 너무 큰 빔이 오히려 품질을 떨어뜨릴 수 있어 경험적 튜닝이 필수입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드:<br>- Hugging Face Transformers: Google/Meta 스타일의 생성기에서 num_beams 사용<br>  from transformers import AutoModelForSeq2SeqLM, AutoTokenizer<br>  tok = AutoTokenizer.from_pretrained('t5-small')<br>  m = AutoModelForSeq2SeqLM.from_pretrained('t5-small')<br>  in_ids = tok('translate English to German: The cat sits.', return_tensors='pt').input_ids<br>  outs = m.generate(in_ids, num_beams=6, length_penalty=1.0, early_stopping=True)<br>- fairseq (production NMT): fairseq-generate --beam 5 --lenpen 1.0<br>- TensorFlow Addons BeamSearchDecoder (ASR/seq2seq 배치용)<br>참고 연구: Sutskever et al. 2014 (seq2seq), Hokamp & Liu 2017 (lexically constrained), Vijayakumar et al. 2016 (diverse beams). 실무 패턴: beam 크기·length_penalty를 validation에서 튜닝, 배치화·케시 사용으로 디코딩 비용 절감, 제약 디코딩은 룰 기반 사실/상표 제약에 효과적.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Beam search is a heuristic decoding algorithm that keeps the top-B partial hypotheses when generating sequences (MT, summarization, ASR), trading off search breadth and latency for practical production use.</p>
+        <p>How it works: At each decoding step you expand the current top-B beams with all possible next tokens, score the extended hypotheses (usually summed log-probabilities), and keep the top-B. Practical systems apply length normalization or penalties, early stopping, and use cached attention keys/values to avoid recomputing encoder/state information. Complexity per step is roughly O(B * V), so implementations batch candidate scoring and use GPU-friendly tensor ops.<br><br>Variants and engineering notes: Diverse beam search encourages variety across beams (useful in dialogue/summarization), lexically constrained beam search enforces inclusion of tokens/phrases (Hokamp & Liu 2017), and hybrid sampling+beam can balance quality vs. diversity. Large LMs often require empirical tuning because very large beams can degrade perceived quality despite higher likelihood.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples + code:<br>- Hugging Face Transformers (NMT/summarization):<br>  from transformers import AutoModelForSeq2SeqLM, AutoTokenizer<br>  tok = AutoTokenizer.from_pretrained('t5-small')<br>  m = AutoModelForSeq2SeqLM.from_pretrained('t5-small')<br>  in_ids = tok('translate English to German: The cat sits.', return_tensors='pt').input_ids<br>  out = m.generate(in_ids, num_beams=6, length_penalty=1.0, early_stopping=True)<br>- fairseq (Facebook/Meta NMT in production): fairseq-generate --beam 5 --lenpen 1.0<br>- TensorFlow Addons (ASR/seq2seq): use tfa.seq2seq.BeamSearchDecoder with tiled batch states.<br>References: Sutskever et al. 2014 (seq2seq), Hokamp & Liu 2017 (constrained decoding), Vijayakumar et al. 2016 (diverse beam). Best practices: tune beam size (often 4–8), apply length penalty, batch/ cache to reduce latency, and use constrained decoding for required tokens.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
