@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Beam Search (Decoding for Sequence Models)",
+      "date": "2026-06-24",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-24-beam-search.html",
+      "excerpt": "Beam search는 생성 모델(번역, 요약, 음성인식)에서 가능한 출력 시퀀스들을 탐색해 높은 점수의 후보들을 유지하는 탐욕적 탐색 기법으로, 실무에서는 속도·품질 균형을 맞추기 위해 널리 사용됩니다."
+    },
+    {
       "title": "Navigating Unreliable Parametric and Contextual Knowledge: Explicit Knowledge Conflict Resolution for LLM Inference",
       "date": "2026-06-23",
       "category": "papers",
