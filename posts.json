@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Word2Vec & Static Word Embeddings",
+      "date": "2026-06-26",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-26-word2vec-and-static-word-embeddings.html",
+      "excerpt": "Word2Vec와 정적 임베딩은 단어를 고정 차원 실수 벡터로 매핑해 검색·추천·피처 엔지니어링에서 빠르게 유사성 연산을 가능하게 합니다."
+    },
+    {
       "title": "Beam Search (Decoding for Sequence Models)",
       "date": "2026-06-24",
       "category": "cs-fundamentals",
