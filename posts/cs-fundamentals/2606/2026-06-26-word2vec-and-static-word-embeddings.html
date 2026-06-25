@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Word2Vec & Static Word Embeddings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Word2Vec와 정적 임베딩은 단어를 고정 차원 실수 벡터로 매핑해 검색·추천·피처 엔지니어링에서 빠르게 유사성 연산을 가능하게 합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Word2Vec & Static Word Embeddings</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-26</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Word2Vec와 정적 임베딩은 단어를 고정 차원 실수 벡터로 매핑해 검색·추천·피처 엔지니어링에서 빠르게 유사성 연산을 가능하게 합니다.</p>
+        <p>작동 원리: Word2Vec의 대표 모델은 Skip-gram(주변 단어 예측)과 CBOW(중심 단어 예측)이며, 네거티브 샘플링 또는 계층적 소프트맥스를 사용해 확률적 학습을 효율화합니다. 수학적으로 Skip-gram with Negative Sampling(SGNS)은 희소 공기행렬의 암묵적 행렬분해와 동치라는 연구(Levy&Goldberg)가 있어 단순한 통계 기반 기법임에도 강력합니다.<br>실무 관점: 정적 임베딩은 컨텍스트 무관하지만 계산 비용이 낮아 대량 로그에서 빠르게 벡터를 추출해 피처 스토어에 저장하거나, 약식 의미 유사성 기반 필터링(예: 검색 전처리, 후보군 생성), A/B 실험용 고정 특징으로 널리 사용됩니다. Google News pre-trained, Stanford GloVe, Facebook FastText 같은 공개 모델이 산업계에서 초기 벡터화 표준으로 쓰였습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드 및 사용처:<br>1) Gensim으로 학습/로딩(Prod용 오프라인 파이프라인):<br>from gensim.models import Word2Vec, KeyedVectors<br>sentences = LineSentence('corpus.txt')<br>model = Word2Vec(sentences, vector_size=300, window=5, sg=1, negative=5, epochs=5)<br>model.wv.save_word2vec_format('w2v.bin', binary=True)<br># 로드<br>kv = KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)<br><br>2) FastText(아웃오브보우드 처리, Facebook):<br># fastText CLI: 학습<br>./fasttext skipgram -input corpus.txt -output model -dim 300<br><br>3) 서빙/모델 통합 패턴 (PyTorch 예):<br>import torch.nn as nn<br>weights = kv.vectors # numpy array<br>emb = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=False)<br># prod: 임베딩을 피처 스토어에 캐시하고 ANN(FAISS)로 유사도 검색<br><br>참고: 대용량 시스템에서는 FAISS로 ANN 인덱싱, feature-store(Feast 등)에 벡터 저장, 정기 재학습으로 드리프트 대응. 주요 참고문헌: Mikolov et al. (2013), Pennington et al. GloVe (2014), Bojanowski et al. FastText (2017).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Word2Vec and static embeddings map words to fixed real-valued vectors enabling fast similarity ops for search, recommendation, and feature engineering in production.</p>
+        <p>How it works: The main Word2Vec flavors are Skip-gram (predict context from a target word) and CBOW (predict target from context). Training uses negative sampling or hierarchical softmax to scale to large corpora. Levy & Goldberg showed SGNS implicitly factorizes a shifted PMI matrix, linking it to matrix-factorization views (hence strong empirical performance despite simplicity).<br>Practical tradeoffs: static embeddings are context-agnostic but cheap to compute and store, so teams use them for offline feature pipelines, candidate generation, lightweight semantic search, and as initialization for downstream models. Popular pretrained sets include Google News vectors, GloVe (Stanford), and FastText (Facebook) which handles OOV via subword units.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code and where it's used:<br>1) Train/load with gensim (batch offline pipeline):<br>from gensim.models import Word2Vec, KeyedVectors<br>model = Word2Vec(LineSentence('corpus.txt'), vector_size=300, window=5, sg=1, negative=5, epochs=5)<br>model.wv.save_word2vec_format('w2v.bin', binary=True)<br>kv = KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)<br><br>2) FastText CLI (Facebook production use for OOV robustness):<br>./fasttext skipgram -input corpus.txt -output model -dim 300<br><br>3) Integrate into model serving (PyTorch):<br>import torch, torch.nn as nn<br>weights = torch.FloatTensor(kv.vectors)<br>embedding = nn.Embedding.from_pretrained(weights, freeze=False)<br># Use ANN (FAISS) for nearest-neighbor candidate retrieval in production<br><br>Where companies use it: Google/academic origin (Mikolov et al.), Facebook uses FastText for upstream text features, and many teams combine static embeddings + FAISS for fast candidate retrieval in ranking/recommendation. Best practices: persist vectors in a feature store, use ANN for scalable NN search, retrain periodically to reduce drift, and prefer FastText or subword models when OOV is common.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
