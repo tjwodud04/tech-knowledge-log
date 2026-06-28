@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Approximate Nearest Neighbors (ANN) & Vector Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="벡터 검색(ANN)은 고차원 임베딩에서 유사한 항목을 빠르게 찾는 기술로, 추천·검색·유사도 검색에서 실시간 응답과 비용 절감을 위해 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Approximate Nearest Neighbors (ANN) & Vector Search</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-06-29</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>벡터 검색(ANN)은 고차원 임베딩에서 유사한 항목을 빠르게 찾는 기술로, 추천·검색·유사도 검색에서 실시간 응답과 비용 절감을 위해 필수적입니다.</p>
+        <p>핵심 아이디어는 정확한 선형 탐색(Brute-force)을 피하고 근사 구조를 사용해 자주 허용 가능한 오차 범위 내에서 최근접 이웃을 반환하는 것입니다. 주요 기법은 그래프 기반(HNSW), 공간 분할과 IVF(중심군 기반), 그리고 양자화(PQ, OPQ)입니다. HNSW는 노드 간 소규모 그래프를 탐색해 낮은 지연시간과 높은 정밀도를 제공하고, IVF+PQ(FAISS)는 클러스터에 나눈 뒤 각 클러스터를 저비용 코드로 압축해 대용량에 적합합니다.<br><br>실제 오픈소스/연구 예시는 Facebook의 FAISS(IVF/PQ/OPQ), Spotify의 Annoy(랜덤 투영 트리), Malkov의 HNSW(HNSWlib), Google의 ScaNN가 있습니다. 산업에서는 Pinecone/Milvus 같은 벡터 DB가 인프라를 단순화하고, Elastic/KNN 플러그인은 기존 검색 스택에 통합됩니다. 트레이드오프는 구축 시간·메모리·정확도·업데이트 용이성 간의 균형입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>FAISS (IVF+PQ) 예제 — 대용량 인덱스에서 자주 사용됨 (GitHub: facebookresearch/faiss):<br><br>import numpy as np<br>import faiss<br>d=128<br>xb = np.random.rand(100000, d).astype('float32')<br>index = faiss.index_factory(d, "IVF65536,PQ32")<br>index.train(xb)<br>index.add(xb)<br>D,I = index.search(xb[:5], 5)<br><br>HNSWlib (저지연 추천) 예제:<br>import hnswlib<br>p = hnswlib.Index(space='cosine', dim=128)<br>p.init_index(max_elements=200000, ef_construction=200, M=16)<br>p.add_items(data)<br>labels, dist = p.knn_query(q, k=10)<br><br>Elastic 벡터 매핑 예: "mappings":{"properties":{"vec":{"type":"dense_vector","dims":768}}}<br><br>실무 패턴: 메타데이터 조인(필터 후 벡터 검색), 인크리멘털 리빌드, 샤딩·레플리카로 질의 지연 분산, recall/latency SLO 계측. 출처: FAISS GitHub, HNSW paper (Malkov+Yashunin), Annoy.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Vector search (ANN) finds nearest embeddings fast by trading exactness for latency and cost — critical for recommendation, semantic search, and retrieval at scale.</p>
+        <p>The core idea is to avoid brute-force O(N) comparisons using approximate structures that return near-neighbors with high probability. Major algorithm families: graph-based (HNSW), partition-based (IVF), and quantization (PQ/OPQ). HNSW builds a navigable small-world graph for very low query latency and high recall; IVF clusters vectors and searches a subset of clusters; PQ compresses vectors into compact codes to reduce memory and I/O.<br><br>Popular implementations: FAISS (Facebook) supports IVF+PQ/OPQ and GPU acceleration, Annoy (Spotify) uses randomized trees for read-heavy workloads, HNSWlib implements Malkov’s HNSW for fast dynamic indexes, and ScaNN (Google) targets TPU/CPU optimizations. Vector DBs like Milvus or managed services (Pinecone) simplify production concerns like sharding, replication, and hybrid filtering.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>FAISS (IVF+PQ) production snippet — common pattern for large offline indexes (source: facebookresearch/faiss):<br><br>import numpy as np<br>import faiss<br>d=128<br>xb = np.random.rand(100000, d).astype('float32')<br>index = faiss.index_factory(d, "IVF65536,PQ32")<br>index.train(xb)<br>index.add(xb)<br>D,I = index.search(xb[:5], 5)<br><br>HNSWlib — low-latency online use:<br>import hnswlib<br>p = hnswlib.Index(space='cosine', dim=128)<br>p.init_index(max_elements=200000, ef_construction=200, M=16)<br>p.add_items(data)<br>labels, dist = p.knn_query(q, k=10)<br><br>Elasticsearch mapping for vector fields:<br>{"mappings": {"properties": {"vec": {"type":"dense_vector","dims":768}}}}<br><br>Operational best practices: filter-by-metadata before vector search, periodic re-training/reindexing for drift, tune ef/search_k for recall vs latency, warm caches and measure recall/latency SLOs. Sources: FAISS repo, HNSW paper (Malkov & Yashunin), Annoy, ScaNN, Milvus.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
