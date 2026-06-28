@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Approximate Nearest Neighbors (ANN) & Vector Search",
+      "date": "2026-06-29",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2606/2026-06-29-approximate-nearest-neighbors-and-vector-search.html",
+      "excerpt": "벡터 검색(ANN)은 고차원 임베딩에서 유사한 항목을 빠르게 찾는 기술로, 추천·검색·유사도 검색에서 실시간 응답과 비용 절감을 위해 필수적입니다."
+    },
+    {
       "title": "Word2Vec & Static Word Embeddings",
       "date": "2026-06-26",
       "category": "cs-fundamentals",
