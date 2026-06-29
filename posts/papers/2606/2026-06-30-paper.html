@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Agent-Native Immune System: Architecture, Taxonomy, and Engineering</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agent-Native Immune System: Architecture, Taxonomy, and Engineering">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Agent-Native Immune System: Architecture, Taxonomy, and Engineering</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Bo Shen, Lifeng Chang, Tianyuan Wei, Yunpeng Li, Feng Shi, Yichen Han, Peijie Gao, Shiyi Kuang, Xin Chang, Dehui Li</div>
+        <div><strong>발행일 / Published:</strong> 2026-06-26</div>
+        <div><strong>Arxiv ID:</strong> 2606.28270</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>정적 챗봇에서 영속적 메모리, 도구 사용 프로토콜, 다중 에이전트 협업을 갖춘 자율 에이전트로의 전환은 AI 위협 지형을 근본적으로 확대했다. 주위 방어(perimeter security)와 학습 시점의 정렬(training-time alignment)과 같은 기존 방어 메커니즘은 에이전트의 능동적 추론 루프 바깥에 머물러 있다. 따라서 이들은 한계가 있다. 완전히 정렬된 에이전트조차도 런타임에 메모리 중독, 도구 체인 조작, 다중 에이전트 프로토콜 공격 등으로 쉽게 탈취될 수 있다. 이러한 중대한 공백을 메우기 위해, 우리는 에이전트 고유 면역 시스템(Agent-Native Immune System, ANIS)을 도입한다. ANIS는 생물학적 영감을 받은 최초의 내인성 방어 아키텍처로, 에이전트의 인지 루프 내부에 직접 내장된다.</p>
+        <p>우리의 프레임워크는 네 가지 주요 기여를 제시한다. 첫째, 우리는 여섯 계층의 면역 타워(Immune Tower, L0–L5)를 설계하고, 비인지적·물리적·논리적 격리 계층인 장벽 면역(Barrier Immunity, L1)을 명확히 포함시킨다. 둘째, 에이전트 바이러스(Agent Viruses)와 에이전트 백신(Agent Vaccines)에 대한 통합 분류 체계를 확립하여, 피상적인 비파라메트릭(non-parametric) 방어와 강건한 파라메트릭(parametric) 백신 간의 중요한 구분을 형식화한다. 셋째, 우리는 하니스 삼중체(Harness Triad)—Meta, Self, Auto—를 개념화한다. 이는 자기 모니터링형 메타인지 자동화의 백본으로서 지속적 면역 학습(Continual Immune Learning, CIL)을 구동하여 백신들이 새로운 위협에 동적으로 적응할 수 있게 한다. 넷째, 우리는 모델 정렬(model alignment)과 에이전트 면역(agent immunity) 사이의 엄격한 이론적 경계를 설정한다. 정렬은 학습 단계에서 정적이고 ‘헌법적’인 가치 기반을 제공하는 반면, ANIS는 런타임 동안 동적으로 작동하는 ‘법 집행’ 메커니즘으로 기능한다.</p>
+        <p>마지막으로 우리는 면역 프로토콜 표준화, Autoimmunity Rate(거짓 양성 개입 비율)과 같은 새로운 평가 지표, 그리고 집단 지능 생태계에서 병원체와 백신의 공진화적 동력학을 포함한 이 분야의 개방 과제들을 제시하며 결론을 맺는다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The transition from static chat bots to autonomous agents--equipped with persistent memory, tool-use protocols, and multi-agent collaboration--has fundamentally expanded the AI threat landscape. Current defense mechanisms, such as perimeter security and training-time alignment, remain external to the agent's active reasoning loop. Consequently, they fall short: a fully aligned agent remains highly vulnerable to runtime hijacking via memory poisoning, tool-chain manipulation, or multi-agent protocol attacks. To address this critical gap, we introduce the Agent-Native Immune System (ANIS), the first biologically inspired, endogenous defense architecture embedded directly within the agent's cognitive loop. Our framework presents four primary contributions. First, we design a six-layer Immune Tower (L0-L5), distinctly incorporating Barrier Immunity (L1) as a non-cognitive, physical-and-logical isolation layer. Second, we establish a unified taxonomy of Agent Viruses and Agent Vaccines, formalizing the critical distinction between superficial non-parametric defenses and robust parametric vaccines. Third, we conceptualize the Harness Triad--Meta, Self, and Auto--a self-monitoring, meta-cognitive automation backbone that drives Continual Immune Learning (CIL), enabling vaccines to dynamically adapt to novel threats. Finally, we establish a rigorous theoretical demarcation between model alignment and agent immunity: while alignment provides a static "constitutional" value foundation during training, ANIS serves as the dynamic "law enforcement" mechanism during runtime. We conclude by framing open challenges for the field, including immune protocol standardization, novel evaluation metrics such as the Autoimmunity Rate (false-positive intervention rate), and the co-evolutionary dynamics between pathogens and vaccines within collective intelligence ecosystems.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2606.28270" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2606.28270.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
