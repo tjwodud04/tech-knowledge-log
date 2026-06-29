@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Agent-Native Immune System: Architecture, Taxonomy, and Engineering",
+      "date": "2026-06-30",
+      "category": "papers",
+      "url": "posts/papers/2606/2026-06-30-paper.html",
+      "excerpt": "Agent-Native Immune System: Architecture, Taxonomy, and Engineering"
+    },
+    {
       "title": "Approximate Nearest Neighbors (ANN) & Vector Search",
       "date": "2026-06-29",
       "category": "cs-fundamentals",
