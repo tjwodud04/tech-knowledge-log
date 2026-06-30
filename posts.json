@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Masked Language Model (MLM)",
+      "date": "2026-07-01",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-01-masked-language-model (mlm).html",
+      "excerpt": "마스킹 언어모델(MLM)은 입력 토큰 일부를 가리고 해당 토큰을 예측하도록 사전학습하는 방식으로, 컨텍스트를 양방향으로 학습해 검색·랭킹·문서이해 같은 실무 시스템에서 중요한 표현을 만든다."
+    },
+    {
       "title": "Agent-Native Immune System: Architecture, Taxonomy, and Engineering",
       "date": "2026-06-30",
       "category": "papers",
