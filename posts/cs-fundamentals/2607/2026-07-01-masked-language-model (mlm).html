@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Masked Language Model (MLM)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="마스킹 언어모델(MLM)은 입력 토큰 일부를 가리고 해당 토큰을 예측하도록 사전학습하는 방식으로, 컨텍스트를 양방향으로 학습해 검색·랭킹·문서이해 같은 실무 시스템에서 중요한 표현을 만든다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Masked Language Model (MLM)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-01</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>마스킹 언어모델(MLM)은 입력 토큰 일부를 가리고 해당 토큰을 예측하도록 사전학습하는 방식으로, 컨텍스트를 양방향으로 학습해 검색·랭킹·문서이해 같은 실무 시스템에서 중요한 표현을 만든다.</p>
+        <p>작동 원리: MLM은 문장 내 일부 토큰을 [MASK]로 바꿔 모델이 원래 토큰을 예측하게 하는 손실(크로스엔트로피)을 최소화한다(예: BERT, Devlin et al. 2018). 실제 구현에서는 동적 마스킹(dynamic masking)으로 학습 데이터마다 마스크를 새로 생성해 과적합을 줄이고, whole-word 또는 span masking(SpanBERT)으로 단어단위/구간 정보를 보존한다. RoBERTa(Liu et al.)는 더 큰 배치·더 긴 학습으로 MLM 품질을 높였고, ELECTRA(Clark et al.)는 'replaced token detection'로 효율을 개선했다.<br>운영관점: MLM 기반 인코더는 검색 쿼리 이해, 문서 임베딩, 엔티티 추출 등에서 fine-tune 되어 사용된다. 생산 환경에서는 mixed precision, gradient accumulation, 데이터 병렬화로 대규모 프리트레이닝을 수행하고, 추론용으로는 사전학습된 encoder를 경량화(주입, distillation)한다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드:<br>출처: BERT (Devlin et al. 2018), RoBERTa (Liu et al. 2019), SpanBERT (Joshi et al. 2020), Hugging Face Transformers.<br>1) 빠른 실험: Hugging Face로 마스크 완료 예측<br>from transformers import pipeline<br>fill = pipeline('fill-mask','bert-base-uncased')<br>fill('The capital of France is [MASK].')<br>2) 프리트레이닝(간단한 패턴):<br>from transformers import AutoTokenizer, AutoModelForMaskedLM, DataCollatorForLanguageModeling, Trainer, TrainingArguments<br>tok=AutoTokenizer.from_pretrained('bert-base-uncased')<br>model=AutoModelForMaskedLM.from_pretrained('bert-base-uncased')<br>collator=DataCollatorForLanguageModeling(tok, mlm=True, mlm_probability=0.15)<br># dataset: tokenized text dataset<br>trainer=Trainer(model=model, args=TrainingArguments(...), data_collator=collator, train_dataset=ds)<br>trainer.train()<br>실무 패턴/베스트프랙티스: dynamic masking 사용, whole-word/span masking 고려, 큰 배치+LR 스케줄링, mixed precision(Apex/torch.cuda.amp), pretrain 후 task별 fine-tune 혹은 distillation을 통해 실서비스로 전개.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Masked Language Modeling (MLM) trains models to predict masked tokens given bidirectional context; it's the backbone for encoder-style models used in search, QA, NER and document understanding in production.</p>
+        <p>How it works: MLM randomly masks tokens in input and optimizes the model to predict the original tokens (cross-entropy). Classic example: BERT (Devlin et al., 2018). Practical improvements include dynamic masking (new masks each epoch), whole-word or span masking (SpanBERT) to handle multi-token words, and large-batch regimes used by RoBERTa to improve convergence. ELECTRA replaces masked-token prediction with a more sample-efficient replaced-token detection objective.<br>Operational notes: In real systems pretrained MLM encoders are fine-tuned for downstream tasks (ranking, intent detection, extractive QA). Production training uses distributed data parallelism, gradient accumulation, mixed precision, and often further pretraining on domain-specific corpora. For inference, models are distilled or quantized to meet latency constraints.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code and sources: BERT (Devlin et al. 2018), RoBERTa (Liu et al. 2019), SpanBERT, Hugging Face Transformers.<br>1) Quick mask prediction demo:<br>from transformers import pipeline<br>fill = pipeline('fill-mask', model='roberta-base')<br>fill('The capital of France is <mask>.')<br>2) Pretraining pattern (Hugging Face):<br>from transformers import AutoTokenizer, AutoModelForMaskedLM, DataCollatorForLanguageModeling, Trainer, TrainingArguments<br>tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')<br>model = AutoModelForMaskedLM.from_pretrained('bert-base-uncased')<br>collator = DataCollatorForLanguageModeling(tokenizer, mlm=True, mlm_probability=0.15)<br># tokenized_dataset should be list of input_ids<br>trainer = Trainer(model=model, args=TrainingArguments(output_dir='./out', per_device_train_batch_size=16), data_collator=collator, train_dataset=tokenized_dataset)<br>trainer.train()<br>Production patterns/best practices: use dynamic/whole-word/span masking depending on downstream tasks, mix MLM with replaced-token detection for efficiency, apply large-batch warmup schedules, enable AMP and model parallelism, and perform distillation/quantization for low-latency serving.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
