@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Raft Consensus Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Raft는 분산 시스템에서 복제 로그를 통해 일관성을 보장하는 합의 알고리즘으로, 이해하기 쉽고 실무에 널리 채택되어 장애 복구와 구성 변경에 강합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Raft Consensus Algorithm</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-03</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Raft는 분산 시스템에서 복제 로그를 통해 일관성을 보장하는 합의 알고리즘으로, 이해하기 쉽고 실무에 널리 채택되어 장애 복구와 구성 변경에 강합니다.</p>
+        <p>Raft의 핵심은 세 가지: 리더 선출(leader election), 로그 복제(log replication), 안전성(safety)입니다. 시스템은 기간(term)으로 구분되며, 각 기간에 하나의 리더가 존재해 클라이언트 요청을 받아 로그 항목을 다른 팔로워에게 appendEntriesRPC로 전파합니다. 리더는 과반수 승인을 받은 항목만 커밋하고 순서를 보장합니다. 안전성은 과거에 커밋된 로그가 다른 리더에 의해 덮어쓰이지 않도록 term과 인덱스 조건을 통해 지켜집니다.<br><br>운영 관점에서는 선거 타임아웃(election timeout)과 하트비트(heartbeat) 주기 설정, 스냅샷(snapshot)과 로그 압축(compaction), 멤버십 변화(joint consensus)가 중요합니다. 스냅샷은 로그가 비대해질 때 상태 머신의 스냅샷을 저장하고 오래된 로그를 제거해 복구 시간과 디스크 사용량을 줄입니다. 멤버십 변경은 안전하게 노드를 추가/제거하기 위해 두 단계의 조인트 컨센서스(joint consensus)를 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례: <br>- etcd (CoreOS): Kubernetes의 키-값 저장소로 etcd 서버는 Go의 etcd/raft 라이브러리를 사용합니다. 프로덕션에서는 토폴로지와 electionTimeout, snapshotCount를 튜닝합니다.<br>  예: etcd 시작 플래그<br>  "etcd --name infra1 --initial-advertise-peer-urls http://10.0.0.1:2380 --listen-peer-urls http://0.0.0.0:2380 --listen-client-urls http://0.0.0.0:2379 --initial-cluster infra1=http://10.0.0.1:2380,infra2=http://10.0.0.2:2380"<br><br>- 라이브러리 사용(Go 등원시): etcd/raft의 낮은 수준 API로 제안하는 예:<br>  "raftNode.Propose(context.TODO(), []byte(\"set x=1\"))"<br><br>- HashiCorp Consul, CockroachDB도 Raft 변형을 사용합니다(참고: Ongaro & Ousterhout, 'Search for an Understandable Consensus Algorithm' 2014). 실무 패턴: 과반수 노드 유지, 스냅샷 주기 설정, 네트워크 분할 대비 read-only 모드/leader-lease 활용.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Raft is a replication-based consensus algorithm that ensures consistency across distributed state machines; it's designed to be easier to understand and implement, and is widely used in production systems.</p>
+        <p>The core of Raft: leader election, log replication, and safety. Time is divided into terms; in each term one leader handles client requests and replicates log entries to followers using AppendEntries RPCs. A leader considers an entry committed once a majority acknowledges it; committed entries are applied to the state machine in order. Safety is enforced by leader election rules and term/index checks so that a new leader never loses previously committed entries.<br><br>Operational concerns include election timeout and heartbeat tuning, log compaction via snapshots, and safe membership changes. Snapshots reduce recovery time and disk usage by serializing state and discarding old logs. Membership changes use joint consensus (two-phase) to avoid losing majority quorums during reconfiguration.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- etcd (CoreOS): used by Kubernetes for cluster metadata. etcd server uses the Go etcd/raft implementation; operators tune electionTimeout and snapshotCount for stability.<br>  Example etcd startup flags:<br>  "etcd --name infra1 --initial-advertise-peer-urls http://10.0.0.1:2380 --listen-peer-urls http://0.0.0.0:2380 --listen-client-urls http://0.0.0.0:2379 --initial-cluster infra1=http://10.0.0.1:2380,infra2=http://10.0.0.2:2380"<br><br>- Low-level API (Go): proposing entries with etcd/raft:<br>  "node.Propose(ctx, []byte(\"put key val\"))"<br><br>- Other adopters: HashiCorp Consul (service discovery), CockroachDB (distributed SQL) use Raft variants. Best practices: maintain odd-numbered clusters or strict majority, enable snapshots and log compaction, monitor election frequency, and use leader leases for low-latency reads. References: Ongaro & Ousterhout, 2014 (Raft paper); etcd repo (github.com/etcd-io/etcd).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
