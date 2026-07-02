@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Raft Consensus Algorithm",
+      "date": "2026-07-03",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-03-raft-consensus-algorithm.html",
+      "excerpt": "Raft는 분산 시스템에서 복제 로그를 통해 일관성을 보장하는 합의 알고리즘으로, 이해하기 쉽고 실무에 널리 채택되어 장애 복구와 구성 변경에 강합니다."
+    },
+    {
       "title": "Masked Language Model (MLM)",
       "date": "2026-07-01",
       "category": "cs-fundamentals",
