@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>wav2vec (self-supervised speech representation)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="wav2vec는 레이블이 적은 환경에서 음성 특징을 자기지도학습으로 추출해 ASR·검색·감정분석 등 실무 시스템에 높은 성능과 데이터 효율을 제공한다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>wav2vec (self-supervised speech representation)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-06</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>wav2vec는 레이블이 적은 환경에서 음성 특징을 자기지도학습으로 추출해 ASR·검색·감정분석 등 실무 시스템에 높은 성능과 데이터 효율을 제공한다.</p>
+        <p>핵심은 raw waveform을 컨볼루션 인코더로 낮은 수준 벡터로 변환하고, Transformer 기반 컨텍스트 인코더로 전역 표현을 학습하는 것이다. 학습 목표는 음성 시그널의 일부를 마스킹하고, 양호한(positive) 샘플과 여러 negative 샘플을 구분하도록 contrastive loss 또는 quantized discrete target과 예측 손실(CTC/MLM류)을 사용하는 것이다. wav2vec 2.0(Meta/Facebook)은 코드북(quantization), 대규모 무라벨 데이터, 마스킹 전략을 결합해 소량의 라벨로도 뛰어난 ASR 성능을 보였다.<br><br>시스템 관점에서 주요 장점은: 1) 라벨 없는 음성(라디오, 콜센터, 필드 레코딩)으로 사전학습 후 도메인 적응; 2) 프리즈된 특징 추출기를 인제스트 파이프라인에 넣어 downstream 태스크 전처리 비용 절감; 3) 작은 라벨셋으로 빠른 파인튜닝. 실제로 Hugging Face, fairseq, torchaudio, SpeechBrain 등에서 구현·배포되어 서비스에 적용된다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 코드(간단한 특징 추출 + 파인튜닝 예)<br><br># feature extract<br>from transformers import Wav2Vec2Processor, Wav2Vec2Model<br>import torchaudio<br>proc = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base')<br>model = Wav2Vec2Model.from_pretrained('facebook/wav2vec2-base')<br>waveform, sr = torchaudio.load('audio.wav')<br>inputs = proc(waveform.squeeze().numpy(), sampling_rate=sr, return_tensors='pt')<br>with torch.no_grad():<br>    features = model(inputs.input_values).last_hidden_state  # [B, T, D]<br><br># 파인튜닝: Hugging Face Wav2Vec2ForCTC 혹은 fairseq-train 사용<br># 실제 적용사례: Meta (wav2vec 2.0 논문), Mozilla Common Voice 기반 파인튜닝, Whisper와 함께 혼합 파이프라인, 콜센터 음성 인덱싱(Elasticsearch + vector embeddings)<br><br>Best practices: 도메인 무라벨로 먼저 사전학습/적응, 입력 정규화와 레이블 불균형 보정, quantized features를 캐싱해 추론 비용 최적화.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>wav2vec is a self-supervised method that learns powerful speech representations from raw audio, enabling high-performance ASR and downstream tasks with minimal labeled data.</p>
+        <p>At its core wav2vec encodes raw waveforms with a convolutional encoder into latent frames and feeds them into a Transformer context network. During pretraining parts of the latent sequence are masked; the model learns to predict masked representations using contrastive loss against negative samples or by predicting quantized targets (wav2vec 2.0). The quantization module discretizes latents into a codebook, which stabilizes targets for contrastive learning. This pipeline allows learning robust, speaker- and noise-invariant features from large unlabeled corpora.<br><br>Practically, teams pretrain on in-domain unlabeled audio (call centers, podcasts, speech logs) then fine-tune with limited transcriptions. Implementations are available in fairseq (original), Hugging Face Transformers, torchaudio, and SpeechBrain, making integration into production ASR, keyword spotting, and voice-search pipelines straightforward.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Minimal feature-extraction + fine-tune snippet<br><br>from transformers import Wav2Vec2Processor, Wav2Vec2Model<br>import torchaudio, torch<br>proc = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base')<br>model = Wav2Vec2Model.from_pretrained('facebook/wav2vec2-base')<br>waveform, sr = torchaudio.load('audio.wav')<br>inputs = proc(waveform.squeeze().numpy(), sampling_rate=sr, return_tensors='pt')<br>with torch.no_grad():<br>    feats = model(inputs.input_values).last_hidden_state  # [B, T, D]<br><br>For end-to-end ASR use Wav2Vec2ForCTC or fairseq-train with --task audio_pretraining then --criterion ctc for fine-tuning. Real deployments: Meta (wav2vec 2.0 paper), Hugging Face model hub production models, Mozilla Common Voice fine-tunes, and commercial voice-bots using pretrain+domain-adapt. Best practices: pretrain/adapt on unlabeled in-domain audio, cache quantized features for inference, use spec-augmentation/masking during fine-tuning and monitor domain shift.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
