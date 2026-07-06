@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "wav2vec (self-supervised speech representation)",
+      "date": "2026-07-06",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-06-wav2vec-self-supervised-speech-representation.html",
+      "excerpt": "wav2vec는 레이블이 적은 환경에서 음성 특징을 자기지도학습으로 추출해 ASR·검색·감정분석 등 실무 시스템에 높은 성능과 데이터 효율을 제공한다."
+    },
+    {
       "title": "Raft Consensus Algorithm",
       "date": "2026-07-03",
       "category": "cs-fundamentals",
