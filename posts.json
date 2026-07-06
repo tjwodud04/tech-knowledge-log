@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "What LLM Agents Say When No One Is Watching: Social Structure and Latent Objective Emergence in Multi-Agent Debates",
+      "date": "2026-07-07",
+      "category": "papers",
+      "url": "posts/papers/2607/2026-07-07-paper.html",
+      "excerpt": "What LLM Agents Say When No One Is Watching: Social Structure and Latent Objective Emergence in Multi-Agent Debates"
+    },
+    {
       "title": "wav2vec (self-supervised speech representation)",
       "date": "2026-07-06",
       "category": "cs-fundamentals",
