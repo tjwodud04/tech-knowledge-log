@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Neural Vocoders for Text-to-Speech (TTS)",
+      "date": "2026-07-08",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-08-neural-vocoders-for-text-to-speech.html",
+      "excerpt": "뉴럴 보코더는 멜-스펙트로그램 같은 로우-레벨 음성 표현을 고품질 파형으로 변환하는 모델로, 자연스러운 음성 합성과 실시간 요구를 충족시키는 핵심 구성요소입니다."
+    },
+    {
       "title": "What LLM Agents Say When No One Is Watching: Social Structure and Latent Objective Emergence in Multi-Agent Debates",
       "date": "2026-07-07",
       "category": "papers",
