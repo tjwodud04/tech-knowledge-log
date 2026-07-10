@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sequence-to-Sequence (Encoder–Decoder) and Teacher Forcing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="시퀀스-투-시퀀스(인코더-디코더)는 입력 시퀀스를 다른 시퀀스로 변환하는 핵심 구조이며, teacher forcing은 학습 안정성과 수렴 속도를 높이는 표준 기법입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Sequence-to-Sequence (Encoder–Decoder) and Teacher Forcing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-10</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>시퀀스-투-시퀀스(인코더-디코더)는 입력 시퀀스를 다른 시퀀스로 변환하는 핵심 구조이며, teacher forcing은 학습 안정성과 수렴 속도를 높이는 표준 기법입니다.</p>
+        <p>작동 원리: 인코더는 입력(예: 문장, 오디오)을 잠재 표현으로 압축하고 디코더는 이 표현을 받아 시퀀스를 생성합니다. RNN/LSTM/GRU 기반 모델과 Transformer 모두 이 패턴을 따르며, 훈련 시 디코더에 이전에 예측한 토큰 대신 정답 토큰을 공급하면 이를 teacher forcing이라 부릅니다. 이는 그래디언트 흐름을 안정화하고 빠른 학습을 돕지만, 훈련-추론 불일치(exposure bias)를 유발할 수 있습니다.<br><br>기술적 세부사항: 전형적 알고리즘은 입력 인코더 -> 컨텍스트(또는 어텐션 맵) -> 디코더 반복 생성입니다. teacher_forcing_ratio(0..1)를 두고 각 시간 스텝에서 확률적으로 정답을 넣을지 모델 출력을 넣을지 결정합니다. 실무에서는 Scheduled Sampling(Bengio et al., 2015)을 도입하거나, 학습 말기에 teacher forcing 비율을 낮추고 label smoothing, beam search와 결합합니다. Transformer 기반의 T5/Marian/FAIRseq 같은 라이브러리도 학습 단계에서 디코더 입력을 시프트된 정답(shift-right)으로 공급하는 방식으로 teacher forcing 효과를 냅니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- Google/Meta 연구: "Listen, Attend and Spell"(Google ASR)와 GNMT는 seq2seq+teacher forcing을 사용해 음성/번역 성능을 개선했고, Transformer 계열(Google T5, Facebook FAIRseq)도 훈련 시 디코더에 shifted targets를 사용합니다(참조: Bahdanau et al., 2015; Vaswani et al., 2017).<br>- 오픈소스: OpenNMT, Fairseq, Hugging Face Transformers는 학습 루틴에서 labels를 shift_right하여 teacher forcing 동작을 구현합니다.<br><br>실무 코드 예 (PyTorch RNN-style teacher forcing):<br><br>"""<br>decoder_input = torch.tensor([sos_token])<br>for t in range(max_len):<br>    output, hidden = decoder(decoder_input, hidden, context)<br>    top1 = output.argmax(1)<br>    use_teacher = random.random() < teacher_forcing_ratio<br>    decoder_input = target[t] if use_teacher else top1<br>"""<br><br>Transformer 스타일 (Hugging Face pattern):<br><br>"""<br>labels = batch['labels']<br>inputs = batch['input_ids']<br>outputs = model(input_ids=inputs, labels=labels)  # internally shifts labels -> teacher forcing<br>"""<br><br>Best practices: teacher_forcing_ratio 스케줄링, scheduled sampling 적용, evaluation 시 항상 모델 출력(무교사)으로 검증 및 빔서치 사용, 긴 시퀀스는 마스킹과 gradient clipping 적용.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Sequence-to-sequence (encoder–decoder) maps one sequence to another (translation, ASR, summarization). Teacher forcing supplies ground-truth decoder inputs during training to speed convergence and stabilize gradients.</p>
+        <p>How it works: an encoder encodes the source sequence to a context vector or attention maps; the decoder autoregressively produces tokens. During training, instead of feeding the decoder's previous prediction, you feed the ground-truth previous token — this is teacher forcing. It reduces error accumulation in early training but creates exposure bias: at inference the model must rely on its own (noisy) predictions.<br><br>Technical details: implement a teacher_forcing_ratio p ∈ [0,1]. At each decode step sample bernoulli(p) to decide whether to use the true token or the model’s last prediction. Transformer models implement the same effect by passing shift-right(labels) as decoder inputs; libraries like Fairseq/HuggingFace do this internally. To mitigate mismatch, use Scheduled Sampling (Bengio et al., 2015), progressively lower p, apply label smoothing, or fine-tune with self-generated sequences.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples:<br>- Research/Production: GNMT, LAS (Google) and many ASR/MT systems used seq2seq with teacher forcing; Transformers (Vaswani et al.) use shifted targets during training. Facebook/Meta’s Fairseq and Google’s T5 training pipelines use teacher-forcing-style decoder inputs.<br>- Open-source: OpenNMT, Fairseq, Hugging Face Transformers — training call patterns below.<br><br>PyTorch RNN teacher forcing snippet:<br><br>"""<br>teacher_forcing_ratio = 0.5<br>decoder_input = torch.tensor([sos_id])<br>for t in range(max_len):<br>    out, hidden = decoder(decoder_input, hidden, enc_out)<br>    top1 = out.argmax(dim=-1)<br>    if random.random() < teacher_forcing_ratio:<br>        decoder_input = target[:, t]<br>    else:<br>        decoder_input = top1<br>"""<br><br>Hugging Face / Transformer pattern:<br><br>"""<br>outputs = model(input_ids=ids, labels=labels)  # model shifts labels internally -> teacher forcing<br>loss = outputs.loss<br>"""<br><br>Production patterns & best practices: schedule teacher_forcing decay, validate with autoregressive sampling (no teacher forcing), use beam search for inference, apply gradient clipping and masking. For robustness, consider mixed training with model-generated prefixes or reinforcement/fine-tuning with sequence-level objectives.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
