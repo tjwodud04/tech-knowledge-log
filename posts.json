@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Sequence-to-Sequence (Encoder–Decoder) and Teacher Forcing",
+      "date": "2026-07-10",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-10-sequence-to-sequence-and-teacher-forcing.html",
+      "excerpt": "시퀀스-투-시퀀스(인코더-디코더)는 입력 시퀀스를 다른 시퀀스로 변환하는 핵심 구조이며, teacher forcing은 학습 안정성과 수렴 속도를 높이는 표준 기법입니다."
+    },
+    {
       "title": "Neural Vocoders for Text-to-Speech (TTS)",
       "date": "2026-07-08",
       "category": "cs-fundamentals",
