@@ -1,0 +1,13 @@
+{
+  "name": "tech-knowledge-log",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Daily bite-sized AI insights: CS fundamentals and trending papers.",
+  "scripts": {
+    "build": "node generate-posts-index.js"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}
