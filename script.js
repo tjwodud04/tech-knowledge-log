@@ -1,36 +1,128 @@
-// Tech Knowledge Log - Interactive Features
-// Smooth, modern interactions for the blog
-
-(function() {
+/**
+ * Tech Knowledge Log — front-end behaviour for the static GitHub Pages site.
+ *
+ * Organised into cohesive units: configuration, utilities, the data layer,
+ * rendering, and interactive features (scroll-in animations, archive search,
+ * smooth scrolling, header shadow). Everything is wired up on DOMContentLoaded.
+ */
+(function () {
   'use strict';
 
-  // Intersection Observer for fade-in animations
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
+  /* ------------------------------ Configuration ----------------------------- */
+
+  const SITE_BASE = '/tech-knowledge-log';
+  const POSTS_INDEX_URL = `${SITE_BASE}/posts.json`;
+
+  const LATEST_POSTS_LIMIT = 6; // posts shown on the home page
+  const SEARCH_DEBOUNCE_MS = 300;
+  const SCROLL_THROTTLE_MS = 100;
+  const HEADER_SCROLL_THRESHOLD = 100; // px scrolled before the header gains a shadow
+
+  const FADE_SELECTOR = '.fade-in, .fade-in-up';
+  const FADE_OBSERVER_OPTIONS = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+
+  /* -------------------------------- Utilities ------------------------------- */
+
+  /** Delay `fn` until `wait` ms have passed without another call. */
+  function debounce(fn, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+
+  /** Run `fn` at most once per `limit` ms. */
+  function throttle(fn, limit) {
+    let inThrottle = false;
+    return function (...args) {
+      if (inThrottle) return;
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => { inThrottle = false; }, limit);
+    };
+  }
+
+  /** Escape a string for safe insertion as HTML text. */
+  function escapeHtml(value) {
+    const replacements = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return (value || '').replace(/[&<>"']/g, (char) => replacements[char]);
+  }
+
+  /** Escape a string for literal use inside a RegExp. */
+  function escapeRegex(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /* ------------------------------- Data layer ------------------------------- */
+
+  /**
+   * Fetch the generated posts index.
+   * @returns {Promise<{ all: object[] }>} All posts, or an empty list on failure.
+   */
+  async function loadPostsIndex() {
+    try {
+      const response = await fetch(POSTS_INDEX_URL, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Failed to fetch posts.json');
+      const data = await response.json();
+      return { all: data.posts || [] };
+    } catch (error) {
+      console.error(error);
+      return { all: [] };
+    }
+  }
+
+  /* -------------------------------- Rendering ------------------------------- */
+
+  /** Render the newest posts as cards on the home page. */
+  function renderLatestPosts(list, posts, limit = LATEST_POSTS_LIMIT) {
+    if (!list) return;
+    list.innerHTML = posts.slice(0, limit).map((post, index) => (
+      `<li class="fade-in-up" style="animation-delay: ${index * 0.1}s;">
+       <article class="post-item">
+         <a class="post-link" href="${post.url}">${escapeHtml(post.title)}</a>
+         <div class="post-meta">
+           <time datetime="${post.date}">${post.date}</time>
+           ${post.category ? ` · ${post.category}` : ''}
+         </div>
+         ${post.excerpt ? `<p class="post-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
+       </article>
+     </li>`
+    )).join('');
+  }
+
+  /** Render the full post list on the archive page and update the counter. */
+  function renderArchive(list, counter, posts) {
+    if (!list) return;
+    list.innerHTML = posts.map((post) => (
+      `<li class="archive-item fade-in" data-title="${escapeHtml(post.title).toLowerCase()}" data-date="${post.date}">
+       <strong class="archive-date">${post.date}</strong>
+       <a href="${post.url}" class="archive-link">${escapeHtml(post.title)}</a>
+     </li>`
+    )).join('');
+    if (counter) counter.textContent = `All ${posts.length} posts`;
+  }
+
+  /* --------------------------- Feature: animations -------------------------- */
 
   const fadeInObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add('is-visible');
         fadeInObserver.unobserve(entry.target);
       }
     });
-  }, observerOptions);
+  }, FADE_OBSERVER_OPTIONS);
 
-  // Observe all fade-in elements
-  document.addEventListener('DOMContentLoaded', () => {
-    const fadeElements = document.querySelectorAll('.fade-in, .fade-in-up');
-    fadeElements.forEach(el => fadeInObserver.observe(el));
+  /** Observe existing fade-in elements so they reveal on scroll. */
+  function initFadeAnimations() {
+    document.querySelectorAll(FADE_SELECTOR).forEach((el) => fadeInObserver.observe(el));
+  }
 
-    initializeSearch();
-    initializeSmoothScroll();
-    initializeHeaderScroll();
-  });
+  /* ----------------------------- Feature: search ---------------------------- */
 
-  // Archive search functionality
-  function initializeSearch() {
+  /** Wire up live filtering of the archive list. */
+  function initSearch() {
     const searchInput = document.getElementById('searchInput');
     if (!searchInput) return;
 
@@ -38,11 +130,11 @@
     const noResults = document.getElementById('noResults');
     const archiveItems = archiveList ? archiveList.querySelectorAll('.archive-item') : [];
 
-    searchInput.addEventListener('input', debounce(function(e) {
-      const searchTerm = e.target.value.toLowerCase().trim();
+    searchInput.addEventListener('input', debounce((event) => {
+      const searchTerm = event.target.value.toLowerCase().trim();
       let visibleCount = 0;
 
-      archiveItems.forEach(item => {
+      archiveItems.forEach((item) => {
         const title = item.dataset.title || '';
         const date = item.dataset.date || '';
         const matchesSearch = title.includes(searchTerm) || date.includes(searchTerm);
@@ -50,26 +142,22 @@
         if (matchesSearch) {
           item.style.display = '';
           visibleCount++;
-          // Highlight matching text
           highlightText(item, searchTerm);
         } else {
           item.style.display = 'none';
         }
       });
 
-      // Show/hide no results message
       if (noResults) {
         noResults.style.display = visibleCount === 0 ? 'block' : 'none';
       }
-    }, 300));
+    }, SEARCH_DEBOUNCE_MS));
   }
 
-  // Highlight search matches
+  /** Wrap matches of `searchTerm` within an archive item in `.highlight`. */
   function highlightText(element, searchTerm) {
     if (!searchTerm) {
-      // Remove existing highlights
-      const highlighted = element.querySelectorAll('.highlight');
-      highlighted.forEach(span => {
+      element.querySelectorAll('.highlight').forEach((span) => {
         span.outerHTML = span.innerHTML;
       });
       return;
@@ -87,149 +175,55 @@
     }
   }
 
-  // Smooth scroll for anchor links
-  function initializeSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
+  /* ------------------------- Feature: smooth scroll ------------------------- */
+
+  /** Smoothly scroll to in-page anchor targets. */
+  function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener('click', function (event) {
         const targetId = this.getAttribute('href');
         if (targetId === '#') return;
 
         const target = document.querySelector(targetId);
         if (target) {
-          e.preventDefault();
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
+          event.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
     });
   }
 
-  // Header scroll effect
-  function initializeHeaderScroll() {
+  /* ------------------------- Feature: header shadow ------------------------- */
+
+  /** Toggle a shadow on the header once the page is scrolled. */
+  function initHeaderScroll() {
     const header = document.querySelector('.site-header');
     if (!header) return;
 
-    let lastScroll = 0;
-    const scrollThreshold = 100;
-
     window.addEventListener('scroll', throttle(() => {
-      const currentScroll = window.pageYOffset;
-
-      if (currentScroll > scrollThreshold) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-
-      lastScroll = currentScroll;
-    }, 100));
+      header.classList.toggle('scrolled', window.pageYOffset > HEADER_SCROLL_THRESHOLD);
+    }, SCROLL_THROTTLE_MS));
   }
 
-  // Utility: Debounce function
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
+  /* ---------------------------------- Init ---------------------------------- */
 
-  // Utility: Throttle function
-  function throttle(func, limit) {
-    let inThrottle;
-    return function(...args) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    };
-  }
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Interactive features are initialised before data loads, matching the
+    // original boot order (search binds against the not-yet-populated archive).
+    initFadeAnimations();
+    initSearch();
+    initSmoothScroll();
+    initHeaderScroll();
 
-  // Utility: Escape regex special characters
-  function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  // Add loading state removal
-  window.addEventListener('load', () => {
-    document.body.classList.add('loaded');
+    const { all } = await loadPostsIndex();
+    renderLatestPosts(document.getElementById('postList'), all);
+    renderArchive(
+      document.getElementById('archiveList'),
+      document.getElementById('archiveCount'),
+      all,
+    );
   });
 
+  // Reveal `.post-item` cards once all assets have loaded.
+  window.addEventListener('load', () => document.body.classList.add('loaded'));
 })();
-
-// ====== Posts index loader & renderer ======
-// Fetch posts index
-async function loadPostsIndex() {
-  try {
-    const res = await fetch('/tech-knowledge-log/posts.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch posts.json');
-    const data = await res.json();
-    return { all: data.posts || [] };
-  } catch (e) {
-    console.error(e);
-    return { all: [] };
-  }
-}
-
-// Render latest posts on index.html
-function renderLatestPosts(list, posts, limit = 6) {
-  if (!list) return;
-  list.innerHTML = posts.slice(0, limit).map((p, index) => (
-    `<li class="fade-in-up" style="animation-delay: ${index * 0.1}s;">
-       <article class="post-item">
-         <a class="post-link" href="${p.url}">${escapeHtml(p.title)}</a>
-         <div class="post-meta">
-           <time datetime="${p.date}">${p.date}</time>
-           ${p.category ? ` · ${p.category}` : ''}
-         </div>
-         ${p.excerpt ? `<p class="post-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
-       </article>
-     </li>`
-  )).join('');
-}
-
-// Render archive page
-function renderArchive(list, counter, posts) {
-  if (!list) return;
-  list.innerHTML = posts.map(p => (
-    `<li class="archive-item fade-in" data-title="${escapeHtml(p.title).toLowerCase()}" data-date="${p.date}">
-       <strong class="archive-date">${p.date}</strong>
-       <a href="${p.url}" class="archive-link">${escapeHtml(p.title)}</a>
-     </li>`
-  )).join('');
-  if (counter) counter.textContent = `All ${posts.length} posts`;
-}
-
-// Escape HTML utility (reuse regex escape above idea)
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-// Boot loader on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', async () => {
-  const { all } = await loadPostsIndex();
-
-  // index.html
-  const postList = document.getElementById('postList');
-  renderLatestPosts(postList, all, 6);
-
-  // archive.html
-  const archiveList = document.getElementById('archiveList');
-  const archiveCount = document.getElementById('archiveCount');
-  renderArchive(archiveList, archiveCount, all);
-
-  // 활성화된 fade-in 옵저버가 있다면 새로 추가된 요소도 관찰
-  try {
-    const fadeElements = document.querySelectorAll('.fade-in, .fade-in-up');
-    fadeElements.forEach(el => {
-      if (typeof fadeInObserver !== 'undefined') fadeInObserver.observe(el);
-    });
-  } catch (_) {}
-});
