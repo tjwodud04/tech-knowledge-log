@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Inverted Index & BM25",
+      "date": "2026-07-13",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-13-information-retrieval-inverted-index-and-bm25.html",
+      "excerpt": "역색인(inverted index)은 대규모 텍스트 검색의 핵심 구조이고, BM25는 문서 순위를 결정하는 널리 쓰이는 확률적 가중치 함수입니다. 두 기술은 실시간 검색·로그 검색·추천 등 실제 시스템에서 핵심 성능 요소입니다."
+    },
+    {
       "title": "Sequence-to-Sequence (Encoder–Decoder) and Teacher Forcing",
       "date": "2026-07-10",
       "category": "cs-fundamentals",
