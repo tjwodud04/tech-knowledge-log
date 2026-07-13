@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Inverted Index & BM25</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="역색인(inverted index)은 대규모 텍스트 검색의 핵심 구조이고, BM25는 문서 순위를 결정하는 널리 쓰이는 확률적 가중치 함수입니다. 두 기술은 실시간 검색·로그 검색·추천 등 실제 시스템에서 핵심 성능 요소입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Inverted Index & BM25</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-13</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>역색인(inverted index)은 대규모 텍스트 검색의 핵심 구조이고, BM25는 문서 순위를 결정하는 널리 쓰이는 확률적 가중치 함수입니다. 두 기술은 실시간 검색·로그 검색·추천 등 실제 시스템에서 핵심 성능 요소입니다.</p>
+        <p>역색인은 단어(term) → 게시물(posting) 리스트(문서ID, 위치, 빈도)를 저장합니다. 생산 시스템은 포스팅을 압축(VarByte, PForDelta), 스킵포인터 및 블록 기반 인코딩으로 조회 비용을 줄입니다. 쿼리 시에는 포스팅 리스트의 교집합/합집합을 빠르게 계산하고, 순위 산정(스코어링)을 위해 TF(term frequency), DF(document frequency), 문서 길이(normalization) 등을 사용합니다. BM25는 TF의 포화(saturation)를 k1 매개변수로 조정하고 문서 길이를 b로 정규화하며 IDF를 더해 최종 점수를 구합니다. 수식: score = sum(IDF(t) * (tf*(k1+1))/(tf + k1*(1-b + b*|D|/avgDL))).</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제 및 코드<br>1) Elasticsearch/OpenSearch: 기본 매칭 엔진으로 Lucene의 BM25를 사용합니다. BM25 파라미터 수정 예:<br>curl -X PUT "http://localhost:9200/myidx" -H 'Content-Type: application/json' -d '{"settings": {"index": {"similarity": {"my_bm25": {"type": "BM25","k1": 1.2,"b": 0.75}}}},"mappings": {"properties": {"text": {"type": "text","similarity": "my_bm25"}}}}'<br>2) Apache Lucene(Java):<br>IndexWriterConfig cfg = new IndexWriterConfig(analyzer);<br>cfg.setSimilarity(new BM25Similarity(1.2f, 0.75f));<br>// production: tune k1/b per field (title vs body)<br>3) Python(검색 + 랭킹 실험): from rank_bm25 import BM25Okapi<br>corpus = [doc.split() for doc in docs]<br>bm25 = BM25Okapi(corpus)<br>scores = bm25.get_scores(query.split())<br>실제 채용: Elastic Stack(로그/텍스트 검색), Apache Solr, 학계: Robertson & Zaragoza 논문(2009)과 Lucene 구현을 참조. 운영 팁: 인덱스 시간에 stopword/normalization 처리, 페이로드나 필드별 가중치로 랭킹 보정, 압축과 메모리 맵(mmap)으로 읽기 비용 최소화.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The inverted index maps terms to postings lists and is the backbone of scalable text search; BM25 is a practical, tunable ranking function used in production search engines to score documents relevance.</p>
+        <p>An inverted index stores for each term a postings list of document IDs and optional metadata (term frequency, positions, payloads). Production stores optimize for disk and CPU: postings are compressed (VarByte, PForDelta), block-sorted, and augmented with skip pointers or block-max scores for fast intersection and top-k retrieval. At query time, search engines merge postings to compute candidate documents and then score them using term statistics.<br>BM25 models TF saturation and document-length normalization. Key parameters: k1 (controls TF saturation) and b (controls length normalization). IDF is applied per term; BM25 sums term contributions to compute a final score. This yields robust out-of-the-box performance across web search, e-commerce, and log search.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code & systems<br>1) Elasticsearch / OpenSearch (uses Lucene BM25 by default). Change similarity:<br>curl -X PUT "http://localhost:9200/products" -H 'Content-Type: application/json' -d '{"settings": {"index": {"similarity": {"custom_bm25": {"type":"BM25","k1":1.2,"b":0.75}}}},"mappings": {"properties": {"description": {"type":"text","similarity":"custom_bm25"}}}}'<br>2) Apache Lucene (Java):<br>IndexWriterConfig cfg = new IndexWriterConfig(analyzer);<br>cfg.setSimilarity(new BM25Similarity(1.2f, 0.75f));<br>// use different Similarity per field for title/body<br>3) Lightweight experiments (Python):<br>from rank_bm25 import BM25Okapi<br>corpus = [d.split() for d in docs]<br>bm25 = BM25Okapi(corpus)<br>scores = bm25.get_scores(query.split())<br>Where used: Elastic Stack, Apache Solr/Lucene, OpenSearch, and academic evaluations (Robertson & Zaragoza). Production patterns: tune k1/b per field, precompute norms, use block-max WAND or BM25 pruning for latency, and compress postings for I/O efficiency.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
