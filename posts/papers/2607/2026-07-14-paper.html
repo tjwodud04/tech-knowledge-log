@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Kaiji Zhou, Ales Leonardis, Yue Feng</div>
+        <div><strong>발행일 / Published:</strong> 2026-07-10</div>
+        <div><strong>Arxiv ID:</strong> 2607.09600</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>대규모 언어 모델(LLM) 에이전트의 추론 능력을 향상하려면 다양한 전문 모델과 도구의 효과적인 조율이 필요하다. 그러나 기존 프레임워크는 대개 작업과 전문가 모델·도구의 기능을 거칠게 매칭하여 API를 호출하는 방식에 머물러, 기능적으로 유사한 대안들 사이의 성능 변동성과 비용 효율성 같은 중요한 요소들을 간과한다. 이를 해결하기 위해 우리는 Agora를 제안한다. Agora는 전문가 모델과 도구에 작업을 동적으로 할당하기 위해 인센티브 호환 경매 메커니즘을 도입하는 프레임워크다. 추론 단계를 거래 가능한 항목으로 취급함으로써, Agora는 에이전트들이 보정된 역량에 따라 입찰하도록 하여 중요한 논리가 가장 자신감이 큰 모델이 아니라 가장 능력 있는 모델로 전달되도록 보장한다. 다섯 개 벤치마크에 대한 평가에서 Agora는 동일한 후보 풀 하에서 비교한 단일 모델, 라우팅 및 캐스케이드 기준 방법들보다 성능이 향상되었으며, 단일 경매 매개변수를 통해 제어 가능한 비용-품질 균형을 노출한다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Enhancing the reasoning capabilities of large language model (LLM) agents requires effective orchestration of diverse expert models and tools. However, existing frameworks typically call APIs based on coarse-grained matching between tasks and the functions of expert models or tools, while overlooking critical factors such as performance variability and cost efficiency among functionally similar alternatives. To address this, we propose Agora, a framework that introduces an incentive-compatible auction mechanism for dynamically allocating tasks to expert models and tools. By treating reasoning steps as tradeable items, Agora enables agents to bid based on their rectified competence-ensuring that critical logic is routed to the most capable solver rather than the most overconfident one. Evaluations across five benchmarks show that Agora improves over matched single-model, routing, and cascade baselines under comparable candidate pools, while exposing a controllable cost-quality trade-off through a single auction parameter.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2607.09600" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2607.09600.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
