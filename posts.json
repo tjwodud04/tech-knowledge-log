@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation",
+      "date": "2026-07-14",
+      "category": "papers",
+      "url": "posts/papers/2607/2026-07-14-paper.html",
+      "excerpt": "Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation"
+    },
+    {
       "title": "Inverted Index & BM25",
       "date": "2026-07-13",
       "category": "cs-fundamentals",
