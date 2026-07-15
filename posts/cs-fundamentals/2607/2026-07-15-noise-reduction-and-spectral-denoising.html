@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Noise Reduction & Spectral Denoising for Audio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스펙트럼 기반 노이즈 제거는 시간-주파수 도메인에서 잡음을 줄여 음성/오디오 품질을 개선하는 기술로, 실시간 통화·스트리밍·포스트프로덕션에서 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Noise Reduction & Spectral Denoising for Audio</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-15</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스펙트럼 기반 노이즈 제거는 시간-주파수 도메인에서 잡음을 줄여 음성/오디오 품질을 개선하는 기술로, 실시간 통화·스트리밍·포스트프로덕션에서 핵심적입니다.</p>
+        <p>작동 원리: 오디오를 STFT로 분해해 각 빈(bin)의 신호 대 잡음 비율을 추정하고(노이즈 스펙트럼 추정), 스펙트럼 게이트/비율 마스크 혹은 Wiener/MMSE 같은 필터를 적용해 노이즈 성분을 억제합니다. 전통 기법으로는 스펙트럴 섭스트랙션(노이즈 스펙트럼을 빼기), Wiener 필터, Ephraim & Malah의 MMSE-LSA 등이 있습니다. 실무에서는 프레임 크기(20–40ms), 오버랩, 노이즈 추적(배경 추정)과 게인 스무딩이 중요합니다.<br><br>딥러닝 기반: 주파수 마스크(ideal ratio mask)나 복소수 스펙트럼을 직접 복원하는 모델(RNN/CNN/Conv-TasNet/Demucs)을 사용해 더 복잡한 잡음을 제거합니다. 하이브리드 패턴(저지연 DSP 전처리 + NN 마스크 추정)은 실시간 시스템(WebRTC, 모바일)에서 널리 쓰입니다. 연구 예로 SEGAN(생성적), Demucs(시간-도메인) 및 Ephraim & Malah(전통 통계적) 참고.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실사용 예시: WebRTC 노이즈 억제 모듈(Chrome, Android)과 Xiph의 RNNoise(경량 RNN 기반)는 실시간 통화에 적용됩니다. 코드: 간단한 스펙트럴 섭스트랙션(Python+librosa):<br><br>import numpy as np<br>import librosa<br>y, sr = librosa.load('in.wav', sr=None)<br>S = librosa.stft(y, n_fft=1024, hop_length=256)<br>mag, phase = np.abs(S), np.angle(S)<br>noise_mag = np.median(mag[:, :10], axis=1, keepdims=True)<br>mag_clean = np.maximum(mag - noise_mag, 0.0)<br>S_clean = mag_clean * np.exp(1j*phase)<br>librosa.output.write_wav('out.wav', librosa.istft(S_clean, hop_length=256), sr)<br><br>RNNoise 사용: C 라이브러리 빌드 후 rnnoise_demo로 실시간 스트림 필터링(많은 오픈소스 프로젝트·OBS 플러그인에서 사용). 실무 Best-practice: 노이즈 프로파일 업데이트, 게인 스무딩, 리얼타임 지연·연산 예산 고려, DSP+NN 하이브리드로 안정성과 성능 균형.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Spectral denoising reduces noise in the time–frequency domain by estimating and suppressing noise components, critical for real-time calls, streaming, and post-production workflows.</p>
+        <p>How it works: audio is transformed with STFT; per-bin noise statistics are estimated (noise floor tracking) and used to build masks or filters (spectral subtraction, Wiener, MMSE). Classic algorithms include spectral subtraction and the Ephraim & Malah MMSE-LSA estimator; practical systems tune frame size (20–40ms), overlap, noise tracking windows, and gain smoothing to avoid musical noise.<br><br>Modern methods: neural nets predict magnitude or complex masks (IRM, cRM) or directly reconstruct waveform (Demucs, Conv-TasNet). Real systems often use a hybrid: a low-latency DSP front-end (gating, beamforming, AEC) plus an NN-based spectral masker for harder noise. Research examples: SEGAN (GAN for speech enhancement), Demucs (time-domain), and RNNoise (lightweight RNN) illustrate different trade-offs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Production examples: WebRTC noise suppression (used in Chrome/Android) and Xiph’s RNNoise are deployed in real-time comms. Quick code: simple spectral subtraction with librosa:<br><br>import numpy as np<br>import librosa<br>y, sr = librosa.load('in.wav', sr=None)<br>S = librosa.stft(y, n_fft=1024, hop_length=256)<br>mag, phase = np.abs(S), np.angle(S)<br>noise_mag = np.median(mag[:, :10], axis=1, keepdims=True)<br>mag_clean = np.maximum(mag - noise_mag, 0.0)<br>S_clean = mag_clean * np.exp(1j*phase)<br>librosa.output.write_wav('out.wav', librosa.istft(S_clean, hop_length=256), sr)<br><br>RNNoise: build from Xiph’s repo and use rnnoise_demo for real-time filtering. PyTorch mask example (pseudo):<br><br># model outputs mask M; apply: S_hat = M * |S| * exp(j phase)<br># train on mag MSE or SI-SDR for time-domain models<br><br>Best practices: combine beamforming/multi-mic AEC, maintain low lookahead for real-time, smooth gains to reduce artifacts, and prefer hybrid DSP+NN pipelines for production.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
