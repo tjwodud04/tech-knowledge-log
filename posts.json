@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Noise Reduction & Spectral Denoising for Audio",
+      "date": "2026-07-15",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-15-noise-reduction-and-spectral-denoising.html",
+      "excerpt": "스펙트럼 기반 노이즈 제거는 시간-주파수 도메인에서 잡음을 줄여 음성/오디오 품질을 개선하는 기술로, 실시간 통화·스트리밍·포스트프로덕션에서 핵심적입니다."
+    },
+    {
       "title": "Agora: Enhancing LLM Agent Reasoning Via Auction-Based Task Allocation",
       "date": "2026-07-14",
       "category": "papers",
