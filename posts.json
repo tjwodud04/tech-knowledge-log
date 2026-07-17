@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Semantic Role Labeling (Predicate–Argument Structure)",
+      "date": "2026-07-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-17-semantic-role-labeling.html",
+      "excerpt": "SRL(술어-론항 표지)는 문장에서 술어(predicate)와 그에 해당하는 역할(행위자, 대상, 장소 등)을 찾아 구조화하는 기술로, 검색·질의응답·대화 에이전트에서 의미 단위로 정보를 추출하고 정규화하는 데 필수적입니다."
+    },
+    {
       "title": "Noise Reduction & Spectral Denoising for Audio",
       "date": "2026-07-15",
       "category": "cs-fundamentals",
