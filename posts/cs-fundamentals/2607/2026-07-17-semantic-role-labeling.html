@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Semantic Role Labeling (Predicate–Argument Structure)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SRL(술어-론항 표지)는 문장에서 술어(predicate)와 그에 해당하는 역할(행위자, 대상, 장소 등)을 찾아 구조화하는 기술로, 검색·질의응답·대화 에이전트에서 의미 단위로 정보를 추출하고 정규화하는 데 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Semantic Role Labeling (Predicate–Argument Structure)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-17</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>SRL(술어-론항 표지)는 문장에서 술어(predicate)와 그에 해당하는 역할(행위자, 대상, 장소 등)을 찾아 구조화하는 기술로, 검색·질의응답·대화 에이전트에서 의미 단위로 정보를 추출하고 정규화하는 데 필수적입니다.</p>
+        <p>작동 원리는 크게 두 가지 계열로 설명됩니다. 전통적 방법은 각 술어에 대해 토큰 단위 BIO(또는 IOB) 라벨링을 수행하거나 의존구문 기반 의존형 SRL을 사용하고, 최신 방법은 span(구간) 기반 접근과 딥러닝 인코더(BiLSTM → ELMo → BERT/Transformer)를 결합해 술어-론항 쌍을 직접 점수화합니다. 학습 데이터는 PropBank/FrameNet 및 CoNLL 공유 태스크로 표준화되어 있으며, 성능 지표는 보통 역할 F1 점수입니다.<br><br>구현상 핵심 요소는 강력한 토큰 표현(사전학습된 언어모델), 술어 탐지(명시적 술어 인식 또는 모든 동사/형용사 후보 고려), 롤 예측(각 스팬/토큰에 대해 역할 타입 분류), 마지막으로 중복과 일관성을 위한 CRF/계층적 제약 적용입니다. 실무에서는 SRL을 QA 랭킹에서 정규화된 주장 추출(claim extraction), 문서 요약의 의미적 중복 제거, 대화의 의도-슬롯 보완용으로 결합해 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례: AllenNLP의 SRL 모델(모델 URL: https://storage.googleapis.com/allennlp-public-models/structured-prediction-srl-bert.2020.12.15.tar.gz)은 연구·프로토타이핑에 널리 쓰입니다(출처: AllenNLP model zoo). 음성비서·QA 시스템(예: 검색 랭킹 전처리, 지식추출 파이프라인)에서도 SRL 기반 정규화가 적용됩니다(데이터 출처: PropBank/CoNLL shared tasks).<br>예제 (Python, AllenNLP):<br><br>pip install allennlp allennlp-models<br>from allennlp.predictors.predictor import Predictor<br>p = Predictor.from_path('https://storage.googleapis.com/allennlp-public-models/structured-prediction-srl-bert.2020.12.15.tar.gz')<br>res = p.predict(sentence='The engineer fixed the bug in production.')<br>print(res['verbs'])<br><br>실무 팁: 대형 서비스에서는 토큰화·도메인 사전(label set) 맞춤, 배치 추론(throughput), 역할 불균형 대비 샘플링/데이터 증강, 그리고 SRL 출력을 downstream 파이프라인(엔티티 링크·정규표현화)과 결합해 사용합니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Semantic Role Labeling (SRL) finds predicates and their arguments (agent, patient, location, etc.) in sentences; it’s a semantic layer used in search, QA, and dialogue systems to normalize meaning-bearing units.</p>
+        <p>How it works: classic pipelines treat SRL as token-level BIO tagging per predicate or dependency-based labeling; modern approaches use span-based models and deep encoders (BiLSTM → contextual embeddings like ELMo → Transformers/BERT). The model typically detects predicates, enumerates candidate argument spans, scores predicate-argument pairs, and classifies roles. Training relies on annotated corpora such as PropBank and FrameNet, with evaluation via role F1 (CoNLL shared tasks set the benchmarks).<br><br>Implementation details: key components are (1) strong contextual token representations (pretrained models), (2) predicate detection (explicit or candidate-driven), (3) span or token scoring for role assignment, and (4) global constraints or CRF/decoding to avoid inconsistent labels. Architectures often combine a classifier over spans with cross-entropy or structured loss; production systems prioritize throughput (batching), domain adaptation, and post-processing for downstream consumability.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world: AllenNLP’s SRL model (model URL: https://storage.googleapis.com/allennlp-public-models/structured-prediction-srl-bert.2020.12.15.tar.gz) is used for prototyping and research (AllenNLP model zoo). Large-scale QA and assistant systems commonly use SRL-like predicate-argument extraction in knowledge extraction and intent understanding (datasets: PropBank, CoNLL).<br>Example (Python, AllenNLP):<br><br>pip install allennlp allennlp-models<br>from allennlp.predictors.predictor import Predictor<br>p = Predictor.from_path('https://storage.googleapis.com/allennlp-public-models/structured-prediction-srl-bert.2020.12.15.tar.gz')<br>res = p.predict(sentence='The engineer fixed the bug in production.')<br>print(res['verbs'])<br><br>Production patterns/best practices: fine-tune encoders on in-domain SRL labels, perform batched inference with GPU for latency-sensitive services, normalize role labels to a compact ontology for downstream consumers, and verify output consistency with light-weight rules or a constrained decoder.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
