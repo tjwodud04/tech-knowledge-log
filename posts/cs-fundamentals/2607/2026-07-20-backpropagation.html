@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Backpropagation (Chain Rule for Training Neural Networks)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="역전파는 연쇄법칙(chain rule)을 이용해 신경망 파라미터의 기울기를 계산하는 핵심 메커니즘으로, 대규모 모델을 빠르고 안정적으로 학습시키는 데 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Backpropagation (Chain Rule for Training Neural Networks)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-20</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>역전파는 연쇄법칙(chain rule)을 이용해 신경망 파라미터의 기울기를 계산하는 핵심 메커니즘으로, 대규모 모델을 빠르고 안정적으로 학습시키는 데 필수적입니다.</p>
+        <p>작동 원리: 순전파로 출력과 중간 활성화를 계산한 뒤, 손실에 대해 출력에서 입력 방향으로 미분을 전파(reverse-mode AD)합니다. 각 노드에서 연쇄법칙을 적용하여 로컬 그라디언트(출력에 대한 입력의 미분)를 곱해 전체 기울기를 얻습니다. 구현상으로는 계산 그래프를 구성해 노드별 로컬 그래디언트와 저장된 활성화를 이용해 역순으로 누적합니다.<br>실무 포인트: 대형 모델은 수백억 파라미터와 긴 연산 그래프를 가지므로 메모리/계산 절약 기법(그래디언트 체크포인팅, mixed-precision, 분산 옵티마이저—예: ZeRO)이 필수입니다. 또한 BPTT(Backpropagation Through Time)는 시퀀스 모델에서 시간 축으로 역전파하는 표준입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드(간단한 PyTorch 예):<br>import torch<br>import torch.nn as nn<br>import torch.nn.functional as F<br><br>model = nn.Linear(10,1).cuda()<br>opt = torch.optim.Adam(model.parameters())<br>scaler = torch.cuda.amp.GradScaler()<br>accum_steps = 4<br>for i, (x,y) in enumerate(loader):<br>    x,y = x.cuda(), y.cuda()<br>    with torch.cuda.amp.autocast():<br>        pred = model(x)<br>        loss = F.mse_loss(pred, y) / accum_steps<br>    scaler.scale(loss).backward()<br>    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)<br>    if (i+1) % accum_steps == 0:<br>        scaler.step(opt); scaler.update(); opt.zero_grad()<br><br>커스텀 연쇄법칙(autograd.Function):<br>class Square(torch.autograd.Function):<br>    @staticmethod<br>    def forward(ctx, x):<br>        ctx.save_for_backward(x)<br>        return x*x<br>    @staticmethod<br>    def backward(ctx, grad_output):<br>        x, = ctx.saved_tensors<br>        return grad_output * 2 * x<br><br>x = torch.tensor(2.0, requires_grad=True)<br>y = Square.apply(x); y.backward(); print(x.grad)<br><br>사용 위치: PyTorch(메타/페이스북 등)와 TensorFlow(구글)는 역전파 기반 자동미분을 핵심으로 사용합니다. 대규모 트레이닝에서는 Microsoft DeepSpeed, NVIDIA의 mixed-precision/CuDNN 최적화, Google의 JAX/XLA(연구·프로덕션)가 흔히 채택됩니다. 연구 참고: Rumelhart et al. 1986, Werbos 1974(초기 제안). Best practice: gradient clipping, fp16 + AMP, 체크포인팅, 분산 옵티마이저(ZeRO) 결합.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Backpropagation uses the chain rule to compute gradients for network parameters; it's the fundamental algorithm enabling efficient training of deep models in production.</p>
+        <p>How it works: forward pass computes activations and loss; reverse-mode automatic differentiation (AD) walks the computation graph backwards, applying the chain rule at each node to accumulate gradients wrt parameters. Each node computes a local derivative and multiplies incoming gradient signals, so complexity scales with graph edges rather than parameter count per se. For temporal models, Backpropagation Through Time (BPTT) unrolls the recurrence and applies the same reverse pass across time steps.<br>Practical considerations: large-scale training requires memory/compute optimizations—gradient checkpointing (trade compute for memory), mixed-precision (FP16 + loss scaling), gradient clipping, and distributed optimizers (e.g., ZeRO) to shard optimizer state and gradients. Autodiff implementations are in PyTorch (used widely in industry), TensorFlow, and JAX (Google Research).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Production-grade PyTorch pattern (AMP, accumulation, clipping):<br>import torch<br>import torch.nn as nn<br>import torch.nn.functional as F<br><br>model = nn.Linear(10,1).cuda()<br>opt = torch.optim.Adam(model.parameters())<br>scaler = torch.cuda.amp.GradScaler()<br>accum_steps = 4<br>for i, (x,y) in enumerate(loader):<br>    x,y = x.cuda(), y.cuda()<br>    with torch.cuda.amp.autocast():<br>        pred = model(x)<br>        loss = F.mse_loss(pred, y) / accum_steps<br>    scaler.scale(loss).backward()<br>    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)<br>    if (i+1) % accum_steps == 0:<br>        scaler.step(opt); scaler.update(); opt.zero_grad()<br><br>Custom backward (showing chain rule via autograd):<br>class Square(torch.autograd.Function):<br>    @staticmethod<br>    def forward(ctx, x):<br>        ctx.save_for_backward(x)<br>        return x*x<br>    @staticmethod<br>    def backward(ctx, grad_output):<br>        x, = ctx.saved_tensors<br>        return grad_output * 2 * x<br><br>x = torch.tensor(2.0, requires_grad=True)<br>y = Square.apply(x); y.backward(); print(x.grad)  # 4.0<br><br>Where used: PyTorch (Meta, many startups), TensorFlow (Google production), JAX (Google Research), DeepSpeed/ZeRO (Microsoft for multi-node large-model training), and NVIDIA libraries for optimized kernels. Research roots: Werbos (1974) and Rumelhart et al. (1986). Best practices: combine AMP, gradient clipping, checkpointing and sharded optimizers for scalable, stable training.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
