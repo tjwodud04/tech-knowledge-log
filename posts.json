@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Backpropagation (Chain Rule for Training Neural Networks)",
+      "date": "2026-07-20",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-20-backpropagation.html",
+      "excerpt": "역전파는 연쇄법칙(chain rule)을 이용해 신경망 파라미터의 기울기를 계산하는 핵심 메커니즘으로, 대규모 모델을 빠르고 안정적으로 학습시키는 데 필수적입니다."
+    },
+    {
       "title": "Semantic Role Labeling (Predicate–Argument Structure)",
       "date": "2026-07-17",
       "category": "cs-fundamentals",
