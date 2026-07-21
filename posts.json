@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "When Do Multi-Agent Systems Help? An Information Bottleneck Perspective",
+      "date": "2026-07-21",
+      "category": "papers",
+      "url": "posts/papers/2607/2026-07-21-paper.html",
+      "excerpt": "When Do Multi-Agent Systems Help? An Information Bottleneck Perspective"
+    },
+    {
       "title": "Backpropagation (Chain Rule for Training Neural Networks)",
       "date": "2026-07-20",
       "category": "cs-fundamentals",
