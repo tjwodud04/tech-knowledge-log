@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>When Do Multi-Agent Systems Help? An Information Bottleneck Perspective</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="When Do Multi-Agent Systems Help? An Information Bottleneck Perspective">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>When Do Multi-Agent Systems Help? An Information Bottleneck Perspective</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Wendi Yu, Lianhao Zhou, Xiangjue Dong, Sai Sudarshan Barath, Declan Staunton, Byung-Jun Yoon, Xiaoning Qian, James Caverlee, Shuiwang Ji</div>
+        <div><strong>발행일 / Published:</strong> 2026-07-17</div>
+        <div><strong>Arxiv ID:</strong> 2607.16133</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LLM 기반의 다중 에이전트 시스템(MAS)은 복잡한 작업에 유망한 패러다임으로 떠올랐습니다. 그러나 단일 에이전트 시스템(SAS)에 비해 언제 이점이 있는지는 불분명하며, 환경에 따라 성능이 일관되게 달라지지 않습니다. 본 논문에서는 정보 병목(information bottleneck) 관점을 통해 MAS와 SAS의 차이를 설명합니다. 구체적으로 핵심 관찰은 다음과 같습니다. SAS는 전체 추론 흔적을 하나의 공유된 컨텍스트에 누적하는 반면, MAS는 제한된 용량의 중계 메시지로 연결된 고립된 로컬 컨텍스트를 사용합니다. 무한한 중계 대역폭 하에서는, 상류 컨텍스트 전체를 전송하는 MAS가 모든 SAS를 시뮬레이션할 수 있음을 보입니다. 따라서 MAS의 비자명한 이점은 중계가 제한될 때 발생하며, 이때 압축은 근본적인 균형(trade-off)을 도입합니다: 중복된 컨텍스트를 줄이면 효율성이 향상될 수 있으나 작업 관련 정보의 손실을 초래할 수도 있습니다. 우리는 이 균형을 유효 매개변수 β로 제어되는 정보 병목으로 형식화하며, β는 모델 역량에 따라 균형이 어떻게 이동하는지를 포착하고, 컨텍스트 축소가 중계 정보 손실보다 클 때 MAS 이점이 발생함을 보입니다. 이론적 고찰을 검증하기 위해 다섯 개 벤치마크와 세 가지 모델 규모에 걸쳐 18개의 통제된 실험을 수행했습니다. 그 결과, 중계가 거의 충분할 때 특히 역량이 낮은(약한) 모델에서 MAS가 일관되게 도움을 주는 것을 관찰했습니다. 반대로 중계가 정보 손실을 초래할 경우에는 MAS의 이점이 줄어들거나 반전되었으며, 특히 중복된 컨텍스트에서 이미 유용한 정보를 잘 추출할 수 있는 강한 모델에서는 압축으로 얻는 이득이 거의 없었습니다. 우리의 연구는 다중 에이전트 설계가 근본적으로 정보 병목 최적화 문제임을 보여주며, 이 관점은 제한된 에이전트 간 통신이 언제 도움이 되고 언제 해가 되는지를 설명합니다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LLM powered multi-agent systems (MAS) have emerged as a promising paradigm for complex tasks. However, their advantages over single-agent systems (SAS) remain unclear, with performance varying inconsistently across settings. Here, we provide an information bottleneck perspective on elucidating the differences between MAS and SAS. Specifically, our key observation is that a SAS accumulates its full reasoning trace in one shared context, while a MAS uses isolated local contexts connected by bounded relay messages. We show that, under infinite relay bandwidth, any SAS can be simulated by a MAS that transmits the full upstream context. Thus, the nontrivial advantage of MAS arises under bounded relays, where compression introduces a fundamental trade-off: reducing redundant context can improve efficiency, but may also incur loss of task-relevant information. We formalize this trade-off as an information bottleneck controlled by an effective parameter $β$, which captures how the balance shifts with model capability, and shows that MAS gains arise when context reduction outweighs relay information loss. We conduct 18 controlled experiments across five benchmarks and three model scales to validate our theoretical studies. We observe that MAS consistently helps when relays are near-sufficient, especially for weaker models. In contrast, MAS gains shrink or reverse when relays incur information loss, especially for stronger models that can already extract useful information from redundant context and thus gain little from compression. Our study shows that multi-agent design is fundamentally an information-bottleneck optimization problem. This perspective explains when bounded inter-agent communication helps or hurts.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2607.16133" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2607.16133.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
