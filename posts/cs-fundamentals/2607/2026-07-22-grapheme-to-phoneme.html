@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Grapheme-to-Phoneme (G2P) Conversion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="G2P는 글자(문자열)를 음소(발음 기호)로 자동 변환하는 기술로, TTS, 음성 인식의 OOV 처리, 발음사전 자동 생성 등에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Grapheme-to-Phoneme (G2P) Conversion</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-22</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>G2P는 글자(문자열)를 음소(발음 기호)로 자동 변환하는 기술로, TTS, 음성 인식의 OOV 처리, 발음사전 자동 생성 등에 필수적입니다.</p>
+        <p>작동 원리는 규칙 기반(WFST), 통계적(joint-sequence) 혹은 신경망(seq2seq/attention, transformer) 방식으로 나뉩니다. 전통적 WFST/Phonetisaurus 계열은 빠르고 해석 가능하며 큰 발음 사전 생성에 적합합니다. Sequitur(또는 Joint-Sequence, Bisani & Ney 2008)는 n-gram 유사한 문자-음소 짝 모델을 학습해 일반화합니다. 신경망 기반은 문자 시퀀스를 인코더에 넣고 디코더가 음소 시퀀스를 생성하며, OOV 형태소나 다국어 처리에서 더 유연한 경향이 있습니다.<br>실무적 제약은: 사전(lexicon)과 G2P의 조합(우선 사전 lookup, 미등록어에 G2P fallback), 발음 표기 체계(ARPAbet/IPA), 언어별 특수 규칙(동형이의 발음) 관리입니다. 시스템 성능 요구에 따라 WFST 계열의 낮은 지연/경량성 vs 신경망의 높은 정확도/학습 데이터 요구를 저울질합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- Phonetisaurus (WFST 기반): 대형 발음 사전 자동 생성에 많이 사용됩니다. 예: model.fst로 추론<br>  phonetisaurus-g2p --model model.fst --word_list words.txt --nbest 1 > output.txt<br>  (출처: Phonetisaurus, OpenFst 기반 오픈소스)<br>- g2p_en (Python, neural + rules): 빠른 프로토타이핑과 서비스 내 OOV 처리<br>  from g2p_en import G2p<br>  g = G2p()<br>  print(g('example'))<br>  (출처: g2p_en, PyPI — 실제 TTS 전처리에서 널리 사용)<br>- 연구/산업: Bisani & Ney 2008 (joint-sequence), Google/Apple/Amazon TTS는 내부 룩업+G2P 파이프라인을 사용해 사용자 입력과 이름의 발음을 생성(상용 시스템 설계 문서 및 연구 발표 참고).<br>실무 팁: 먼저 룩업 표를 적용하고 G2P는 fallback으로 사용, 모델 결과를 표준 발음 표기(ARPAbet/IPA)로 정규화, 캐시와 n-best + language model rerank로 안정성 향상.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>G2P converts written graphemes into phonemic sequences; it's critical for TTS, OOV handling in ASR, and building/expanding pronunciation lexica in production.</p>
+        <p>Mechanisms fall into three practical classes: WFST/rule-based (fast, interpretable), joint-sequence/statistical (Sequitur-style, good generalization), and neural seq2seq/transformer models (higher accuracy given data). WFST-based tools (e.g., Phonetisaurus/OpenFst) are used when low latency and model inspectability matter. Joint-sequence approaches model grapheme–phoneme pairs as variable-length units (Bisani & Ney, 2008). Neural models use encoder-decoder with attention or transformer layers to emit phoneme sequences and are preferred for languages with complex orthography or multilingual setups.<br>In production you typically combine a curated lexicon (priority lookup) with a G2P fallback. Important engineering choices: output alphabet (ARPAbet vs IPA), normalization and tokenization upstream, n-best outputs with LM/reranking, and caching for low-latency lookups.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples:<br>- Phonetisaurus (OpenFst WFST): commonly used to generate large lexica and fast inference. Example inference command:<br>  phonetisaurus-g2p --model model.fst --word_list words.txt --nbest 1 > output.txt<br>  (source: Phonetisaurus / OpenFst projects)<br>- g2p_en (Python, practical neural+rule hybrid): quick integration in services<br>  from g2p_en import G2p<br>  g = G2p()<br>  print(g('example'))<br>  (source: g2p_en on PyPI — used in many TTS preprocessing pipelines)<br>- Research/Industry: Bisani & Ney (2008) Joint-Sequence Models; major cloud TTS providers (Google Cloud TTS, Amazon Polly, Microsoft Azure TTS) use combined lexicon + G2P pipelines for names/OOV words (described in product docs and research posters).<br>Production best practices: prefer lexicon lookup first, use G2P as fallback, produce n-best with LM reranking for ambiguous forms, normalize orthography before G2P, and persist/cache results to reduce latency.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
