@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Grapheme-to-Phoneme (G2P) Conversion",
+      "date": "2026-07-22",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-22-grapheme-to-phoneme.html",
+      "excerpt": "G2P는 글자(문자열)를 음소(발음 기호)로 자동 변환하는 기술로, TTS, 음성 인식의 OOV 처리, 발음사전 자동 생성 등에 필수적입니다."
+    },
+    {
       "title": "When Do Multi-Agent Systems Help? An Information Bottleneck Perspective",
       "date": "2026-07-21",
       "category": "papers",
