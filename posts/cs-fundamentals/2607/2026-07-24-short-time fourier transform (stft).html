@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Short-Time Fourier Transform (STFT)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="STFT는 신호를 짧은 겹침 창(window)으로 나누어 각 창에 FFT를 적용해 시간-주파수 표현을 만드는 기법으로, 실시간 오디오 처리·음성인식·음원분리 등 실무 시스템의 표준 전처리입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Short-Time Fourier Transform (STFT)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-24</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>STFT는 신호를 짧은 겹침 창(window)으로 나누어 각 창에 FFT를 적용해 시간-주파수 표현을 만드는 기법으로, 실시간 오디오 처리·음성인식·음원분리 등 실무 시스템의 표준 전처리입니다.</p>
+        <p>작동 원리는 간단합니다: 입력 신호를 윈도우(예: Hamming)로 자르고 n_fft 길이의 FFT를 계산하며, hop_length(오버랩율)를 통해 시간 해상도와 지연(latency)을 조절합니다. 결과로 복소수 스펙트로그램(크기와 위상)이 나오며, 크기는 로그 스펙트럼이나 Mel 필터뱅크로 변환해 ML 입력으로 자주 사용합니다. 역변환은 ISTFT(Overlap-Add)로 위상과 창을 맞춰 재구성하며, 불연속성이나 창 보정(window normalization)에 주의해야 합니다.<br><br>실무 관점에서는 n_fft, hop_length, window 선택이 지연-해상도 트레이드오프를 결정합니다. 배치 처리엔 FFTW/cuFFT, GPU에선 cuFFT나 torch.stft를 쓰고, 실시간 시스템(WebRTC, Kaldi의 프론트엔드, Deezer Spleeter 등)은 프레임 버퍼와 링 버퍼로 온라인 STFT를 구현합니다. 위상 기반 처리(복원, 위상 보상)는 음질에 큰 영향을 줍니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- Kaldi ASR: Kaldi는 STFT/Mel 필터를 프론트엔드로 사용(https://kaldi-asr.org). <br>- WebRTC 노이즈 억제: 온라인 STFT 기반으로 실시간 레이턴시 최적화(https://webrtc.org). <br>- Spleeter(Deezer): 음악 분리에서 STFT 기반 스펙트로그램을 U-Net에 입력(https://github.com/deezer/spleeter).<br><br>파이썬 예제(librosa):<br>import librosa, numpy as np<br>y, sr = librosa.load('audio.wav', sr=None)<br>S = librosa.stft(y, n_fft=1024, hop_length=256, window='hann')<br>mag_db = librosa.amplitude_to_db(np.abs(S))<br># 역변환<br>y_rec = librosa.istft(S, hop_length=256, window='hann')<br><br>PyTorch(배치·GPU):<br>import torch<br>x = torch.from_numpy(y).float().to('cuda')<br>S = torch.stft(x, n_fft=1024, hop_length=256, window=torch.hann_window(1024).to('cuda'), return_complex=True)<br><br>실무 팁: n_fft는 2의 제곱 선택, 윈도우 미리 계산, 배치 FFT 사용, 로그 스케일+정규화 적용, 온라인 모드에선 링버퍼와 hop_size로 레이턴시 설정, 위상 보정 필요 시 복소수 네트워크/리컨스트럭션을 고려하세요.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>STFT splits a signal into short, overlapping windows and applies FFT per frame to produce a time–frequency representation; it's a cornerstone for audio analysis, speech systems, and real-time DSP.</p>
+        <p>How it works: STFT applies a window (e.g. Hann) to successive, overlapping frames and computes an FFT for each frame. Key parameters—n_fft (frequency resolution), hop_length (time resolution/latency), and window type—govern the time-frequency trade-off. Output is a complex spectrogram (magnitude + phase); magnitudes are commonly converted to log scale or Mel bands for ML, while phase is needed for high-quality reconstruction via ISTFT (overlap-add with window normalization).<br><br>Implementation notes: production systems precompute windows, use FFTW/cuFFT or GPU batched FFTs, and choose power-of-two n_fft for speed. Online/low-latency systems (WebRTC, real-time mixers) maintain a frame ring buffer and compute STFT incrementally. Research and production pipelines often fuse STFT magnitude with neural networks (e.g., U-Nets, conv nets) for separation/enhancement; phase-aware models or complex-valued networks improve reconstruction.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world references: Kaldi uses STFT/Mel frontend for ASR (https://kaldi-asr.org), WebRTC uses online STFT for noise suppression (https://webrtc.org), Deezer Spleeter feeds STFT spectrograms into a U-Net for source separation (https://github.com/deezer/spleeter).<br><br>Python (librosa):<br>import librosa, numpy as np<br>y, sr = librosa.load('audio.wav', sr=None)<br>S = librosa.stft(y, n_fft=1024, hop_length=256, window='hann')<br>mag_db = librosa.amplitude_to_db(np.abs(S))<br>y_rec = librosa.istft(S, hop_length=256, window='hann')<br><br>PyTorch (GPU, batched):<br>import torch<br>x = torch.from_numpy(y).float().unsqueeze(0).to('cuda')<br>win = torch.hann_window(1024).to('cuda')<br>S = torch.stft(x, n_fft=1024, hop_length=256, window=win, return_complex=True)<br><br>Production best practices: use batched FFT libraries (FFTW/cuFFT), precompute windows, choose n_fft/hop to meet latency targets, normalize log-mel inputs for NN training, and consider phase-aware or complex-domain models when reconstruction quality is critical.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
