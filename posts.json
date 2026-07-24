@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Short-Time Fourier Transform (STFT)",
+      "date": "2026-07-24",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-24-short-time fourier transform (stft).html",
+      "excerpt": "STFT는 신호를 짧은 겹침 창(window)으로 나누어 각 창에 FFT를 적용해 시간-주파수 표현을 만드는 기법으로, 실시간 오디오 처리·음성인식·음원분리 등 실무 시스템의 표준 전처리입니다."
+    },
+    {
       "title": "Grapheme-to-Phoneme (G2P) Conversion",
       "date": "2026-07-22",
       "category": "cs-fundamentals",
