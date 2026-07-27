@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Coreference Resolution (대응 표현 해소)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="코어퍼런스 해소는 텍스트에서 서로 같은 실체를 가리키는 표현들(예: "그", "Alice", "그녀의")을 연결하는 기술로, 검색·요약·대화 시스템의 의미 일관성에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Coreference Resolution (대응 표현 해소)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-27</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>코어퍼런스 해소는 텍스트에서 서로 같은 실체를 가리키는 표현들(예: "그", "Alice", "그녀의")을 연결하는 기술로, 검색·요약·대화 시스템의 의미 일관성에 필수적입니다.</p>
+        <p>작동 원리: 전통적 방법은 명사구 탐지 + 규칙 기반 특징(성, 수, 거리) 매칭이었지만, 실제 대규모 시스템에서는 신경망 기반 스팬-투-스팬(score) 모델이 주류입니다. 대표적 접근은 Lee et al. (2017) 의 end-to-end 모델로, 모든 가능한 스팬(명사구 후보)을 임베딩하고 쌍별 점수와 멘션 허용 확률을 결합해 클러스터를 구성합니다. 후속 연구(SpanBERT 등)는 스팬 표현 품질을 높이고 앙상블/리랭킹을 도입해 실전 성능을 개선했습니다.<br><br>운영 관점: 배치 파이프라인에서는 토큰화→NER/사전처리→코어퍼런스 모델→후처리(굴절/정규화)로 이어집니다. 대화 시스템은 실시간 제약 때문에 스트리밍(최근 발화만 유지) 또는 분해능(confine) 전략을 씁니다. 성능 지표는 MUC, B^3, CEAF 등이며, 불확실성(모델 점수)을 상용 규칙(예: 고신뢰도 일치만 병합)으로 조절해 오탐을 줄입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드<br>- AllenNLP (Lee et al. 기반): 모델 다운로드/예측<br>  from allennlp.predictors.predictor import Predictor\n  predictor = Predictor.from_path('https://storage.googleapis.com/allennlp-public-models/coref-model-2018.03.14.tar.gz')\n  out = predictor.predict(document='Alice went to the store. She bought milk.')\n  # out['clusters'] => [[ [0,0], [3,3] ]]  <br>  (사용처: 연구/프로토타입, 법률문서 색인화, 문서 요약 전처리)<br><br>- spaCy + coreferee (생산성 높은 파이프라인):\n  import spacy\n  import coreferee\n  nlp = spacy.load('en_core_web_trf')\n  nlp.add_pipe('coreferee')\n  doc = nlp('Angela called Bob. He answered.')\n  print(doc._.coref_chains)<br>  (사용처: 챗봇 컨텍스트 관리, 고객지원 로그 연계)<br><br>참고 논문/모델: Lee et al., 2017 (end-to-end), Joshi et al., 2020 (SpanBERT). 실무 베스트프랙티스: 고신뢰도 병합 규칙, 스트리밍 제약, 도메인별 사전 학습(legal/medical)과 오류 분석 중심의 데이터 보강.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Coreference resolution links mentions that refer to the same entity (e.g., "Alice", "she", "the user") and is critical for search, QA, summarization, and dialogue coherence in production systems.</p>
+        <p>How it works: Early systems used mention detection plus rule/feature-based pairwise classifiers (gender/number/recency). Modern production and research favor span-based neural models (Lee et al., 2017) that enumerate candidate spans, compute span embeddings (context-aware), score mentionness, and score antecedent links to form clusters. Improvements (SpanBERT, better contextual encoders) reduce ambiguity and increase cross-sentence linking.<br><br>Operationally, coreference is a pipeline stage: tokenization → mention detection → coref model → cluster post-processing. For online systems (chatbots, assistants) latency and memory force streaming or windowed strategies (keep only recent utterances), and applications often apply precision thresholds to avoid false merges. Evaluation uses MUC, B^3, and CEAF metrics; production tuning emphasizes precision over recall where mistakes are costly.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world tools and code<br>- AllenNLP (Lee et al. implementation):<br>  from allennlp.predictors.predictor import Predictor<br>  predictor = Predictor.from_path('https://storage.googleapis.com/allennlp-public-models/coref-model-2018.03.14.tar.gz')<br>  out = predictor.predict(document='Alice went to the store. She bought milk.')<br>  # out['clusters'] => [[ [0,0], [3,3] ]]<br>  (Used for document understanding, e-discovery preprocessing, summarization pipelines)<br><br>- spaCy + coreferee (spaCy v3 transformer pipeline):<br>  import spacy<br>  import coreferee<br>  nlp = spacy.load('en_core_web_trf')<br>  nlp.add_pipe('coreferee')<br>  doc = nlp('Angela called Bob. He answered.')<br>  print(doc._.coref_chains)<br>  (Used in chat systems for context tracking and customer support automation)<br><br>References: Lee et al., 2017 (end-to-end neural coref), Joshi et al., 2020 (SpanBERT). Production best practices: thresholding for precision, domain-specific fine-tuning, streaming/windowing for latency, and human-in-the-loop correction on high-impact flows.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
