@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Coreference Resolution (대응 표현 해소)",
+      "date": "2026-07-27",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-27-coreference-resolution.html",
+      "excerpt": "코어퍼런스 해소는 텍스트에서 서로 같은 실체를 가리키는 표현들(예: "
+    },
+    {
       "title": "Short-Time Fourier Transform (STFT)",
       "date": "2026-07-24",
       "category": "cs-fundamentals",
