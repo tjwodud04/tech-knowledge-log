@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "TRACE-ROUTER: Task-Consistent and Adaptive Online Routing for Agentic AI",
+      "date": "2026-07-28",
+      "category": "papers",
+      "url": "posts/papers/2607/2026-07-28-paper.html",
+      "excerpt": "TRACE-ROUTER: Task-Consistent and Adaptive Online Routing for Agentic AI"
+    },
+    {
       "title": "Coreference Resolution (대응 표현 해소)",
       "date": "2026-07-27",
       "category": "cs-fundamentals",
