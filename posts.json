@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Nucleus Sampling (Top-p Sampling)",
+      "date": "2026-07-29",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-29-nucleus-sampling.html",
+      "excerpt": "Nucleus(Top-p) 샘플링은 누적 확률이 p(예: 0.9)에 도달할 때까지 확률 질량을 포함하는 어휘 서브셋에서 토큰을 샘플하는 방법으로, 더 자연스럽고 덜 반복적인 텍스트를 생성하는 데 중요합니다."
+    },
+    {
       "title": "TRACE-ROUTER: Task-Consistent and Adaptive Online Routing for Agentic AI",
       "date": "2026-07-28",
       "category": "papers",
