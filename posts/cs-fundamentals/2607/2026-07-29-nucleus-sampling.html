@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Nucleus Sampling (Top-p Sampling)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Nucleus(Top-p) 샘플링은 누적 확률이 p(예: 0.9)에 도달할 때까지 확률 질량을 포함하는 어휘 서브셋에서 토큰을 샘플하는 방법으로, 더 자연스럽고 덜 반복적인 텍스트를 생성하는 데 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Nucleus Sampling (Top-p Sampling)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-29</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Nucleus(Top-p) 샘플링은 누적 확률이 p(예: 0.9)에 도달할 때까지 확률 질량을 포함하는 어휘 서브셋에서 토큰을 샘플하는 방법으로, 더 자연스럽고 덜 반복적인 텍스트를 생성하는 데 중요합니다.</p>
+        <p>작동 원리는 간단합니다. 모델의 로짓을 소프트맥스로 확률로 변환한 뒤 확률이 높은 순으로 정렬하여 누적 확률이 p를 넘기기 전까지의 토큰만 남깁니다. 그 서브셋에서 온도를 적용한 뒤 샘플링하면 낮은 확률(노이즈) 토큰으로 인한 이상 반복 또는 무의미한 토픽 드리프트를 줄이면서 창의성을 유지합니다. 기술적으로는 정렬과 누적합(cumsum)이 필요하므로 어휘 크기가 큰 환경에서는 효율화(top-k 근사, partial sort, torch.topk 등)가 필요합니다.<br><br>실무적 고려사항: p 값(보통 0.8–0.95)과 온도(예: 0.7–1.0)를 함께 조정하며, 결정적 응답이 필요한 작업은 빔서치/greedy로 처리합니다. Holtzman et al., 2019(“The Curious Case of Neural Text Degeneration”)가 핵심 논문이며, OpenAI 문서와 Hugging Face 구현에서 널리 채택됩니다. 대화형 서비스에서는 일관성 유지를 위해 반복 규제(repetition penalty)나 토큰 블랙리스트를 함께 사용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>Hugging Face Transformers 예제(실무에서 가장 흔함):<br><br>from transformers import AutoModelForCausalLM, AutoTokenizer<br>model = AutoModelForCausalLM.from_pretrained('gpt2')<br>tok = AutoTokenizer.from_pretrained('gpt2')<br>input_ids = tok('Hello', return_tensors='pt').input_ids<br>out = model.generate(input_ids, do_sample=True, top_p=0.9, temperature=0.8, max_length=50)<br>print(tok.decode(out[0]))<br><br>자체 구현(토치):<br><br>probs = torch.softmax(logits, dim=-1)sorted_probs, indices = torch.sort(probs, descending=True)<br>cum = torch.cumsum(sorted_probs, dim=-1)<br>mask = cum > 0.9<br>sorted_probs[mask] = 0<br>sorted_probs = sorted_probs / sorted_probs.sum(dim=-1, keepdim=True)<br># 역정렬한 인덱스 매핑 후 샘플링<br><br>실제 사용처: OpenAI·Hugging Face 가이드, 연구(예: Holtzman et al.), 콘텐츠 생성 파이프라인과 대화형 제품에서 창의적 응답 생성에 널리 사용됩니다. 생산 환경에서는 latency와 메모리 때문에 partial top-p 구현과 배치 최적화가 필수입니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Nucleus (top-p) sampling chooses tokens from the smallest set whose cumulative probability ≥ p (e.g. 0.9), trading off coherence and diversity for more natural generation in real systems.</p>
+        <p>How it works: convert logits to probabilities, sort tokens by probability, keep the top-most tokens until their cumulative probability reaches p, then sample from that truncated distribution (optionally scaled by temperature). This prevents rare long-tail tokens from being considered while preserving enough mass to avoid repetitive or overly-safe outputs.<br><br>Performance/implementation notes: naive sorting is O(V log V) for vocabulary size V, so production systems often use partial sorts/top-k approximations or torch.topk to find the cutoff efficiently. Tune top_p (common range 0.8–0.95) along with temperature; combine with repetition penalties, token blocking, or fallback to top-k for deterministic tasks. The method was popularized by Holtzman et al., 2019 (“The Curious Case of Neural Text Degeneration”) and is referenced in OpenAI and Hugging Face guidelines.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Hugging Face production example (common in pipelines):<br><br>from transformers import AutoModelForCausalLM, AutoTokenizer<br>model = AutoModelForCausalLM.from_pretrained('gpt2')<br>tok = AutoTokenizer.from_pretrained('gpt2')<br>input_ids = tok('Hello', return_tensors='pt').input_ids<br>out = model.generate(input_ids, do_sample=True, top_p=0.9, temperature=0.8, max_length=50)<br>print(tok.decode(out[0]))<br><br>Efficient torch-style cutoff (implementation sketch):<br><br>probs = torch.softmax(logits, dim=-1)<br>sorted_probs, indices = torch.sort(probs, descending=True)<br>cum = torch.cumsum(sorted_probs, dim=-1)<br>cutoff_mask = cum > 0.9<br>sorted_probs[cutoff_mask] = 0<br>sorted_probs = sorted_probs / sorted_probs.sum(dim=-1, keepdim=True)<br># map back via indices and sample<br><br>Where used: OpenAI model parameters/docs and Hugging Face libraries use top_p for creative generation; research (Holtzman et al.) shows it reduces degeneration. In production, companies use partial sorting, batching, and combined heuristics (top-p + temperature + repetition penalty) to balance latency, safety, and quality.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
