@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Tries & Prefix Trees (Patricia / Radix / FST)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="트라이(Trie)는 문자열의 접두(prefix)를 노드로 표현해 빠른 접두 검색, 자동완성, longest-prefix-match에 특화된 자료구조로서 실무 시스템에서 색인·라우팅·사전 압축에 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Tries & Prefix Trees (Patricia / Radix / FST)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-07-31</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>트라이(Trie)는 문자열의 접두(prefix)를 노드로 표현해 빠른 접두 검색, 자동완성, longest-prefix-match에 특화된 자료구조로서 실무 시스템에서 색인·라우팅·사전 압축에 널리 쓰입니다.</p>
+        <p>작동 원리: 트라이는 각 문자(혹은 문자 블록)를 간선으로 하는 트리로, 공통 접두를 공유해 메모리를 절약하고 접두 검색을 O(L) (L=키 길이)로 수행합니다. 실무에선 메모리/속도 균형을 위해 경계 병합(radix/compacted trie), 비트 기준 분기(Patricia) 또는 상태 기계(FST)를 씁니다. FST(유한상태전이기계)는 동일한 출력(또는 가중치)을 공유 가능한 경로로 압축해 대규모 단어 사전(역색인 사전, 자동완성)에서 메모리와 I/O를 줄입니다.<br><br>알고리즘 포인트: 삽입/탐색은 트리 탐색이며, 삭제는 자식 노드 유무에 따라 경계 병합을 수행합니다. Patricia/radix는 길이가 긴 일찍 갈라지는 경로를 하나의 엣지로 병합해 포인터 수와 캐시 미스를 줄입니다. FST는 정렬된 키 목록으로 최소 유한상태 기계를 구성하므로 읽기 전용 대규모 사전에 적합합니다. 성능 튜닝은 문자 집합(UTF-8 블록), 노드 레이아웃(배열 vs 해시), 레벨별 압축을 고려합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드:<br>- Lucene FST: 검색엔진에서 용어 사전과 자동완성(autocomplete)에 사용. (Apache Lucene)<br>  Java 예시 (간단):<br>  java.nio.charset.Charset cs = java.nio.charset.StandardCharsets.UTF_8;<br>  org.apache.lucene.util.fst.Builder<Long> b = new org.apache.lucene.util.fst.Builder<>(org.apache.lucene.util.fst.FST.INPUT_TYPE.BYTE1, org.apache.lucene.util.fst.NoOutputs.getSingleton());<br>  // 정렬된 키들을 바이트 배열로 feed해서 FST 생성<br><br>- ripgrep / fst crate (Rust, BurntSushi): 대용량 문자열 매칭과 자동완성 색인에 사용됩니다.<br>  Rust 예시:<br>  use fst::Map; let keys = vec!["apple","app","banana"]; let wtr = fst::Map::from_iter(keys.into_iter().enumerate().map(|(i,k)|(k.as_bytes(), i))).unwrap();<br><br>- 네트워크 라우팅: BGP/OSPF 라우터(FRRouting/Cisco)는 longest-prefix-match를 위해 Patricia/radix 트리를 사용합니다(실제 라우팅 테이블 구현).<br><br>베스트프랙티스: 읽기 전용 대규모 사전엔 FST, 동적 삽입·삭제엔 radix/patricia, 메모리 제약이 강할 땐 MARISA-trie 같은 압축 구현을 사용하세요.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A trie (prefix tree) stores keys by shared prefixes enabling O(L) prefix lookup and efficient auto-complete, longest-prefix match, and dictionary compression—widely used in search engines, routing stacks, and NLP indexing.</p>
+        <p>How it works: A trie represents each character (or block) as an edge and each prefix as a node; shared prefixes collapse common paths. Practical systems use compacted/radix tries (merge single-child paths), Patricia tries (bitwise branching for IP prefixes), or FSTs (finite-state transducers) that merge equivalent suffixes/outputs for extreme memory efficiency. Insert/search run in time proportional to key length; deletions require potential edge/node compression.<br><br>Technical notes: Choose node layout (array for small alphabets, hash/map for sparse alphabets), block/byte granularity for UTF-8, and compressed representations to reduce pointer overhead. FSTs are built from sorted key lists and produce minimized automata ideal for read-heavy workloads (Lucene, Rust fst crate). Patricia/radix implementations optimize for longest-prefix-match in routing by storing bits/prefix-lens on edges.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples + code:<br>- Apache Lucene FST: used to store term dictionaries and autocomplete. Minimal Java sketch:<br>  org.apache.lucene.util.fst.Builder<Object> b = new org.apache.lucene.util.fst.Builder<>(org.apache.lucene.util.fst.FST.INPUT_TYPE.BYTE1, org.apache.lucene.util.fst.NoOutputs.getSingleton());<br>  // feed sorted byte[] keys to builder, then b.finish()<br><br>- Rust fst (BurntSushi): used by ripgrep for fast string matching and autocomplete indices.<br>  Rust snippet:<br>  use fst::Map;<br>  let keys = vec!["app","apple","banana"];<br>  let map = fst::Map::from_iter(keys.into_iter().enumerate().map(|(i,k)|(k.as_bytes(), i))).unwrap();<br>  assert!(map.get("app".as_bytes()).is_some());<br><br>- Networking: FRRouting/Cisco implementations use Patricia/radix tries for IP longest-prefix-match in routing tables (production routers).<br><br>Production patterns: use FSTs for immutable, read-heavy dictionaries; radix/Patricia for mutable prefix-match (routing, IP/URL routing); precompute and serialize tries for fast startup. Monitor memory vs CPU tradeoffs and pick byte vs bit granularity based on key distribution.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
