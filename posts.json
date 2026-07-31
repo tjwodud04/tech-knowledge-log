@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Tries & Prefix Trees (Patricia / Radix / FST)",
+      "date": "2026-07-31",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2607/2026-07-31-tries-and-prefix-trees.html",
+      "excerpt": "트라이(Trie)는 문자열의 접두(prefix)를 노드로 표현해 빠른 접두 검색, 자동완성, longest-prefix-match에 특화된 자료구조로서 실무 시스템에서 색인·라우팅·사전 압축에 널리 쓰입니다."
+    },
+    {
       "title": "Nucleus Sampling (Top-p Sampling)",
       "date": "2026-07-29",
       "category": "cs-fundamentals",
