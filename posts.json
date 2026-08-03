@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Speaker Recognition (Voice Biometrics & Diarization)",
+      "date": "2026-08-03",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-03-speaker-recognition.html",
+      "excerpt": "스피커 인식은 음성에서 '누가 말했는지'를 판별하는 기술로, 인증(voice biometrics), 화자인물 분리(디아리제이션), 회의 녹취 색인 등 실무 시스템에서 신원 확인과 분석 자동화에 필수적입니다."
+    },
+    {
       "title": "Tries & Prefix Trees (Patricia / Radix / FST)",
       "date": "2026-07-31",
       "category": "cs-fundamentals",
