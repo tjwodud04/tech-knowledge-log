@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Speaker Recognition (Voice Biometrics & Diarization)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스피커 인식은 음성에서 '누가 말했는지'를 판별하는 기술로, 인증(voice biometrics), 화자인물 분리(디아리제이션), 회의 녹취 색인 등 실무 시스템에서 신원 확인과 분석 자동화에 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Speaker Recognition (Voice Biometrics & Diarization)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-03</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스피커 인식은 음성에서 '누가 말했는지'를 판별하는 기술로, 인증(voice biometrics), 화자인물 분리(디아리제이션), 회의 녹취 색인 등 실무 시스템에서 신원 확인과 분석 자동화에 필수적입니다.</p>
+        <p>작동 원리는 보통 음성 신호에서 임베딩(voice embeddings/x-vectors)을 추출하고, 임베딩 간 유사도(코사인/PLDA 등)를 계산해 동일인 여부를 판단하는 방식입니다. 전통적 파이프라인은 음성전처리→VAD→프레임 특징(MFCC)→딥러닝 기반 임베딩(예: x-vector, ECAPA-TDNN)→스코어링(PLDA/코사인)입니다. 가장 널리 알려진 연구로는 Kaldi 기반 x-vector(Snyder et al., 2018)와 ECAPA-TDNN(Desplanques et al., 2020)이 실무 성능 기준입니다.<br><br>실제 시스템에서는 도메인 편차(마이크, 채널, 노이즈)에 강하도록 데이터 증강, 채널 보정, 점수 보정(calibration)을 함께 적용합니다. 또한 디아리제이션과 결합하면 '언제 누가 말했나'를 만들어 회의 요약이나 검색 인덱싱에 활용됩니다. 오픈소스 라이브러리: Kaldi(프로덕션 백엔드), pyannote.audio(디아리제이션, 임베딩), SpeechBrain(검증/식별 레시피), Resemblyzer(빠른 임베딩 실험)가 널리 사용됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제(간단한 임베딩+스코어): Resemblyzer를 사용해 두 오디오 파일의 유사도를 빠르게 계산합니다.<br><br>from resemblyzer import VoiceEncoder<br>from scipy.spatial.distance import cosine<br>encoder = VoiceEncoder()<br>emb1 = encoder.embed_utterance(wav1)  # numpy array<br>emb2 = encoder.embed_utterance(wav2)<br>sim = 1 - cosine(emb1, emb2)<br>print('cosine similarity:', sim)<br><br>대규모/프로덕션에서는 Kaldi x-vector + PLDA 스코어링을 사용해 신뢰도 분포를 얻고(참고: Kaldi sv/recipes), pyannote.audio의 pretrained pipeline으로 디아리제이션을 수행해 각 세그먼트에서 임베딩을 추출하여 데이터베이스에 저장한 뒤 실시간 엔롤먼트와 일치시키는 패턴이 일반적입니다. 베스트 프랙티스: 강한 VAD, 데이터 증강(리버브/노이즈), 점수 캘리브레이션, 임계값을 운영 환경에서 타깃 FMR/FRR에 맞춰 튜닝하세요. 관련 자료: Snyder et al. 2018 (x-vectors), Desplanques et al. 2020 (ECAPA-TDNN), pyannote.audio docs, Kaldi SRE recipes.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Speaker recognition identifies 'who spoke' from audio and is used in voice authentication, speaker diarization for meetings, and indexing voice logs—critical for secure access and automated audio analytics in production.</p>
+        <p>The typical pipeline extracts speaker embeddings (x-vectors, ECAPA-TDNN) from speech and applies similarity scoring (cosine or PLDA) for verification/identification. Core steps: pre-processing → VAD → acoustic features (MFCC/FBANK) → neural embedding extractor → score back-end (PLDA/cosine) → calibration/thresholding. Landmark research includes Kaldi x-vector approaches (Snyder et al., 2018) and ECAPA-TDNN (Desplanques et al., 2020) which are production-grade.<br><br>In practice you must handle channel/microphone mismatch via data augmentation, domain adaptation, and score normalization. For diarization, embeddings are computed per segment (pyannote.audio, LIUM/pyAudioAnalysis historically) and clustered to produce “who spoke when”. Production stacks often mix Kaldi for back-end enrollment/scoring, SpeechBrain for rapid experiments, and pyannote for diarization pipelines.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Quick real-world code: use Resemblyzer for rapid prototyping of embeddings and cosine scoring.<br><br>from resemblyzer import VoiceEncoder<br>from scipy.spatial.distance import cosine<br>encoder = VoiceEncoder()<br>emb1 = encoder.embed_utterance(wav1)<br>emb2 = encoder.embed_utterance(wav2)<br>sim = 1 - cosine(emb1, emb2)<br>print('similarity', sim)<br><br>For production: Kaldi x-vector extraction + PLDA scoring (see Kaldi SRE recipes) or deploy ECAPA-TDNN models via SpeechBrain/ONNX for low-latency inference. Common production patterns: enroll multiple utterances per speaker, store L2-normalized embeddings, perform score calibration (Platt scaling/isotonic), and use VAD + session-level fusion. References: Snyder et al. (2018), Desplanques et al. (2020), pyannote.audio and SpeechBrain docs for implementation guides.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
