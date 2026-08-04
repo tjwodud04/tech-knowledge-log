@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>TokTier: Exact Stateful Tokenization for Agentic LLM Serving</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TokTier: Exact Stateful Tokenization for Agentic LLM Serving">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>TokTier: Exact Stateful Tokenization for Agentic LLM Serving</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Zhenyu Zhang, Zhichao Cao</div>
+        <div><strong>발행일 / Published:</strong> 2026-07-31</div>
+        <div><strong>Arxiv ID:</strong> 2607.29678</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LLM 서빙 시스템은 프롬프트 KV 상태를 캐시하지만, 대부분의 프론트엔드는 여전히 매 호출마다 전체 요청 텍스트를 다시 토크나이즈한다. 그 비용은 긴 전사(transcript)를 각 소규모 툴 결과 뒤에 재전송하는 코딩 에이전트에게 돌아가며, 짧은 추가만으로도 이전 시퀀스 끝부분 근처의 토큰 경계가 바뀔 수 있어 재사용이 어렵다. 두 에이전트 생태계에서의 153,951건 호출을 분석한 결과, 호출의 중앙값은 약 1.4K 문자(약 1,400자)를 덧붙였고, 맥락이 수백만 문자에 이르는 세션을 시작하거나 재구성하는 호출은 전체의 단지 1.0–3.6%에 불과했다. 플릿 프롬프트 캐시 적중률이 94.1%일 때, 토크나이제이션은 최초 토큰까지 걸리는 시간의 최대 64%를 차지했다.</p>
+        <p>TokTier는 상태를 유지하는 토크나이제이션 서비스로 단 하나의 계약을 따른다: 방출되는 토큰 ID는 항상 요청 텍스트에 대한 전체 기준 토크나이제이션과 동일해야 한다. 세션을 이어갈 때는 추가된 부분 주변의 작은 윈도우만 다시 토크나이즈하고, 각 요청별 안정 경계 검사를 통과한 뒤에만 결과를 스플라이스(삽입)한다. 실패하면 윈도우를 넓히거나 전체 토크나이제이션으로 대체한다. 재사용 가능한 접두사가 없는 호출의 경우에는 GPT 계열의 정규식 사전토크나이제이션을 실행-로컬 규칙으로 분해하고, 정확한 사전토크나이즈와 BPE를 GPU에서 실행한다. 표본 기반 섀도우 검증기가 실시간 트래픽을 재검증한다.</p>
+        <p>17개 토크나이저 계열에 걸친 차등 캠페인은 1.5×10^10개의 분할 검사, 12.4 TB의 실제 텍스트 코퍼스, 93,000회 이상의 재생된 에이전트 단계를 포함했으며, 발산은 전혀 없었다. 증분 수리는 100K에서 3M 문자 범위에서 0.5–1.1 ms가 소요되며, 이는 HF 토크나이제이션보다 최대 437배 빠르고, 1M 문자에서는 가장 강력한 캐시 기반 베이스라인(Gigatoken)을 완전히 예열한 경우보다 2.1배 빠르다. GPU 기반의 전체 토크나이제이션은 1M 문자 요청을 0.87 ms에 인코딩하며, 이는 HF보다 최대 491배 빠르고 공개된 가장 빠른 CPU 방식보다 23.4배 빠르다.</p>
+        <p>vLLM과 함께하면 기록된 버스트 상황에서 최초 토큰까지의 중앙값 시간이 16–34% 감소하고 P99는 23% 감소한다. P99 목표를 50 ms로 설정하면, 4개의 수리 코어와 1개의 GPU로 초당 1,821 요청을 지속적으로 처리할 수 있는 반면, 16코어 상태 비저장 프론트엔드는 40에서 포화된다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>LLM serving systems cache prompt KV state, yet most front ends still re-tokenize the full request text on every call. The cost lands on coding agents, which resubmit a long transcript after each small tool result, and reuse is hard because even a short append can change token boundaries near the end of the previous sequence. Across 153,951 calls from two agent ecosystems, the median call appends about 1.4K characters, and only 1.0-3.6% of calls start or rebuild a session with contexts of millions of characters. At a 94.1% fleet prompt-cache hit rate, tokenization reaches up to 64% of time to first token. TokTier is a stateful tokenization service with one contract: emitted token IDs are always identical to full reference tokenization of the request text. For a session continuation, it re-tokenizes a small window around the append and splices only after a per-request stable-boundary check, widening the window or falling back to full tokenization on failure. For a call without a reusable prefix, it decomposes GPT-family regex pre-tokenization into run-local rules and runs exact pre-tokenization and BPE on a GPU. A sampled shadow verifier re-checks live traffic. Across 17 tokenizer families, differential campaigns cover 1.5x10^10 split checks, a 12.4 TB real-text corpus, and 93,000+ replayed agent steps, with zero divergence. Incremental repair takes 0.5-1.1 ms from 100K to 3M characters, up to 437x faster than HF tokenization and 2.1x faster at 1M than the strongest cache-based baseline (Gigatoken) fully prewarmed. GPU full tokenization encodes a 1M-character request in 0.87 ms, up to 491x below HF and 23.4x below the fastest published CPU method. With vLLM, median time to first token drops 16-34% and P99 drops 23% under recorded bursts. Under a 50 ms P99 objective, four repair cores plus one GPU sustain 1,821 requests/s where a 16-core stateless front end saturates at 40.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2607.29678" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2607.29678.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
