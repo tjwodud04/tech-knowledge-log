@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Acoustic Echo Cancellation (AEC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="음향 반향 제거(AEC)는 스피커에서 나온 소리가 마이크로 다시 들어와 통화나 회의에서 자가 음성 반향을 유발하는 문제를 제거하는 기술로, 실시간 통신 품질에 직접 영향을 줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Acoustic Echo Cancellation (AEC)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-05</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>음향 반향 제거(AEC)는 스피커에서 나온 소리가 마이크로 다시 들어와 통화나 회의에서 자가 음성 반향을 유발하는 문제를 제거하는 기술로, 실시간 통신 품질에 직접 영향을 줍니다.</p>
+        <p>작동 원리: AEC는 송신 신호(플레이백)를 모델링해 수신 마이크 신호에서 그 성분을 추정·빼는 과정입니다. 전형적 흐름은(1) 재생 신호의 버퍼링(일반적으로 프레임 단위), (2) 적응 필터(예: LMS, NLMS, RLS, 또는 빈도별 필터)의 동기화된 업데이트, (3) 잔류 에코 억제를 위한 후처리(서브밴드 처리, 레벨링, 음성 검출 포함)로 구성됩니다. 지연(플레이백→마이크) 불확실성과 비선형성(스피커 왜곡, 하드웨어 클리핑)은 주요 실무 문제입니다.<br><br>실무 디테일: 최신 시스템은 시간-주파수 도메인 AEC(예: STFT 기반)와 음성 활동 검출(VAD), 회귀 정규화, 잡음 추정, 모드 전환(방향성 마이크/풋프린트 보정)을 결합합니다. WebRTC의 AEC3/AECM, SpeexDSP의 speex_echo, PulseAudio의 module-echo-cancel 등은 서로 다른 트레이드오프(지연, 계산량, 잔류 에코)를 선택합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드<br>- 브라우저: Chrome/Firefox/WebRTC는 getUserMedia 제약으로 AEC를 활성화합니다:<br>  navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true } })<br>  (WebRTC 내 AEC3는 Google의 엔진으로 대규모 통화에서 사용됩니다.)<br><br>- 리눅스 데스크탑: PulseAudio/pipewire의 모듈:<br>  pactl load-module module-echo-cancel use_master_format=1 aec_method=webrtc<br>  (설정으로 aec_method=webrtc/speex 등 선택 가능)<br><br>- 임베디드/서버: SpeexDSP C API 예시:<br>  SpeexEchoState *st = speex_echo_state_init(frame_size, filter_length);<br>  speex_echo_cancellation(st, rec_frame, play_frame, out_frame);<br>  speex_echo_state_destroy(st);<br><br>베스트 프랙티스: 정확한 지연 측정(플레이백 타임스탬프 동기화), VAD 결합으로 필터 업데이트 멈추기, 비선형 잔류 억제를 위한 레벨 기반 포스트프로세싱, 그리고 플랫폼별 AEC 엔진(webrtc vs speex) 성능 비교를 권장합니다. 연구참조: WebRTC AEC3 문서/논문, SpeexDSP 구현들을 실무 출처로 확인하세요.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Acoustic Echo Cancellation (AEC) removes speaker playback that re-enters the microphone so the far-end doesn't hear a delayed/echoed version of their voice; it's essential for clear real-time audio in conferencing and voice assistants.</p>
+        <p>How it works: AEC estimates the component of the microphone signal that comes from local playback and subtracts it. Typical pipeline: (1) buffer playback frames and align them to microphone frames, (2) adaptive filtering using algorithms like LMS/NLMS/RLS or frequency-domain adaptive filters, (3) residual-echo suppression and post-processing (subband attenuation, comfort noise, double-talk detection). Practical challenges include variable latency, non-linearities from speakers/amps, and double-talk (both sides speaking).<br><br>Technical detail: Modern AECs often use STFT-based frequency domain filters (lower compute for long filters), echo path change detection, voice activity detection to freeze adaptation during double-talk, and non-linear postfilters. Google’s WebRTC AEC3 (and AECM) and open-source SpeexDSP are representative implementations with different latency/CPU/accuracy trade-offs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples and code<br>- Browser/WebRTC: enable AEC via getUserMedia:<br>  navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true } })<br>  (Chrome/Firefox rely on WebRTC AEC modules in production for Google Meet and other services.)<br><br>- Desktop Linux: PulseAudio/PipeWire module using WebRTC AEC:<br>  pactl load-module module-echo-cancel use_master_format=1 aec_method=webrtc<br><br>- Native C (SpeexDSP):<br>  SpeexEchoState *st = speex_echo_state_init(frame_size, filter_length);<br>  speex_echo_cancellation(st, rec_frame, play_frame, out_frame);<br>  speex_echo_state_destroy(st);<br><br>Production patterns/best practices: sync timestamps to measure true end-to-end latency, use VAD to avoid corrupting filter coefficients during double-talk, evaluate both algorithmic delay and CPU on target hardware, and test with non-linear speaker distortions. Sources: WebRTC AEC3 (Google), SpeexDSP, PulseAudio module-echo-cancel, and published AEC literature.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
