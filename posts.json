@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Acoustic Echo Cancellation (AEC)",
+      "date": "2026-08-05",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-05-acoustic-echo-cancellation.html",
+      "excerpt": "음향 반향 제거(AEC)는 스피커에서 나온 소리가 마이크로 다시 들어와 통화나 회의에서 자가 음성 반향을 유발하는 문제를 제거하는 기술로, 실시간 통신 품질에 직접 영향을 줍니다."
+    },
+    {
       "title": "TokTier: Exact Stateful Tokenization for Agentic LLM Serving",
       "date": "2026-08-04",
       "category": "papers",
