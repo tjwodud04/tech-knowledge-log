@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Stemming vs Lemmatization (Text Normalization)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="스테밍은 규칙적 접미사 제거로 단어를 축약하고, 표제어화(레마타이제이션)는 형태소·사전 기반으로 단어의 사전형을 반환합니다. 실무에서는 검색, 색인, ML 전처리에서 성능·정확도·속도 트레이드오프를 결정합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Stemming vs Lemmatization (Text Normalization)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-07</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>스테밍은 규칙적 접미사 제거로 단어를 축약하고, 표제어화(레마타이제이션)는 형태소·사전 기반으로 단어의 사전형을 반환합니다. 실무에서는 검색, 색인, ML 전처리에서 성능·정확도·속도 트레이드오프를 결정합니다.</p>
+        <p>스테밍은 Porter, Snowball 같은 규칙 기반 알고리즘으로 빠르게 동작하며 "running"→"run" 대신 "runn"처럼 잘못된 어간이 나올 수 있습니다. 반면 레마타이제이션은 품사(POS) 태깅과 형태소 분석 또는 룩업 테이블을 사용해 "running"→"run"처럼 의미적으로 올바른 표제어를 제공합니다. 레마타이제이션은 언어별 사전과 복잡한 규칙 또는 통계적 모델을 필요로 하므로 비용이 더 큽니다.<br><br>대규모 검색엔진(예: Elasticsearch/Lucene)은 색인·쿼리 단계에서 스테밍 필터로 높은 리콜을 확보합니다. 반면 추천·의미적 검색·문서 분류 파이프라인(예: spaCy, Stanford CoreNLP 기반)은 레마타이제이션으로 노이즈를 줄이고 downstream 모델 성능을 높입니다. 연구에서는 Krovetz KStem(중간 접근)이나 언어특화 레마타이저가 좋은 균형을 보인다는 결과들이 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예시(출처: Elasticsearch Docs, spaCy, NLTK, Porter 1980):<br><br>1) Elasticsearch(색인·검색에서 스테밍)<br>PUT /myindex<br>{<br>  "settings":{<br>    "analysis":{<br>      "analyzer":{<br>        "my_english":{<br>          "tokenizer":"standard",<br>          "filter":["lowercase","english_stemmer"]<br>        }<br>      },<br>      "filter":{<br>        "english_stemmer":{ "type":"stemmer","name":"english" }<br>      }<br>    }<br>  }<br>}<br>(프로덕션: 높은 처리량·빠른 응답이 필요할 때 사용)<br><br>2) spaCy 레마타이제이션 (파이프라인 통합, 품사 필요)<br>import spacy<br>nlp = spacy.load("en_core_web_sm")<br>for t in nlp("Running dogs"): print(t.text, t.lemma_, t.pos_)<br>(추천: 의미 보존과 표제어 정확도가 중요한 분류/NER에 사용)<br><br>베스트프랙티스: 작업 목적에 따라 선택(검색=스테밍, 의미적 정확도=레마), 언어별 모델 사용, POS 태그와 함께 레마 적용, 성능 제한 시 캐시 또는 룩업 테이블 병행.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Stemming strips suffixes by heuristic rules to produce a crude root; lemmatization returns dictionary base forms using morphological analysis and POS. In production the choice impacts recall, precision, and runtime.</p>
+        <p>Stemming (Porter, Snowball) is fast rule-based suffix stripping: e.g., "running" might become "runn" or "run" depending on algorithm. Lemmatization uses POS tagging + morphological/lookup resources so "running" → "run" reliably. Lemmatizers can be dictionary-based, rule-based with morphological paradigms, or statistical/ML models; they require more CPU and often language resources.<br><br>In real systems, search engines (Elasticsearch/Lucene) frequently use stemming to increase recall and reduce index size. Pipelines that need semantic accuracy—NER, intent classification, QA—use lemmatization (spaCy, Stanford CoreNLP) to reduce noise for downstream models. Research (Krovetz KStem, evaluations on IR tasks) shows mixed results: stemming helps IR recall, while lemmatization helps tasks needing grammatical normalization.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples (sources: Elasticsearch docs, spaCy docs, NLTK, Porter 1980, Krovetz KStem):<br><br>1) Elasticsearch analyzer using stemming (production search):<br>PUT /myindex<br>{<br>  "settings": {"analysis": {"analyzer": {"my_english": {"tokenizer":"standard","filter":["lowercase","english_stemmer"]}},"filter": {"english_stemmer": {"type":"stemmer","name":"english"}}}}<br><br>2) Python examples — stemming vs lemmatization:<br># Stemming (NLTK)<br>from nltk.stem import PorterStemmer<br>ps = PorterStemmer()<br>print(ps.stem('running'))  # 'run' or 'runn' depending<br><br># Lemmatization (spaCy)<br>import spacy<br>nlp = spacy.load('en_core_web_sm')<br>for t in nlp('Running dogs'): print(t.text, t.lemma_, t.pos_)<br><br>Production patterns / best practices: choose by objective (search = stemming for recall; semantic tasks = lemmatization), measure impact on downstream metrics, use language-specific tools, cache lemmas or use lightweight lookup tables under latency constraints, and combine with normalization (lowercasing, unicode normalization, stopword strategy).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
