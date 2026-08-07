@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Stemming vs Lemmatization (Text Normalization)",
+      "date": "2026-08-07",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-07-stemming-vs-lemmatization.html",
+      "excerpt": "스테밍은 규칙적 접미사 제거로 단어를 축약하고, 표제어화(레마타이제이션)는 형태소·사전 기반으로 단어의 사전형을 반환합니다. 실무에서는 검색, 색인, ML 전처리에서 성능·정확도·속도 트레이드오프를 결정합니다."
+    },
+    {
       "title": "Acoustic Echo Cancellation (AEC)",
       "date": "2026-08-05",
       "category": "cs-fundamentals",
