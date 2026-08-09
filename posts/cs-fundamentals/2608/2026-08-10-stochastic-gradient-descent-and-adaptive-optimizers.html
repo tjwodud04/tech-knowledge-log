@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Stochastic Gradient Descent & Adaptive Optimizers (SGD, Adam, RMSProp, LAMB)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="확률적 경사하강법(SGD)과 적응형 옵티마이저는 딥러닝 학습의 핵심이며, 대규모 분산학습·사전학습에서 수렴 속도와 일반화 성능을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Stochastic Gradient Descent & Adaptive Optimizers (SGD, Adam, RMSProp, LAMB)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-10</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>확률적 경사하강법(SGD)과 적응형 옵티마이저는 딥러닝 학습의 핵심이며, 대규모 분산학습·사전학습에서 수렴 속도와 일반화 성능을 좌우합니다.</p>
+        <p>작동 원리: SGD는 미니배치에 대한 기울기로 파라미터를 갱신합니다. 모멘텀(momentum)은 과거 기울기를 지수감쇠 합으로 축적해 진동을 줄이고 수렴을 가속합니다. Nesterov는 모멘텀의 lookahead를 사용해 더 안정적인 업데이트를 제공합니다. Adam/RMSProp 같은 적응형 옵티마이저는 각 파라미터의 1차·2차 모멘트를 추정해 좌표별 학습률을 조절하여 스케일 불변성을 제공합니다.<br><br>현실 문제: 적응형 옵티마이저는 초기 수렴이 빠르지만 과적합·일반화 성능이 떨어질 수 있어, BERT 등 NLP 사전학습에는 AdamW(가중치 감쇠를 분리한 버전)와 learning-rate warmup, gradient clipping이 널리 쓰입니다. 반대로 대형 비전 모델(ResNet 계열)은 SGD+momentum과 대형 배치 보정(linear scaling rule), LARS/LAMB 같은 스케일러를 사용해 초대형 배치에서 안정적 학습을 구현합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드( PyTorch ):<br><br># SGD + momentum + linear LR scale<br>opt = torch.optim.SGD(model.parameters(), lr=0.1*batch_size/256, momentum=0.9, weight_decay=1e-4)<br># AdamW + warmup (BERT-like)<br>opt = torch.optim.AdamW(model.parameters(), lr=3e-5, weight_decay=0.01)<br>scheduler = get_linear_schedule_with_warmup(optimizer=opt, num_warmup_steps=1000, num_training_steps=100000)<br><br>실무 패턴: weight decay는 AdamW처럼 decoupled 적용, lr warmup + decay, mixed-precision (AMP) + gradient scaling, 파라미터 그룹별 다른 lr 사용. 출처: Goyal et al. (2017) 대형배치 학습, Loshchilov & Hutter(2019) AdamW, You et al.(2019) LAMB — 이들 기법은 Google/FB/OpenAI의 대규모 트레이닝 파이프라인과 Hugging Face/DeepSpeed에서 채택됩니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>SGD and adaptive optimizers (Adam, RMSProp, LAMB) are the workhorses of neural network training; choice and tuning determine convergence speed, stability, and generalization in production models.</p>
+        <p>How it works: SGD updates parameters by the mini-batch gradient; momentum accumulates an exponential moving average of past gradients to damp oscillation and accelerate along consistent directions. Nesterov momentum looks ahead before computing the gradient update. Adaptive methods (RMSProp, Adam) track per-parameter squared gradients (second moment) and scale updates, giving coordinate-wise learning rates that often speed early convergence.<br><br>Practical considerations: adaptive optimizers converge fast but can generalize worse than SGD in some vision tasks; thus many production pipelines use AdamW (decoupled weight decay) with warmup for transformers (BERT, GPT) and SGD+momentum or LARS/LAMB for very large-batch vision or pretraining runs. Common patterns: LR warmup, cosine/linear decay, gradient clipping, parameter groups, and mixed-precision with loss scaling.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real code (PyTorch examples used in production):<br><br># ResNet-style: SGD + momentum + linear scaling<br>opt = torch.optim.SGD(model.parameters(), lr=0.1 * batch_size / 256, momentum=0.9, weight_decay=1e-4)<br># Transformer-style: AdamW + warmup<br>opt = torch.optim.AdamW(model.parameters(), lr=3e-5, weight_decay=0.01)<br>scheduler = get_linear_schedule_with_warmup(opt, warmup_steps=1000, t_total=100000)<br><br>Best practices: use AdamW (Loshchilov & Hutter) for transformers (BERT uses AdamW + warmup), LAMB/LARS (You et al.) for huge-batch training, apply mixed-precision (NVIDIA Apex/torch.cuda.amp) and gradient clipping. Sources: Kingma & Ba (2015) Adam, Goyal et al. (2017) large-batch ImageNet, Loshchilov & Hutter (2019) AdamW, You et al. (2019) LAMB; adopted in Hugging Face, DeepSpeed, and large-scale internal pipelines at Google/OpenAI.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
