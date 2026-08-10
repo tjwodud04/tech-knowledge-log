@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Mohammad Amanlou, Parham Abed Azad, Farbod Davoodi, Mostafa Masumi, Behnam Bahrak, Abdol-Hossein Vahabie</div>
+        <div><strong>발행일 / Published:</strong> 2026-08-07</div>
+        <div><strong>Arxiv ID:</strong> 2608.07438</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>인간과 유사한 인지는 과거 경험을 주제적 유사성만으로 선택하지 않으며, 정서적 중요성과 해결되지 않은 갈등도 접근 가능성을 형성한다. 본 논문에서는 사실적 기억과 정서적 기억을 분리하고 이를 갈등 인지형 집행 제어기를 통해 통합하는 LLM(대형 언어 모델) 에이전트를 위한 인지 아키텍처인 PsychoAgent를 제안한다. 정서적 기억은 먼저 의미적 관련성으로 필터링되고, 그 다음 현저성(salience)에 따라 재정렬되어 주제 적합성을 보존하면서 감정적으로 중요한 흔적들이 프롬프트에 들어가도록 한다. 세 가지 통제된 갈등 시나리오에서 전체 아키텍처는 의미-정서 방식 및 단일 메모리 RAG 기준선보다 갈등에 결정적인 기억을 더 많이 검색했다(0.933 vs. 0.500 및 0.667), 단 소량의 의미 유사도 비용이 수반되었다. 다섯 명의 블라인드 평가자가 27개의 출력물을 평가했고, 평가자 내 표준화 후 전체 아키텍처가 전체 평균에서 가장 높은 점수를 보였으나(+0.22 표준편차) 보정된 쌍별 차이는 유의하지 않았다. 3일간의 예시 추적에서는 지속적인 정서 영향, 오프라인 메모리 재결합, 선택적 메모리 재가중화가 추가로 관찰되었다. 이 결과들은 정서 민감적 검색이 LLM 에이전트에서 인간과 유사한 갈등 효과를 모델링하기 위한 검사 가능한 메커니즘임을 지지한다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Human-like cognition does not select past experience by topical similarity alone: affective significance and unresolved conflict also shape what becomes accessible. We present PsychoAgent, a cognitive architecture for LLM agents that separates factual and affective memory and integrates both through a conflict-aware executive controller. Affective memories are first filtered by semantic relevance and then re-ranked by salience, preserving topical fit while allowing emotionally important traces to enter the prompt. Across three controlled conflict scenarios, the full architecture retrieved more conflict-critical memories than semantic-affective and single-memory RAG baselines (0.933 vs. 0.500 and 0.667), with a small semantic-similarity cost. Five blinded raters evaluated 27 outputs. After within-rater standardization, the full architecture had the highest overall mean (+0.22 SD), but corrected pairwise differences were not significant. A three-day illustrative trace further shows persistent affect, offline memory recombination, and selective memory reweighting. The findings support affect-sensitive retrieval as an inspectable mechanism for modeling human-like conflict effects in LLM agents.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2608.07438" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2608.07438.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
