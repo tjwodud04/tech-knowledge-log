@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents",
+      "date": "2026-08-11",
+      "category": "papers",
+      "url": "posts/papers/2608/2026-08-11-paper.html",
+      "excerpt": "PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents"
+    },
+    {
       "title": "Stochastic Gradient Descent & Adaptive Optimizers (SGD, Adam, RMSProp, LAMB)",
       "date": "2026-08-10",
       "category": "cs-fundamentals",
