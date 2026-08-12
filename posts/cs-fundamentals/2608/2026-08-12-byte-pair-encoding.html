@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Byte-Pair Encoding (BPE)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BPE는 텍스트를 바이트/문자 단위에서 빈도 기반으로 병합해 어휘를 만드는 서브워드 기법으로, 희귀단어 처리와 모델 크기/성능 균형에 중요합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Byte-Pair Encoding (BPE)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-12</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>BPE는 텍스트를 바이트/문자 단위에서 빈도 기반으로 병합해 어휘를 만드는 서브워드 기법으로, 희귀단어 처리와 모델 크기/성능 균형에 중요합니다.</p>
+        <p>작동 원리: 초기에는 모든 문자를 토큰으로 보고, 훈련 코퍼스에서 가장 자주 등장하는 인접 토큰 쌍을 반복적으로 병합합니다. 각 병합은 새로운 토큰(서브워드)을 만들고 어휘집에 추가됩니다. Sennrich et al. (2015) 논문에서 기계번역에 BPE를 적용해 OOV 문제를 줄였고, GPT-2(오픈AI)는 바이트-레벨 BPE를 사용해 바이너리 안정성과 멀티언어 지원을 확보했습니다. 기술적 포인트: 병합 빈도 계산과 반복 횟수(어휘 크기), 바이트-레벨 처리 여부(UTF-8 안전성), 디코딩 시 longest-match 규칙(그리디 매칭)이 실전에서 중요합니다.<br><br>성능·운영: 대규모 파이프라인에서는 Tokenizer 훈련을 병렬화하고(예: Hugging Face tokenizers의 Rust 구현), 훈련된 merges 파일과 vocab 파일을 모델 버전과 함께 저장/배포합니다. 체크포인트 간 호환성 유지와 토크나이저 재현성(reproducibility)이 실무 관건입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예시 — Hugging Face tokenizers(토크나이저 훈련 및 사용):<br><br>Python 예제 (byte-level BPE):<br>from tokenizers import ByteLevelBPETokenizer<br># 학습: 데이터는 줄 단위 텍스트 파일<br>tokenizer = ByteLevelBPETokenizer()<br>tokenizer.train(files=["data.txt"], vocab_size=30000, min_frequency=2)<br>tokenizer.save_model("./tokenizer")<br># 인코딩<br>ids = tokenizer.encode("Hello, world!").ids<br>print(ids)<br><br>참고: GPT-2(바이트-레벨 BPE) 구현: Radford et al., OpenAI GPT-2(2019). WordPiece/SentencePiece(구글)는 변형으로, SentencePiece는 바이너리 세그먼트와 unigram 모델도 제공합니다. 실무 베스트프랙티스: 토크나이저 버전 고정, merges + vocab 함께 배포, 훈련 데이터 도메인(특수 토큰/도메인 어휘) 반영.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>BPE is a subword tokenization method that iteratively merges frequent adjacent byte/character pairs to build a compact vocabulary, crucial for handling rare words and controlling model size in production.</p>
+        <p>How it works: Start with characters (or bytes) as atomic tokens and count adjacent token pair frequencies across the corpus. Repeatedly merge the highest-frequency pair into a new token until reaching a target vocab size. Key engineering choices: using bytes vs. Unicode characters (byte-level BPE avoids unknown bytes and preserves reversible tokenization), deciding vocab_size and min_frequency, and applying greedy longest-match decoding. Sennrich et al. (2015) demonstrated BPE's effectiveness for neural machine translation; GPT-2 uses a byte-level BPE variant to ensure byte-level safety and cross-lingual capability.<br><br>Operational notes: Use optimized libraries (Hugging Face tokenizers in Rust) for speed, persist vocab+merges files with model checkpoints, and lock tokenizer config in production to ensure reproducible tokenization.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code (Hugging Face tokenizers):<br>from tokenizers import ByteLevelBPETokenizer<br># Train on newline-separated corpus<br>tokenizer = ByteLevelBPETokenizer()<br>tokenizer.train(files=["data.txt"], vocab_size=50000, min_frequency=2)<br>tokenizer.save_model("./tokenizer")<br># Use<br>print(tokenizer.encode("Hello, world!").tokens)<br><br>Other productions: OpenAI GPT-2 uses byte-level BPE (Radford et al., 2019); Google uses WordPiece/SentencePiece for BERT/Translation (SentencePiece also supports BPE and unigram). Best practices: co-deploy vocab+merges with model, fix tokenizer version in serving, and tune vocab_size to balance OOV vs. tokenizer length. See: Sennrich et al. 2015, Hugging Face tokenizers repo, Google SentencePiece.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
