@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Knowledge Graphs & Graph Embeddings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="지식그래프는 엔티티와 관계를 노드·엣지로 표현한 구조화된 사실 저장소이며, 그래프 임베딩은 이런 구조를 연속적인 벡터공간으로 변환해 실시간 검색·추천·추론에 효율성을 제공합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Knowledge Graphs & Graph Embeddings</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-14</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>지식그래프는 엔티티와 관계를 노드·엣지로 표현한 구조화된 사실 저장소이며, 그래프 임베딩은 이런 구조를 연속적인 벡터공간으로 변환해 실시간 검색·추천·추론에 효율성을 제공합니다.</p>
+        <p>작동 원리: 지식그래프는 RDF/Property-Graph 형태로 스키마(타입, 제약)를 가지며 SPARQL/Cypher로 질의합니다. 그래프 임베딩은 엔티티와 관계를 고정차원 벡터로 매핑하여 유사도·추론·클러스터링에 사용합니다. 대표적 알고리즘으로는 트랜슬레이셔널(TransE), 빌리니어(DistMult, ComplEx), 무작위 워크 기반(DeepWalk, node2vec), 그리고 메시지 패싱 GNN(GraphSAGE, GAT)이 있습니다.<br>운영 관점: 대규모는 PyTorch-BigGraph, DGL/PyG + Faiss로 서빙하며, negative sampling·type constraints·incremental updates·provenance(출처) 관리가 핵심입니다. 평가 지표는 MRR, Hits@K, ROC-AUC, downstream task 성능(예: 추천 CTR)입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예: Neo4j에 상품·카테고리·사용자 그래프를 저장하고 PyG의 Node2Vec 또는 AmpliGraph의 TransE로 임베딩을 생성해 ANN에 인덱싱하면 유사상품 검색·콜드 스타트 추천에 바로 활용됩니다. 코드 예:<br># Neo4j Cypher로 추출<br>MATCH (u:User)-[r:PURCHASE]->(p:Product) RETURN u.id, p.id<br><br># PyG Node2Vec (요약)<br>from torch_geometric.nn import Node2Vec<br>model = Node2Vec(edge_index, embedding_dim=128, walk_length=20, context_size=10, walks_per_node=10)<br>loader = model.loader(batch_size=128, shuffle=True)<br># 학습 후<br>emb = model.embedding.weight.data.numpy()<br><br># Faiss로 서빙<br>import faiss<br>idx = faiss.IndexFlatL2(128)<br>idx.add(emb)<br><br>참고: Google Knowledge Graph(검색), Facebook의 PyTorch-BigGraph(대규모 임베딩), 논문 TransE(2013), GraphSAGE(2017) 활용 사례가 산업에서 널리 채택됩니다. 실무패턴: 스키마 명확화→작은 샘플로 모델·평가→배치 임베딩·주기적 재학습→ANN 서빙·모니터링.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A knowledge graph stores entities and typed relations as a graph of facts; graph embeddings map those nodes/relations into continuous vectors so systems can do fast similarity, link prediction, and ML over structured knowledge.</p>
+        <p>How it works: Knowledge graphs use schemas (RDF/Property-Graph) and are queried with SPARQL/Cypher; embeddings compress structure into fixed-size vectors. Approaches include translational models (TransE), bilinear/factorization models (DistMult, ComplEx), random-walk methods (DeepWalk, node2vec), and GNNs that aggregate neighbor messages (GraphSAGE, GAT). Training uses positive triples and negative sampling; evaluation uses MRR/Hits@K or downstream metrics (e.g., CTR improvement).<br>Production notes: For billion-scale graphs use PyTorch-BigGraph or distributed DGL/PyG, store vectors in ANN indexes (Faiss/HNSW) for low-latency lookups, and manage incremental updates, type constraints, and provenance to avoid drift and stale facts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world pattern: export graph edges from Neo4j/BigQuery, train embeddings, serve with ANN. Example code snippets:<br># TransE with AmpliGraph<br>from ampligraph.latent_features import TransE<br>model = TransE(batches_count=100, epochs=200, k=200, eta=20)<br>model.fit(np.array(triples))<br><br># Node2Vec with PyG (summary)<br>from torch_geometric.nn import Node2Vec<br>model = Node2Vec(edge_index, embedding_dim=128, walk_length=20, context_size=10, walks_per_node=10)<br>loader = model.loader(batch_size=128)<br># train -> emb = model.embedding.weight.data.numpy()<br><br># Faiss index for serving<br>import faiss<br>index = faiss.IndexFlatL2(128)<br>index.add(emb)<br><br>Where used: Google Knowledge Graph (search relevance), Facebook/Meta uses PyTorch-BigGraph for social embeddings, LinkedIn/Amazon use product/talent graphs for recommendations and entity resolution. Best practices: enforce schema constraints, monitor embedding drift, use negative sampling tuned per relation, evaluate both ranking metrics and downstream business KPIs, and serve via ANN with versioning and A/B tests.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
