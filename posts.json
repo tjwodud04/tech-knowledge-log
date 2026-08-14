@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Knowledge Graphs & Graph Embeddings",
+      "date": "2026-08-14",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-14-knowledge-graphs-and-graph-embeddings.html",
+      "excerpt": "지식그래프는 엔티티와 관계를 노드·엣지로 표현한 구조화된 사실 저장소이며, 그래프 임베딩은 이런 구조를 연속적인 벡터공간으로 변환해 실시간 검색·추천·추론에 효율성을 제공합니다."
+    },
+    {
       "title": "Byte-Pair Encoding (BPE)",
       "date": "2026-08-12",
       "category": "cs-fundamentals",
