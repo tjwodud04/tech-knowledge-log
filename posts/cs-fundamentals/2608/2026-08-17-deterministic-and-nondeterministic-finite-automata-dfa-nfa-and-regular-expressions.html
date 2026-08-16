@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>DFA, NFA and Regular Expressions: Practical Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="유한 오토마타(DFA/NFA)와 정규표현식은 문자열 매칭과 텍스트 처리의 이론적 기반으로, 고성능 검색·파싱·정적분석 시스템에서 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>DFA, NFA and Regular Expressions: Practical Guide</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-17</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>유한 오토마타(DFA/NFA)와 정규표현식은 문자열 매칭과 텍스트 처리의 이론적 기반으로, 고성능 검색·파싱·정적분석 시스템에서 핵심적입니다.</p>
+        <p>NFA는 상태 전이가 여러 가능성을 허용하는 모델이고 DFA는 각 상태에 대해 입력 심볼당 하나의 전이만 허용하는 결정적 모델입니다. 정규표현식은 이러한 유한 오토마타와 등가이며, Thompson의 구성법으로 정규식→NFA, 부분집합(Subset) 알고리즘으로 NFA→DFA로 변환합니다. DFA는 매칭이 선형시간·상태 참조만으로 가능해 런타임 예측성이 필요할 때 유리하지만 상태폭증(state explosion)이 문제될 수 있습니다.<br><br>실무에서는 RE2(Google), Rust regex, Hyperscan(Intel)처럼 DFA/하이브리드 엔진을 사용해 대량 로그·네트워크 패킷·IDS 패턴을 처리합니다. 연구에서는 Hopcroft의 최소화 알고리즘, Brzozowski 변환, 트랜지션 압축(transition compression) 같은 최적화가 많이 적용됩니다. 또한 정규표현식 엔진 설계에서는 백트래킹 폭주를 피하기 위해 NFA 기반 엔진을 제한하거나 DFA 전환을 부분적으로 적용합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- Google RE2: 대규모 서비스에서 ReDoS 방지와 O(n) 매칭 보장을 위해 사용. 설치/사용: apt/源码 or go wrapper. 예: Go에서 RE2 사용<br>  import "regexp"<br>  r := regexp.MustCompile(<code>\b(user|admin)\b</code>)<br>  fmt.Println(r.MatchString("admin"))<br>- Rust regex: DFA/상승식 최적화로 로그 검색에 사용<br>  use regex::Regex;<br>  let re = Regex::new(r"\d{4}-\d{2}-\d{2}").unwrap();<br>  assert!(re.is_match("2021-12-31"));<br>- Intel Hyperscan: 네트워크 IDS/IPS에서 다중 패턴 DFA를 하드웨어 가속 사용(라이브러리 API 통해 컴파일/스트리밍 매칭).<br>Best practices: 정규식 복잡도 측정, 가능한 경우 DFA 기반 엔진 사용, 필요 시 패턴을 분해하고 사전 필터(트라이/접두사 해시)를 두어 상태 폭증 회피.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Finite automata (DFA/NFA) and regular expressions form the theoretical backbone of string matching and are widely used in high-performance search, parsing, and static analysis systems.</p>
+        <p>An NFA allows multiple possible transitions for an input symbol from a state; a DFA has exactly one transition per input symbol per state. Regular expressions are equivalent to finite automata: Thompson's construction compiles regex→NFA, and the subset construction (powerset) converts NFA→DFA. DFAs provide predictable O(n) matching with simple state-table lookups, but can suffer from state explosion when naïvely constructed.<br><br>In production, engines like Google RE2, Rust's regex crate, and Intel Hyperscan use DFA or hybrid techniques to safely and quickly match billions of inputs (logs, network packets, IDS signatures). Research optimizations include Hopcroft minimization, Brzozowski derivatives, and transition compression. Practical engines balance NFA expressiveness and DFA performance to avoid pathological backtracking (ReDoS) while keeping memory use acceptable.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples:<br>- Google RE2 (safe, O(n) guarantee): used across Google services to avoid catastrophic backtracking. Example (Go stdlib uses RE2 semantics):<br>  import "regexp"<br>  r := regexp.MustCompile(<code>\b(user|admin)\b</code>)<br>  fmt.Println(r.MatchString("admin"))<br>- Rust regex crate (DFA/hybrid, used in ripgrep for fast searches):<br>  use regex::Regex;<br>  let re = Regex::new(r"\d{4}-\d{2}-\d{2}").unwrap();<br>  assert!(re.is_match("2021-12-31"));<br>- Intel Hyperscan: compiles many patterns into high-performance automata for IDS/IPS and DPI. API compiles patterns into a database then streams data for matching.<br>Production patterns: measure pattern complexity, prefer DFA-based engines for untrusted input, use prefix filters/trie to reduce automaton size, and apply minimization or on-the-fly DFA construction when memory is constrained.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
