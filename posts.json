@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "DFA, NFA and Regular Expressions: Practical Guide",
+      "date": "2026-08-17",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-17-deterministic-and-nondeterministic-finite-automata-dfa-nfa-and-regular-expressions.html",
+      "excerpt": "유한 오토마타(DFA/NFA)와 정규표현식은 문자열 매칭과 텍스트 처리의 이론적 기반으로, 고성능 검색·파싱·정적분석 시스템에서 핵심적입니다."
+    },
+    {
       "title": "Knowledge Graphs & Graph Embeddings",
       "date": "2026-08-14",
       "category": "cs-fundamentals",
