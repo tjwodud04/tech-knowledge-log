@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "AgentRewind: Recoverable Execution for Long-Horizon LLM Agents",
+      "date": "2026-08-18",
+      "category": "papers",
+      "url": "posts/papers/2608/2026-08-18-paper.html",
+      "excerpt": "AgentRewind: Recoverable Execution for Long-Horizon LLM Agents"
+    },
+    {
       "title": "DFA, NFA and Regular Expressions: Practical Guide",
       "date": "2026-08-17",
       "category": "cs-fundamentals",
