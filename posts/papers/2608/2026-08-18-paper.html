@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AgentRewind: Recoverable Execution for Long-Horizon LLM Agents</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AgentRewind: Recoverable Execution for Long-Horizon LLM Agents">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>AgentRewind: Recoverable Execution for Long-Horizon LLM Agents</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Yu Zhuang, Kefei Chen, Yitong Duan, Shuxin Zheng, Jian Li, Xu-Yao Zhang</div>
+        <div><strong>발행일 / Published:</strong> 2026-08-14</div>
+        <div><strong>Arxiv ID:</strong> 2608.14380</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>많은 실제 작업은 LLM 에이전트가 긴 실행 기간 동안 환경과 상호작용해야 한다. 실행 초기에 발생한 오류는 에이전트의 컨텍스트와 환경 상태 모두에 전파될 수 있으며, 이후의 행동만으로 그 영향을 되돌리기 어려울 수 있다. 기존 방법들은 주로 계획 개선과 안전 검사로 이러한 오류를 줄이는 데 초점을 맞추지만, 오류 발생 이후의 지원은 거의 제공하지 않는다. 장기 실행 중 복구를 가능하게 하기 위해, 우리는 에이전트 컨텍스트와 제어된 환경의 정렬된 체크포인트를 기록하여 에이전트가 이전 상태로 돌아가 이전 시도의 정보를 활용해 실행을 재개할 수 있게 하는 런타임 복구 프레임워크인 AgentRewind를 제안한다. 또한 일련의 관련 요구사항을 포함한 장기 엔지니어링 과제에서 작업 완료와 부분 진행 상황을 평가하기 위한 벤치마크인 MettleBench를 구성했다. 여러 과제와 다양한 모델, 실행 전략, 에이전트 하네스에 걸친 실험은 AgentRewind가 비교 대상 기준보다 작업 성공률과 체크리스트 평균 진행도를 향상시킨다는 것을 보여준다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Many real-world tasks require LLM agents to interact with their environments over long execution horizons. Errors that occur early in execution may propagate through both the agent context and environment state, and their effects may be difficult to reverse through subsequent actions. Existing methods mainly seek to reduce such errors through plan refinement and safety checks but provide little support after errors occur. To enable recovery during long-horizon execution, we present AgentRewind, a runtime recovery framework that records aligned checkpoints of the agent context and controlled environment, allowing agents to return to an earlier state and resume execution with information from previous attempts. We also construct MettleBench, a benchmark for evaluating task completion and partial progress on long-horizon engineering assignments containing a series of related requirements. Experiments across tasks, multiple models, execution strategies, and agent harnesses show that AgentRewind improves task success rate and average checklist progress over the compared baselines.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2608.14380" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2608.14380.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
