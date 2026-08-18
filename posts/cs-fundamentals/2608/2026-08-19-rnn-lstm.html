@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Recurrent Neural Networks (RNNs) & LSTMs — Practical Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RNN과 LSTM은 시계열·문자열·스트리밍 데이터 처리에 특화된 순환 구조로, 실무에서는 음성인식·언어모델·세션 기반 추천 등 낮은 지연과 온라인 추론이 필요한 곳에서 여전히 유효합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Recurrent Neural Networks (RNNs) & LSTMs — Practical Guide</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-19</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>RNN과 LSTM은 시계열·문자열·스트리밍 데이터 처리에 특화된 순환 구조로, 실무에서는 음성인식·언어모델·세션 기반 추천 등 낮은 지연과 온라인 추론이 필요한 곳에서 여전히 유효합니다.</p>
+        <p>핵심 작동 원리는 상태(hidden state)를 시간 steps에 걸쳐 전달해 이전 입력의 정보를 유지하는 것입니다. 일반 RNN은 기울기 소실/폭주 문제가 있어, LSTM은 입력·출력·망각 게이트로 장기 의존성을 제어합니다. 수식으로는 게이트들을 통해 cell state c_t와 hidden h_t를 갱신하며, 배치에서는 pack_padded_sequence로 가변 길이를 처리하고 cudnn 최적화(LSTM)의 장점을 활용합니다. 훈련 시에는 gradient clipping, 가중치 초기화(orthogonal), 혹은 layer normalization/skip connection을 도입해 안정성을 높입니다. 그러나 매우 긴 문맥이나 대규모 병렬 처리에서는 Transformer가 대안입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 적용 사례와 코드: Baidu DeepSpeech(CTC+RNNs)·Sutskever 등(Seq2Seq LSTM)·Hidasi 등(세션 기반 추천 RNN). PyTorch 예: <br><br>import torch.nn as nn<br>from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence<br>lstm = nn.LSTM(input_size=80, hidden_size=512, num_layers=3, batch_first=True, bidirectional=True)<br>packed = pack_padded_sequence(x, lengths, batch_first=True, enforce_sorted=False)<br>packed_out, _ = lstm(packed)<br>out, _ = pad_packed_sequence(packed_out, batch_first=True)<br>logits = linear(out) # for CTC: log_probs = F.log_softmax(logits, dim=-1)<br><br>운영 팁: 입력 길이별로 정렬하지 않고 enforce_sorted=False 사용, 학습 시 clip_grad_norm_(model.parameters(), 5), 프로덕션은 cuDNN LSTM 사용(속도)과 ONNX 변환 후 TensorRT로 임베디드·서빙에서 가속. 논문/오픈소스: Hochreiter&Schmidhuber'97, Sutskever et al. 2014, Hannun et al. (DeepSpeech).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>RNNs and LSTMs are sequence models that maintain hidden state across time steps; they remain practical for streaming, low-latency inference, and many time-series tasks in production.</p>
+        <p>RNNs propagate hidden states through time; vanilla RNNs suffer from vanishing/exploding gradients. LSTMs add input, forget, and output gates to control a cell state, enabling learning of longer-range dependencies. In practice you handle variable-length sequences with pack_padded_sequence / pad_packed_sequence, use bidirectional LSTMs for offline context, and prefer cuDNN-backed LSTM kernels for throughput. Training best practices include gradient clipping, orthogonal initialization, layer normalization or recurrent dropout, and monitoring sequence-wise masks. For very long contexts or massive parallelism, Transformers often outperform RNNs, but RNNs/LSTMs are still favorable for streaming/online scenarios.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Production & research examples: Baidu DeepSpeech (CTC + RNNs), Sutskever et al. (Seq2Seq LSTM), Hidasi et al. (session-based RNN recommendations). PyTorch snippet:<br><br>import torch.nn as nn<br>from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence<br>lstm = nn.LSTM(emb_dim, 512, num_layers=2, bidirectional=True, batch_first=True)<br>packed = pack_padded_sequence(inputs, lengths, batch_first=True, enforce_sorted=False)<br>packed_out, _ = lstm(packed)<br>out, _ = pad_packed_sequence(packed_out, batch_first=True)<br>log_probs = nn.functional.log_softmax(fc(out), dim=-1)<br>ctc = nn.CTCLoss(blank=0)<br>loss = ctc(log_probs.transpose(0,1), targets, input_lengths, target_lengths)<br><br>Deployment patterns: export to ONNX, use cuDNN LSTM for inference speed, clip gradients during training, prefer stateful inference for streaming ASR, and consider replacing with Transformer/Conformer when batch-parallel throughput and long-range context matter. Key refs: Hochreiter & Schmidhuber '97, Sutskever et al. 2014, Hannun et al. (DeepSpeech).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
