@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Recurrent Neural Networks (RNNs) & LSTMs — Practical Guide",
+      "date": "2026-08-19",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-19-rnn-lstm.html",
+      "excerpt": "RNN과 LSTM은 시계열·문자열·스트리밍 데이터 처리에 특화된 순환 구조로, 실무에서는 음성인식·언어모델·세션 기반 추천 등 낮은 지연과 온라인 추론이 필요한 곳에서 여전히 유효합니다."
+    },
+    {
       "title": "AgentRewind: Recoverable Execution for Long-Horizon LLM Agents",
       "date": "2026-08-18",
       "category": "papers",
