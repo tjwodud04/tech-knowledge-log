@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Linear Predictive Coding (LPC)",
+      "date": "2026-08-21",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-21-linear-predictive-coding-lpc.html",
+      "excerpt": "LPC(선형 예측 부호화)는 현재 음성 샘플을 과거 샘플의 선형 조합으로 모델링해 저비트레이트 전송과 음성 합성에서 핵심 역할을 합니다. 실무에서는 코덱, 음성 합성의 프레임별 피처, 그리고 하이브리드 신경 vocoder에 널리 쓰입니다."
+    },
+    {
       "title": "Recurrent Neural Networks (RNNs) & LSTMs — Practical Guide",
       "date": "2026-08-19",
       "category": "cs-fundamentals",
