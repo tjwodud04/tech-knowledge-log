@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Linear Predictive Coding (LPC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LPC(선형 예측 부호화)는 현재 음성 샘플을 과거 샘플의 선형 조합으로 모델링해 저비트레이트 전송과 음성 합성에서 핵심 역할을 합니다. 실무에서는 코덱, 음성 합성의 프레임별 피처, 그리고 하이브리드 신경 vocoder에 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Linear Predictive Coding (LPC)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-21</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>LPC(선형 예측 부호화)는 현재 음성 샘플을 과거 샘플의 선형 조합으로 모델링해 저비트레이트 전송과 음성 합성에서 핵심 역할을 합니다. 실무에서는 코덱, 음성 합성의 프레임별 피처, 그리고 하이브리드 신경 vocoder에 널리 쓰입니다.</p>
+        <p>원리: 프레임 단위로 신호를 윈도잉한 뒤 자가상관을 계산하고 Levinson–Durbin 알고리즘으로 예측계수(a1..ap)를 구합니다. 신호는 x[n] ≈ Σ_{i=1..p} a_i x[n-i]로 근사되며, 잔차(Excitation)=x[n]-prediction을 전송하거나 합성에 사용합니다. 실무 파라미터: 전화(8 kHz)에선 p≈8~12, 와이드밴드(16 kHz)엔 p≈16~20이 일반적입니다.<br>실제 시스템: CELP 계열(예: G.729), Speex, Skype의 SILK 파트(후에 Opus와 통합)에서 LPC 기반 예측/필터링을 사용합니다. 최근 연구인 LPCNet(Valin & Skoglund, 2019)은 신경망의 입력으로 LPC 잔차를 사용해 효율적 실시간 합성을 달성했습니다. 안정성: 대역폭 확장(bandwidth expansion), 전치(pre-emphasis) 0.97 적용, Levinson–Durbin 수치 안정화가 중요합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>간단한 파이썬 구현 예(프레임별 LPC+잔차):<br>import numpy as np<br>from scipy.signal import lfilter<br><br>def levinson(r,order):<br>    a=np.zeros(order+1); a[0]=1.0; e=r[0]<br>    for i in range(1,order+1):<br>        acc=sum(a[j]*r[i-j] for j in range(0,i))<br>        k=-(r[i]+acc)/e<br>        a[1:i]=[a[j]+k*a[i-j] for j in range(1,i)]<br>        a[i]=k; e*=1-k*k<br>    return a<br><br># y: frame signal, order=16<br>r=np.correlate(y, y, 'full')[len(y)-1:]<br>A=levinson(r,16)<br>residual=lfilter(A,1,y)<br><br>현업 팁: pre-emphasis, 창 크기(20~30ms), 오더를 샘플링율에 맞춰 조정, 코덱에서는 계수 양자화+안정화 필요. 참고: Opus (RFC 6716), Speex, ITU-T G.729, LPCNet 논문.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Linear Predictive Coding models each speech sample as a linear combination of past samples; it’s fundamental for low-bitrate codecs, feature extraction, and hybrid neural vocoders in production systems.</p>
+        <p>Core mechanics: split the signal into short frames, apply pre-emphasis and windowing, compute autocorrelation, then solve for predictor coefficients via Levinson–Durbin. The signal is approximated as x[n] ≈ Σ_{i=1..p} a_i x[n-i]; the residual (excitation) is x[n] minus the prediction. Typical orders: p≈8–12 for narrowband (8 kHz), p≈16–20 for wideband (16 kHz+). In real systems engineers apply bandwidth expansion or coefficient stabilization and quantize coefficients for transmission.<br>Where used: many production codecs and standards rely on LPC or LPC-based modules — CELP/G.729 in telephony, Speex (Xiph), the SILK mode in Skype (later part of Opus), and modern research like LPCNet (Valin & Skoglund, 2019) combine LPC with small neural networks for efficient synthesis.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Minimal Python example (frame LPC -> residual):<br>import numpy as np<br>from scipy.signal import lfilter<br><br>def levinson(r, order):<br>    a = np.zeros(order+1); a[0]=1.0; e=r[0]<br>    for i in range(1, order+1):<br>        acc = sum(a[j]*r[i-j] for j in range(0,i))<br>        k = -(r[i]+acc)/e<br>        a[1:i] = [a[j] + k*a[i-j] for j in range(1,i)]<br>        a[i] = k; e *= 1 - k*k<br>    return a<br><br># y = frame samples<br>r = np.correlate(y, y, 'full')[len(y)-1:]<br>A = levinson(r, 16)  # predictor polynomial with A[0]=1<br>residual = lfilter(A, 1.0, y)<br><br>Practical tips: use pre-emphasis (~0.97), 20–30 ms frames, choose order by sampling rate, stabilize coefficients before quantization. References: Opus (RFC 6716) uses SILK (LPC-based), Speex/G.729, and the LPCNet paper for neural vocoder hybrids.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
