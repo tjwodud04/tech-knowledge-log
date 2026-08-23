@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Latent Dirichlet Allocation (LDA) / Topic Modeling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="잠재 디리클레 할당(LDA)은 문서를 주제들의 혼합으로, 주제는 단어 분포로 표현하는 확률적 모델로서 대규모 텍스트 코퍼스의 탐색, 분류, 추천 시스템 전처리로 실무에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Latent Dirichlet Allocation (LDA) / Topic Modeling</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-24</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>잠재 디리클레 할당(LDA)은 문서를 주제들의 혼합으로, 주제는 단어 분포로 표현하는 확률적 모델로서 대규모 텍스트 코퍼스의 탐색, 분류, 추천 시스템 전처리로 실무에서 널리 사용됩니다.</p>
+        <p>작동 원리: LDA는 생성 모델로 각 문서는 주제 혼합(theta)에서 주제를 샘플하고, 선택된 주제에서 단어를 샘플한다고 가정합니다. 베타(주제-단어)와 알파(문서-주제)라는 디리클레 사전 분포를 두어 희소성·일반성 조절이 가능합니다. 실제 추론은 관측된 단어로부터 잠재 주제 분포를 추정하는 과정으로, 대표적인 알고리즘은 변분 베이즈(variational Bayes), 콜랩스드 깁스 샘플링(collapsed Gibbs sampling), 그리고 온라인 변분(Online VB; 대규모 스트리밍 데이터에 적합)입니다.<br>스케일링: 대규모(수십억 토큰) 환경에서는 MALLET의 병렬 깁스, Gensim의 streaming/online LDA, Apache Spark MLlib LDA(EM/온라인 VB) 같은 분산/온라인 구현을 사용합니다. 하이퍼파라미터(alpha, beta)와 토픽 수(k)는 도메인별로 코히런스(coherence)나 정성적 검토로 튜닝합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예시(출처 포함):<br>1) Python + Gensim (빠른 프로토타입)<br>code: 'from gensim.corpora import Dictionary\nfrom gensim.models.ldamodel import LdaModel\ndocs = [[w for w in doc.split()] for doc in texts]\ndict = Dictionary(docs)\ncorpus = [dict.doc2bow(d) for d in docs]\nlda = LdaModel(corpus, id2word=dict, num_topics=20, passes=10, random_state=42)'<br>사용처: 뉴스 카테고리 자동 태깅, 콘텐츠 클러스터링(뉴스룸, 미디어 업체). 참고: Blei et al. 2003.<br>2) 대규모: MALLET (깁스 샘플러) — 더 높은 품질, Spark MLlib — 분산 처리. 예: 'spark.ml.clustering.LDA'로 토픽 추출해 추천 파이프라인에 연결.<br>베스트 프랙티스: 텍스트 전처리(불용어 제거, 표제어화), tf-idf로 단어 가중치 조정, 토픽 수와 alpha/beta를 coherence로 검증, 모델 시드 고정과 토픽 안정성 검사. 참고: Hoffman et al. 2010(Online LDA), MALLET.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Latent Dirichlet Allocation (LDA) is a probabilistic topic model that represents documents as mixtures of topics and topics as distributions over words; it's used in production for corpus exploration, feature extraction for recommender/search systems, and automated tagging.</p>
+        <p>How it works: LDA is a generative Bayesian model: for each document you draw a topic distribution theta ~ Dir(alpha), then for each word draw a topic z ~ Mult(theta) and a word w ~ Mult(beta_z). Alpha and beta are Dirichlet priors controlling sparsity and generality. Inference computes posterior distributions over theta and beta given observed words. Common inference methods: collapsed Gibbs sampling (MALLET), mean-field variational Bayes, and Online VB (Hoffman et al.) which streams mini-batches for large corpora.<br>Scalability & trade-offs: Gibbs sampling often yields higher-quality topics but is heavier to parallelize; variational/online methods scale better for production pipelines (Spark MLlib supports EM/online LDA). Choose num_topics and priors using coherence metrics and stability checks.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code & sources:<br>1) Gensim (prototype/production-friendly):<br>code: 'from gensim.corpora import Dictionary\nfrom gensim.models.ldamodel import LdaModel\ndocs = [[w for w in doc.split()] for doc in texts]\ndict = Dictionary(docs)\ncorpus = [dict.doc2bow(d) for d in docs]\nlda = LdaModel(corpus, id2word=dict, num_topics=50, passes=20, random_state=0)'<br>Used for content clustering, editorial topic tagging in media pipelines. Reference: D. Blei et al., 2003; Gensim.<br>2) Production-scale: MALLET (parallel Gibbs) or Apache Spark MLlib LDA for distributed corpora. Example pattern: preprocess -> build vocabulary/TF-IDF -> distributed LDA -> incorporate topic vectors into downstream ranking or recommender models. Best practices: aggressive preprocessing (lemmatize, stopwords), tune num_topics via coherence, use MALLET for final model quality and online/streaming LDA for continuous pipelines (Hoffman 2010).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
