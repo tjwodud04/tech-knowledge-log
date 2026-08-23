@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Latent Dirichlet Allocation (LDA) / Topic Modeling",
+      "date": "2026-08-24",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-24-latent-dirichlet-allocation.html",
+      "excerpt": "잠재 디리클레 할당(LDA)은 문서를 주제들의 혼합으로, 주제는 단어 분포로 표현하는 확률적 모델로서 대규모 텍스트 코퍼스의 탐색, 분류, 추천 시스템 전처리로 실무에서 널리 사용됩니다."
+    },
+    {
       "title": "Linear Predictive Coding (LPC)",
       "date": "2026-08-21",
       "category": "cs-fundamentals",
