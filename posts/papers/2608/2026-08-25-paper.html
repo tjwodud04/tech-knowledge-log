@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Xuanyu Meng, Jiashuo Sun, Jash Rajesh Parekh, Jiawei Han</div>
+        <div><strong>발행일 / Published:</strong> 2026-08-21</div>
+        <div><strong>Arxiv ID:</strong> 2608.21252</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>긴 연결 문서에 대한 질문응답(QA)은 관련 증거가 여러 엔티티와 그들 간의 관계에 걸쳐 분산될 수 있기 때문에 여전히 어려운 문제로 남아 있다. 기존의 검색 보강 생성(RAG) 방법들은 보통 문서를 원시 청크로 인덱싱하고 임베딩 유사도로 검색한다. 하지만 청크 경계가 엔티티와 이를 지지하는 증거를 분리하거나 질문이 말뭉치 전반에 걸친 멀티홉 추론을 요구할 때 이들 방법의 성능은 저하된다. 우리는 EnSI-RAG(Entity-Structure-Indexed Retrieval-Augmented Generation)를 제안하는데, 이는 쿼리와 무관한 엔티티 중심 인덱스를 구성하는 프레임워크다. 각 레코드 (e, t, k, v)는 엔티티 e, 그 타입 t, 의미 범주 k ∈ {속성, 관계, 측면}, 그리고 값 v를 나타내며 원본 출처 패시지와의 연결을 유지한다. 쿼리 시 이러한 레코드들이 검색 단위로 작동하고, 대형 언어 모델(LLM)이 검색된 패시지들을 종합해 최종 답변을 생성한다. 이 설계는 증거의 위치화와 답변 합성을 분리하면서도 추적 가능한 출처 증거를 보존한다. Loong과 Oolong 전체에서 EnSI-RAG는 평균 정확도 78.24를 달성했으며, 참고로 사용된 공개 베이스라인 점수들과 비교하면 6.62포인트 높은 수치로서 이러한 환경들 전반에서의 유효성을 시사한다. 코드는 https://github.com/RamonMeng/EnSI-RAG 에서 확인할 수 있다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Question answering (QA) over long, connected documents remains challenging because relevant evidence may span multiple entities and their relationships. Existing retrieval-augmented generation (RAG) methods typically index documents as raw chunks and retrieve them through embedding similarity. Their performance degrades when chunk boundaries separate entities from supporting evidence or when a question requires multi-hop reasoning across the corpus. We propose EnSI-RAG (Entity-Structure-Indexed Retrieval-Augmented Generation), a framework that constructs a query-independent, entity-centered index. Each record (e, t, k, v) represents an entity e, its type t, a semantic category k in {property, relation, aspect}, and a value v, while retaining links to the original source passages. At query time, these records serve as retrieval handles, and an LLM synthesizes the retrieved passages into the final answer. This design separates evidence localization from answer synthesis while preserving traceable source evidence. Across Loong and Oolong, EnSI-RAG achieves an average accuracy of 78.24. Relative to the published baseline scores used as references, this is 6.62 points higher, suggesting its effectiveness across these settings. The code is available at https://github.com/RamonMeng/EnSI-RAG.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2608.21252" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2608.21252.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
