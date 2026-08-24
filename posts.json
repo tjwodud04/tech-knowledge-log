@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering",
+      "date": "2026-08-25",
+      "category": "papers",
+      "url": "posts/papers/2608/2026-08-25-paper.html",
+      "excerpt": "EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering"
+    },
+    {
       "title": "Latent Dirichlet Allocation (LDA) / Topic Modeling",
       "date": "2026-08-24",
       "category": "cs-fundamentals",
