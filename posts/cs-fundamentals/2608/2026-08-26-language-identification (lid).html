@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Language Identification (LID)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="언어 식별(LID)은 텍스트나 음성의 언어를 자동으로 판별하는 기술로, 라우팅·번역·콘텐츠 필터링 등 실서비스에서 필수 요소입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Language Identification (LID)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-26</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>언어 식별(LID)은 텍스트나 음성의 언어를 자동으로 판별하는 기술로, 라우팅·번역·콘텐츠 필터링 등 실서비스에서 필수 요소입니다.</p>
+        <p>작동 원리는 주로 문자/음절 기반의 피처(문자 n-그램), 통계적 모델, 그리고 최근의 임베딩/딥러닝 모델로 구성됩니다. 고전적 방법은 Cavnar & Trenkle(1994)의 문자 n-그램 프로파일 매칭과, Lui & Baldwin(2011)의 langid.py처럼 Naive Bayes/ML 기반 모델입니다. Facebook의 fastText(Joulin et al., 2017)는 효율적인 서브워드/문자 n-그램과 선형 분류기로 다국어 LID에 널리 쓰이며, Google의 CLD3는 신경망 기반의 경량 모델로 웹 콘텐츠에서 빠르게 언어를 추정합니다.<br><br>운영 시스템에서는 짧은 텍스트(소셜 미디어, 검색 쿼리)와 코드스위칭(혼합언어) 문제를 고려해야 합니다. 실무적 대응은: 1) 문자 n-그램과 토큰 피처의 앙상블, 2) 문장 길이별 다른 모델(짧은 텍스트 전용 튜닝), 3) 임계값(confidence)과 백오프(backoff) 전략, 4) 도메인 적응(파인튜닝)입니다. 또한 추적된 신뢰도와 메타데이터(사용자 로케일, HTTP 헤더)를 결합해 오탐을 줄입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- fastText LID (Facebook): 대규모 서비스에서 경량 LID로 사용됨. 예: 콘텐츠 라우팅, 번역 전처리.<br>  설치/실행 예제:<br>  pip install fasttext<br>  from fasttext import load_model<br>  m = load_model('lid.176.ftz')<br>  print(m.predict('Bonjour, je m\'appelle Pierre'))  # ('__label__fr',prob)<br><br>- langid.py (Lui & Baldwin): 빠른 배포형 모델<br>  pip install langid<br>  import langid<br>  langid.set_languages(['en','zh','fr'])<br>  print(langid.classify('Hola mundo'))<br><br>- CLD3 (Google): 웹 크롤러·검색 로그에서 사용. PyPI: cld3<br>  import cld3<br>  print(cld3.get_language('これは日本語です'))<br><br>베스트 프랙티스: 학습 데이터에 도메인 샘플을 포함해 파인튜닝, 짧은 텍스트에 대한 별도 모델, confidence 기반 라우팅과 휴리스틱(예: 유저 로케일)이 결합된 다계층 체계 도입. 주요 레퍼런스: Cavnar & Trenkle (1994), Lui & Baldwin (2011), Joulin et al. (2017).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Language Identification (LID) automatically detects the language of text or speech and is critical for routing, translation, moderation, and analytics in production systems.</p>
+        <p>How it works: classical LID relies on character-level n-gram profiles (Cavnar & Trenkle, 1994) and statistical classifiers; langid.py (Lui & Baldwin, 2011) is an example of a compact Naive Bayes/ML system. Modern systems use subword/character embeddings and lightweight neural nets—fastText (Joulin et al., 2017) uses character n-grams with a linear classifier for fast, scalable LID; CLD3 (Google) uses a small neural model optimized for short web text.<br><br>Production considerations: short texts (queries, tweets) and code-switching reduce accuracy, so practitioners use ensembles (n-gram + neural), thresholding on confidence, domain-specific fine-tuning, and metadata fusion (user locale, headers). Typical pipeline: fast prefilter (high-recall n-gram), high-precision model for ambiguous/short cases, and fallback heuristics. Logging confidence and error patterns is essential for iterative improvement.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples and code:<br>- fastText LID (Facebook/Meta) — widely used for routing and pre-translation. Download pretrained 'lid.176.ftz'.<br>  pip install fasttext<br>  from fasttext import load_model<br>  m = load_model('lid.176.ftz')<br>  print(m.predict('Das ist ein Test'))  # returns label + probability<br><br>- langid.py (research-grade, Lui & Baldwin)<br>  pip install langid<br>  import langid<br>  print(langid.classify('Bonjour le monde'))<br><br>- CLD3 (Google) — optimized for short web snippets<br>  pip install cld3<br>  import cld3<br>  print(cld3.get_language('Hello world'))<br><br>Production patterns and best practices: fine-tune models on in-domain text, use separate models for very short inputs, apply confidence thresholds and backoff heuristics, and combine model output with metadata (IP/locale). References: Cavnar & Trenkle (1994), Lui & Baldwin (2011), Joulin et al. (2017, fastText).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
