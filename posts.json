@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Language Identification (LID)",
+      "date": "2026-08-26",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-26-language-identification (lid).html",
+      "excerpt": "언어 식별(LID)은 텍스트나 음성의 언어를 자동으로 판별하는 기술로, 라우팅·번역·콘텐츠 필터링 등 실서비스에서 필수 요소입니다."
+    },
+    {
       "title": "EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering",
       "date": "2026-08-25",
       "category": "papers",
