@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Nyquist–Shannon Sampling Theorem — Sampling, Aliasing, Reconstruction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="샘플링 정리는 아날로그(연속) 신호를 디지털로 안전하게 변환하기 위한 조건을 규정하며, 실무에서는 ADC, 오디오/비디오 인코딩, 딥러닝 전처리에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Nyquist–Shannon Sampling Theorem — Sampling, Aliasing, Reconstruction</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-28</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>샘플링 정리는 아날로그(연속) 신호를 디지털로 안전하게 변환하기 위한 조건을 규정하며, 실무에서는 ADC, 오디오/비디오 인코딩, 딥러닝 전처리에서 필수적입니다.</p>
+        <p>핵심은 최대주파수 f_max가 주어질 때 샘플링 주파수 f_s ≥ 2·f_max (Nyquist rate)를 만족해야 원래 신호를 손실 없이 재구성할 수 있다는 것(Shannon 샘플링 정리). 이를 어기면 고주파 성분이 낮은 주파수로 접히는 aliasing이 발생해 복원 불가한 왜곡을 만든다. 실제 시스템은 이상적 저역통과(무한대대역) 필터를 쓸 수 없으므로 anti-aliasing 아날로그 필터나 디지털 다단계 FIR/IIR 필터(예: polyphase, decimation)가 병행된다.<br><br>구현 관점에서는 샘플링 변경 시 반드시 저역필터링 → 리샘플링 → (선택적으로) 보간(reconstruction) 순을 따릅니다. 오디오/비디오 파이프라인(FFmpeg/SoX/libsoxr)은 고차 필터와 대칭 FIR을 사용해 aliasing을 줄이고, SD/HD 비디오 축소나 오디오 리샘플링 같은 production path에서 반드시 적용합니다. 딥러닝에서는 입력 이미지를 다운샘플링할 때 anti-aliasing(예: TensorFlow's tf.image.resize antialias=True, 또는 LANCZOS)을 사용해 모델의 과적합/shift-sensitivity를 완화합니다 (관련 연구: Azulay & Weiss, 2018).</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제(오디오 리샘플링): FFmpeg/soxr 사용<br>ffmpeg -i in.wav -ar 16000 -ac 1 -af aresample=resampler=soxr out_16k.wav<br>Python(디지털 저역 + 다운샘플):<br>from scipy.signal import resample_poly<br># anti-aliasing via polyphase FIR: downsample from 48000 to 16000<br>y16k = resample_poly(y48k, up=1, down=3)<br>이미지 리사이즈(파이썬/Pillow):<br>from PIL import Image<br>img.resize((w//2,h//2), resample=Image.LANCZOS)<br>산업 적용: Spotify/Apple/Netflix는 고품질 resampling(library: libsoxr, SoX)을 사용해 스트리밍과 트랜스코딩에서 aliasing을 방지. SDR/GNU Radio와 ADC 설계에서는 아날로그 anti-alias 필터+디지털 decimation 체인이 표준 패턴입니다. 실무 베스트프랙티스: 리샘플 전 저역필터, 적절한 필터 차수 선택, polyphase 구조로 성능 최적화.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>The Nyquist–Shannon theorem sets the sampling rate needed to convert continuous signals into discrete samples without losing information; it's central to ADCs, audio/video transcodes, and ML preprocessing.</p>
+        <p>The core rule: if a signal's highest frequency is f_max, sampling at f_s ≥ 2·f_max (Nyquist rate) lets you reconstruct the original band-limited signal. Sampling below that causes aliasing where high-frequency energy folds into lower frequencies and cannot be separated during reconstruction. Because real filters aren't ideal, practical systems combine analog anti-alias filters and digital filters (FIR/IIR, polyphase) before decimation or interpolation.<br><br>In practice pipelines follow: anti-alias low-pass → resample (decimate/interpolate) → reconstruction (e.g., sinc or windowed-sinc interpolation). Production tools (FFmpeg, SoX, libsoxr) use high-quality FIR or splines to limit aliasing during format conversion. In ML, anti-aliased image downsampling (e.g., tf.image.resize with antialias=True or PIL LANCZOS) reduces shift-sensitivity (see Azulay & Weiss, 2018 on CNN shift invariance). SDR stacks (GNU Radio) and ADC front-ends pair analog filters with digital decimators as a standard design.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real commands and code (where used):<br>- FFmpeg (used by YouTube, Netflix transcode stacks):<br>ffmpeg -i input.wav -ar 16000 -ac 1 -af aresample=resampler=soxr output_16k.wav<br>- Python (production preprocessing with SciPy polyphase anti-aliasing):<br>from scipy.signal import resample_poly<br># downsample 48000->16000 with internal FIR anti-alias<br>y16k = resample_poly(y48k, up=1, down=3)<br>- Image resize for training pipelines (Pillow/TensorFlow used in ML infra):<br>from PIL import Image<br>img.resize((w//2,h//2), resample=Image.LANCZOS)<br>Sources & production notes: FFmpeg/SoX/libsoxr docs; GNU Radio flowgraphs; ADC application notes from TI/Analog Devices; research: Azulay & Weiss, "Making Convolutional Networks Shift-Invariant" (arXiv 2018). Best practices: always anti-alias before downsampling, prefer polyphase implementations for performance, and validate with spectral plots (FFT) to confirm alias suppression.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
