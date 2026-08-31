@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Weighted Finite-State Transducers (WFSTs) for Speech & Text",
+      "date": "2026-08-31",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2608/2026-08-31-weighted-finite-state-transducers-wfsts.html",
+      "excerpt": "WFST는 상태와 가중치(확률/비용)를 가진 유한 상태 전이도로, 음성·텍스트 시스템에서 음소·단어·어휘규칙·언어모델을 효율적으로 결합·검색하는 핵심 구조입니다. 생산 시스템에서 디코더 속도와 모델 결합의 명시적 제어를 제공합니다."
+    },
+    {
       "title": "Nyquist–Shannon Sampling Theorem — Sampling, Aliasing, Reconstruction",
       "date": "2026-08-28",
       "category": "cs-fundamentals",
