@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Weighted Finite-State Transducers (WFSTs) for Speech & Text</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="WFST는 상태와 가중치(확률/비용)를 가진 유한 상태 전이도로, 음성·텍스트 시스템에서 음소·단어·어휘규칙·언어모델을 효율적으로 결합·검색하는 핵심 구조입니다. 생산 시스템에서 디코더 속도와 모델 결합의 명시적 제어를 제공합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Weighted Finite-State Transducers (WFSTs) for Speech & Text</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-08-31</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>WFST는 상태와 가중치(확률/비용)를 가진 유한 상태 전이도로, 음성·텍스트 시스템에서 음소·단어·어휘규칙·언어모델을 효율적으로 결합·검색하는 핵심 구조입니다. 생산 시스템에서 디코더 속도와 모델 결합의 명시적 제어를 제공합니다.</p>
+        <p>기술적 요약: WFST는 입력심볼→출력심볼과 가중치(예: 로그우도)를 가진 호(arc)들의 그래프로, 합성(composition), 최소화(minimization), 결정화(determinization), 최단경로 탐색(shortest-path) 같은 연산으로 여러 지식 소스(L: lexicon, G: grammar/LM, C: context, H: HMM)를 하나의 디코더 그래프로(HCLG)로 결합합니다. 모히(Mohri) 등의 이론을 바탕으로 반환 규칙과 반(semiring) 연산이 핵심입니다.<br><br>실무 동작: 보통 OpenFST/pywrapfst 또는 Pynini를 사용해 FST를 만들고 fstcompose로 합성합니다. 합성 후 epsilon 제거, 결정화, 최소화, 그리고 최적화(arc sorting, determinize+minimize)를 거쳐 실시간 디코더에서 빠른 탐색을 보장합니다. Kaldi 같은 대형 ASR 툴킷은 이러한 파이프라인(H->C->L->G 합성)을 자동화해 HCLG.fst를 생성합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사례 및 코드: 오픈소스 Kaldi와 OpenFST, 구글의 Pynini(문자열 변형/텍스트 정규화)에 실전 적용 사례가 존재합니다.<br><br>1) OpenFST 명령 예시 (터미널):<br><br>echo "0 1 a b 0.5<br>1" > trans.txt<br>fstcompile --isymbols=isyms.txt --osymbols=osyms.txt trans.txt | fstdeterminize | fstminimize > trans.fst<br><br>2) Python(Pywrapfst) 간단 합성/최단경로 예:<br><br>import pywrapfst as fst<br>A=fst.Fst()<br>s=A.add_state(); t=A.add_state(); A.set_start(s); A.set_final(t)<br>A.add_arc(s, fst.Arc(97,98, fst.Weight('log',0.2), t))<br>B=A.copy()<br>C=fst.compose(A,B)<br>spath=fst.shortestpath(C)<br><br>3) 실무 패턴/베스트 프랙티스: 심볼 테이블 관리(일관된 isymbols/osyms), epsilon 호 제거와 arc sorting으로 합성 성능 확보, 로그-반(semiring) 사용으로 underflow 방지. 출처: A. Mohri et al., "Weighted finite-state transducers in speech recognition"; OpenFST(2007); Kaldi(프로덕션 ASR 파이프라인).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A WFST is a finite-state transducer whose transitions carry weights (probabilities/costs); in production speech and text systems it's used to compose lexicons, acoustic/context models and language models into a single searchable graph for fast decoding.</p>
+        <p>Core mechanics: WFSTs represent mappings from input symbol sequences to output sequences with an associated weight per path. Key algorithms are composition (to combine layers like L:lexicon and G:language model), determinization, minimization, epsilon-removal and shortest-path (Viterbi) search. Semiring algebra (e.g., tropical/log) governs how weights combine. In ASR pipelines you typically build components (H,C,L,G) and compose into HCLG.fst so the decoder performs one graph search instead of interleaving models at runtime.<br><br>How it runs in practice: OpenFST (C++/pywrapfst) and Pynini provide APIs; Kaldi automates WFST-based graph building and optimization for production ASR. Best-practice steps: keep consistent symbol tables, remove epsilons before expensive compositions when feasible, arc-sorting by input/output labels to speed composition, use determinize+minimize to shrink search graphs, and use log-domain weights to avoid numerical issues.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples and commands (sources: OpenFST, Kaldi, Pynini, Mohri et al.):<br><br>1) OpenFST CLI (compose & optimize):<br># compile<br>fstcompile --isymbols=isyms.txt --osymbols=osyms.txt lex.txt > L.fst<br>fstcompile --isymbols=isyms.txt --osymbols=osyms.txt gram.txt > G.fst<br># compose and optimize<br>fstcompose L.fst G.fst | fstrmepsilon | fstdeterminize | fstminimize > LG.fst<br><br>2) Python (pywrapfst) snippet:<br>import pywrapfst as fst<br>A=fst.Fst(); s=A.add_state(); t=A.add_state(); A.set_start(s); A.set_final(t)<br>A.add_arc(s, fst.Arc(1,2,fst.Weight('tropical',0.5),t))<br>B=A.copy(); C=fst.compose(A,B); print(fst.shortestpath(C).num_states())<br><br>3) Production uses: Kaldi builds HCLG.fst for decoders in many speech services; Pynini is used at Google for text normalization and G2P rules. Papers: Mohri et al. (2002) "Weighted finite-state transducers in speech recognition"; Allauzen et al. (2007) OpenFST. Best practices: pre-sort arcs, manage symbol tables, prefer log/tropical semirings and profile compositions on large graphs to avoid memory blowup.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
