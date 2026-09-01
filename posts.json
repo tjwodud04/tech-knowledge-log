@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Towards a Systems Foundation for Agentic Skills: Architecture, Lifecycle, and Security",
+      "date": "2026-09-01",
+      "category": "papers",
+      "url": "posts/papers/2609/2026-09-01-paper.html",
+      "excerpt": "Towards a Systems Foundation for Agentic Skills: Architecture, Lifecycle, and Security"
+    },
+    {
       "title": "Weighted Finite-State Transducers (WFSTs) for Speech & Text",
       "date": "2026-08-31",
       "category": "cs-fundamentals",
