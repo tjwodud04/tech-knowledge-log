@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>B-tree / B+Tree and Database Indexing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="B-트리(실무에선 보통 B+트리)는 디스크 기반 DB의 기본 색인 구조로, 대용량 데이터에서 빠른 검색/삽입/삭제를 보장해 실제 시스템 성능을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>B-tree / B+Tree and Database Indexing</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-02</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>B-트리(실무에선 보통 B+트리)는 디스크 기반 DB의 기본 색인 구조로, 대용량 데이터에서 빠른 검색/삽입/삭제를 보장해 실제 시스템 성능을 좌우합니다.</p>
+        <p>B-트리는 노드가 여러 키와 자식 포인터를 가지는 균형 트리입니다. 실무 DB는 보통 리프에만 레코드(또는 레코드 포인터)를 모아 순차 접근을 빠르게 하는 B+트리를 씁니다. 노드 한 페이지가 디스크 블록 크기(예: 4KB)에 맞춰져 있어 I/O 횟수가 최소화됩니다. 핵심 연산은 O(log_f N)이고, f는 노드의 평균 fanout(페이지당 슬롯 수)입니다.<br><br>삽입/삭제 시 노드 분할이나 병합이 발생해 트리 깊이가 변하지 않도록 균형을 유지합니다. 생산환경에서는 클러스터형 인덱스(clustered index, InnoDB의 경우 PRIMARY KEY가 클러스터)를 사용해 레코드 물리 정렬을 유도하거나, PostgreSQL의 B-tree와 같은 비클러스터형 색인으로 다중 인덱싱을 적용합니다. 학술적 근원으로는 Bayer & McCreight(1972)과 엔진별 최적화(예: InnoDB 페이지 레이아웃, PostgreSQL fillfactor)가 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드/명령 예: MySQL(InnoDB)에서는 기본 키가 클러스터형 인덱스입니다.<br><br>CREATE TABLE users (<br>  id BIGINT PRIMARY KEY,<br>  email VARCHAR(255),<br>  name TEXT<br>) ENGINE=InnoDB;<br>CREATE INDEX idx_email ON users(email);<br>SHOW INDEX FROM users;<br><br>PostgreSQL 사용 예(옵티마이저 확인):<br>CREATE INDEX ON users(email);<br>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM users WHERE email='a@b.com';<br><br>실무 패턴/베스트프랙티스: 기본 키는 좁고 불변으로(예: surrogate int) 설계, 자주 필터되는 칼럼에만 인덱스 추가, 복합 인덱스 순서와 커버링(c-overing) 설계 고려, PostgreSQL은 fillfactor로 페이지 분포 조정, 정기 REINDEX/VACUUM으로 파편화 해소. 참고: InnoDB(Oracle/MySQL), PostgreSQL docs, SQLite(내부 B-tree 구현), Berkeley DB 논문 및 소스.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>B-trees (in DBs usually B+ trees) are the standard on-disk index structure that keep search/insert/delete efficient for large datasets and directly affect production performance.</p>
+        <p>A B-tree is a balanced multi-way tree where each node holds multiple keys and child pointers; databases commonly use B+ trees that keep all records (or pointers) in leaves for fast sequential scans. Node size is tuned to disk page size (e.g., 4KB) so each tree level corresponds to one I/O; complexity is O(log_f N) where f is node fanout. Inserts and deletes trigger splits/merges to preserve balance. <br><br>Production engines implement practical optimizations: InnoDB uses a clustered B+ tree for the PRIMARY KEY (rows stored in leaf pages) and secondary indexes that point to PK values; PostgreSQL implements a B-tree variant with configurable fillfactor to control page utilization. Foundational research includes Bayer & McCreight (1972); modern papers discuss cache-conscious layouts and prefix/compression to increase fanout.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world commands and snippets:<br><br>-- MySQL / InnoDB clustered primary key<br>CREATE TABLE users (<br>  id BIGINT PRIMARY KEY,<br>  email VARCHAR(255),<br>  name TEXT<br>) ENGINE=InnoDB;<br>CREATE INDEX idx_email ON users(email);<br>SHOW INDEX FROM users;<br><br>-- PostgreSQL: create index and inspect plan<br>CREATE INDEX ON users(email);<br>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM users WHERE email='a@b.com';<br><br>Production patterns / best practices: choose narrow, immutable clustered keys (surrogate integer) to reduce secondary index bloat; design composite-index column order to match WHERE clauses and avoid redundant indexes; use PostgreSQL fillfactor to reduce page splits during bulk loads; schedule REINDEX/VACUUM for fragmentation. Sources: MySQL/InnoDB docs, PostgreSQL docs, SQLite source (B-tree pager), Berkeley DB, Bayer & McCreight 1972.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
