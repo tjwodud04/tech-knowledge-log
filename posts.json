@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "B-tree / B+Tree and Database Indexing",
+      "date": "2026-09-02",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-02-b-tree-and-database-indexing.html",
+      "excerpt": "B-트리(실무에선 보통 B+트리)는 디스크 기반 DB의 기본 색인 구조로, 대용량 데이터에서 빠른 검색/삽입/삭제를 보장해 실제 시스템 성능을 좌우합니다."
+    },
+    {
       "title": "Towards a Systems Foundation for Agentic Skills: Architecture, Lifecycle, and Security",
       "date": "2026-09-01",
       "category": "papers",
