@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Zipf's Law and Word Frequency Distributions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Zipf 법칙은 자연어 말뭉치에서 단어 사용 빈도가 단어 순위의 역수에 비례한다는 경험적 법칙으로, 검색·인덱싱·언어모델링 등 실무 시스템의 성능·저장·샘플링 설계에 직접 영향을 줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Zipf's Law and Word Frequency Distributions</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-04</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Zipf 법칙은 자연어 말뭉치에서 단어 사용 빈도가 단어 순위의 역수에 비례한다는 경험적 법칙으로, 검색·인덱싱·언어모델링 등 실무 시스템의 성능·저장·샘플링 설계에 직접 영향을 줍니다.</p>
+        <p>작동 원리는 단어 빈도 f(r) ≈ C / r^s (r은 순위, s≈1)로 모델링하는 것에서 출발합니다. 실무에서는 극단적인 장기 꼬리(long tail)와 상위 몇 개의 초빈출어(stopwords)가 시스템 동작에 미치는 영향을 분리해 설계합니다. 예컨대 inverted index에서 초빈출어를 별도 처리하면 색인·쿼리 비용을 크게 줄일 수 있고, 언어모델은 꼬리 단어의 희소성을 보정하기 위해 Good–Turing, Kneser–Ney 같은 평활화를 씁니다.<br><br>기술적으로는 빈도-순위 로그-로그 선형회귀로 지수 s를 추정하고, Zipf 샘플링은 numpy.random.zipf로 시뮬레이션 가능합니다. 또한 정보검색에서 IDF = log(N/df) 는 Zipf 분포로부터 기대를 갖고 튜닝되며, 압축(예: variable-byte, Golomb)과 캐시 전략도 빈도 분포에 맞춰 최적화됩니다. 연구에서는 Clauset et al. (2009) 같은 논문이 분포의 적합성 검사와 대안(로그정규 등)을 다룹니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- Elasticsearch/Lucene: stopword 필터와 term frequency 기반 scoring(예: BM25)로 Zipf 특성을 이용. (참고: Lucene analyzers 설정)<br>  예: curl로 index 생성 시 stopwords 적용<br>  curl -XPUT 'http://localhost:9200/myidx' -H 'Content-Type: application/json' -d '{"settings": {"analysis": {"analyzer": {"my_analyzer": {"tokenizer": "standard","filter": ["lowercase","stop"]}}}}}'<br>- 언어모델/LM: KenLM, SRILM 등은 빈도 기반 평활화 적용. Python 샘플(빈도·Zipf 추정):<br>  from collections import Counter<br>  import numpy as np<br>  tokens = open('corpus.txt','r',encoding='utf8').read().split()<br>  freqs = Counter(tokens)<br>  freqs_sorted = np.array(sorted(freqs.values(), reverse=True))<br>  ranks = np.arange(1, len(freqs_sorted)+1)<br>  s, C = np.polyfit(np.log(ranks), np.log(freqs_sorted), 1)<br>  print('slope=', s)<br>- 연구/검증: Clauset, Shalizi, Newman, "Power-law distributions in empirical data" (2009)에서 maximum-likelihood 추정과 KS 테스트 권장. 실무 패턴: stopword 분리, 빈도 기반 캐싱, 평활화 조정, 압축 포맷 선정.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Zipf's law states that word frequency is roughly proportional to 1/rank in natural language corpora; this affects indexing cost, retrieval scoring, compression, and language-model smoothing in production systems.</p>
+        <p>How it works: word counts follow f(r) ≈ C / r^s (s≈1). Practically this produces a small set of very frequent tokens (stopwords) and a long tail of rare tokens. Systems exploit that shape: search engines treat high-frequency tokens differently (stopword removal, specialized posting lists), storage layers use frequency-aware compression, and language models apply smoothing to handle the sparse tail (Good–Turing, Kneser–Ney).<br><br>Technically you estimate s via log–log linear fit or maximum-likelihood (Clauset et al. 2009). Sampling from a Zipf-like distribution is available in NumPy (numpy.random.zipf). Retrieval models like BM25/TF-IDF are tuned with the expectation that IDF correlates inversely with rank; caching and sharding strategies prioritize hot terms to reduce latency.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world cases:<br>- Elasticsearch / Lucene: BM25 and stopword filters leverage Zipfian skew. Example index setting to enable stopword filter:<br>  curl -XPUT 'http://localhost:9200/myidx' -H 'Content-Type: application/json' -d '{"settings": {"analysis": {"analyzer": {"my_analyzer": {"tokenizer": "standard","filter": ["lowercase","stop"]}}}}}'<br>- Language modeling: KenLM and SRILM use count smoothing for heavy-tailed counts. Python example to compute ranks and fit s:<br>  from collections import Counter<br>  import numpy as np<br>  tokens = open('corpus.txt','r',encoding='utf8').read().split()<br>  freqs = Counter(tokens)<br>  freqs_sorted = np.array(sorted(freqs.values(), reverse=True))<br>  ranks = np.arange(1, len(freqs_sorted)+1)<br>  slope, intercept = np.polyfit(np.log(ranks), np.log(freqs_sorted), 1)<br>  print('s ~', -slope)<br>- Academic/engineering refs: Clauset et al. (2009) for power‑law fitting; production best practices: separate stopword handling, frequency-aware compression (Golomb, varint), tune smoothing and cache hot terms.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
