@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Zipf's Law and Word Frequency Distributions",
+      "date": "2026-09-04",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-04-zipf's-law-and-word-frequency-distributions.html",
+      "excerpt": "Zipf 법칙은 자연어 말뭉치에서 단어 사용 빈도가 단어 순위의 역수에 비례한다는 경험적 법칙으로, 검색·인덱싱·언어모델링 등 실무 시스템의 성능·저장·샘플링 설계에 직접 영향을 줍니다."
+    },
+    {
       "title": "B-tree / B+Tree and Database Indexing",
       "date": "2026-09-02",
       "category": "cs-fundamentals",
