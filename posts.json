@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Dropout & Regularization in Neural Networks",
+      "date": "2026-09-07",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-07-dropout-and-regularization-in-neural-networks.html",
+      "excerpt": "드롭아웃과 정규화는 과적합을 줄이고 모델 일반화 성능을 향상시키는 핵심 기법으로, 대규모 서비스와 연구에서 널리 사용됩니다."
+    },
+    {
       "title": "Zipf's Law and Word Frequency Distributions",
       "date": "2026-09-04",
       "category": "cs-fundamentals",
