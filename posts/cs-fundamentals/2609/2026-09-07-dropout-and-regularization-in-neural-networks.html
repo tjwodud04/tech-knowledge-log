@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Dropout & Regularization in Neural Networks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="드롭아웃과 정규화는 과적합을 줄이고 모델 일반화 성능을 향상시키는 핵심 기법으로, 대규모 서비스와 연구에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Dropout & Regularization in Neural Networks</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-07</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>드롭아웃과 정규화는 과적합을 줄이고 모델 일반화 성능을 향상시키는 핵심 기법으로, 대규모 서비스와 연구에서 널리 사용됩니다.</p>
+        <p>드롭아웃(dropout)은 신경망 학습 중 무작위로 뉴런을 비활성화하여 앙상블 효과를 내는 방법입니다. L2(weight decay), 조기 중단(early stopping), 배치 정규화(batch norm)와 함께 사용되며, 트랜스포머(예: BERT)는 내부적으로 드롭아웃을 핵심 하이퍼파라미터로 사용합니다(Devlin et al., 2018). 드롭아웃은 작은 데이터셋에서 과적합 완화에 특히 유용하지만 배치 정규화와 함께 쓸 때는 효과/순서에 주의해야 합니다.<br><br>기술적으로 학습 중 각 레이어의 활성화 a_i에 대해 p 확률로 0을 곱하고, 학습/추론 시 스케일링을 조정합니다(inverted dropout). L2 정규화는 손실에 λ||w||^2 항을 추가하여 가중치 크기를 제한합니다. 현대 트랜스포머·비전 모델에서는 AdamW(가중치 감쇠 분리)를 사용해 L2 성격의 규제와 모멘텀 기반 옵티마이저를 분리합니다(Loshchilov & Hutter). 불확실성 추정을 위해 Gal & Ghahramani의 Monte Carlo dropout을 추론 시에도 활성화하여 T번 샘플링해 예측분포를 얻습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 코드 예시(핵심 패턴):<br>- Keras (TF):<br>  model = tf.keras.Sequential([<br>    tf.keras.layers.Dense(512, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4)),<br>    tf.keras.layers.Dropout(0.5),<br>    tf.keras.layers.Dense(num_classes, activation='softmax')<br>  ])<br>  model.compile(optimizer='adam', loss='categorical_crossentropy')<br>  # 사용처: Keras 기반 서비스, 연구 프로토타입<br><br>- PyTorch + AdamW (권장, Hugging Face/Transformers와 동일 패턴):<br>  import torch.nn as nn<br>  import torch.optim as optim<br>  model = nn.Sequential(nn.Linear(768, 768), nn.ReLU(), nn.Dropout(0.1), nn.Linear(768, num_classes))<br>  optimizer = optim.AdamW(model.parameters(), lr=3e-5, weight_decay=0.01)<br><br>- Monte Carlo Dropout(추론 불확실성):<br>  model.train()  # dropout 활성화<br>  preds = torch.stack([model(x) for _ in range(50)])<br>  mean, std = preds.mean(0), preds.std(0)<br><br>실제 사용 사례: BERT/GPT 계열은 dropout≈0.1 사용(Hugging Face Transformers), Gal & Ghahramani의 MC dropout은 의료영상·자율주행 불확실성 연구에서 사용됨. Best practice: conv 계열은 배치 정규화가 있으면 드롭아웃 비율을 낮게(혹은 사용하지 않음), weight decay는 bias/LayerNorm 제외, AdamW 사용.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dropout and regularization reduce overfitting and improve generalization; they are standard tools in production models and academic work (e.g., BERT, vision models).</p>
+        <p>Dropout randomly zeros activations during training to approximate an ensemble of sub-networks, improving robustness. L2 regularization (weight decay) penalizes large weights; early stopping and data augmentation complement these techniques. In modern architectures, dropout is commonly used in transformers (Devlin et al., 2018) and vision models, but its placement and rate matter—convolutional blocks with batch norm often need little or no dropout.<br><br>Mechanically, inverted dropout scales activations during training so inference needs no post-scaling. Weight decay adds λ||w||^2 to the loss; with adaptive optimizers use AdamW to decouple weight decay from gradient updates (Loshchilov & Hutter). For predictive uncertainty, Monte Carlo (MC) dropout keeps dropout on at inference and averages T stochastic forward passes (Gal & Ghahramani, 2016). Interaction effects: dropout + batch norm can reduce effectiveness—tune order and rates accordingly.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Practical snippets used in production/research:<br>- TensorFlow/Keras:<br>  model = tf.keras.Sequential([<br>    tf.keras.layers.Dense(512, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4)),<br>    tf.keras.layers.Dropout(0.5),<br>    tf.keras.layers.Dense(num_classes, activation='softmax')<br>  ])<br>  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')<br>  # Used in prototypes and services built on TF/Keras<br><br>- PyTorch + AdamW (common in Hugging Face/production):<br>  import torch.nn as nn<br>  import torch.optim as optim<br>  model = nn.Sequential(nn.Linear(768, 768), nn.ReLU(), nn.Dropout(0.1), nn.Linear(768, num_classes))<br>  optimizer = optim.AdamW(model.parameters(), lr=3e-5, weight_decay=0.01)<br><br>- MC Dropout for uncertainty:<br>  model.train()  # enable dropout<br>  preds = torch.stack([model(x) for _ in range(50)])<br>  mean, std = preds.mean(0), preds.std(0)<br><br>Real deployments: BERT/GPT variants use dropout≈0.1 (Devlin et al.; Hugging Face Transformers); AdamW is standard for transformer fine-tuning; MC Dropout is used in medical imaging and autonomous driving research for uncertainty estimation. Best practices: start with dropout 0.1–0.5 (lower for conv+BN), apply weight decay only to weights (not biases/LayerNorm), use AdamW for decoupled weight decay.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
