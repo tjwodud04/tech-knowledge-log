@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "TF–IDF & Bag-of-Words (BoW)",
+      "date": "2026-09-09",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-09-tf-idf-and-bag-of-words.html",
+      "excerpt": "Bag-of-Words는 문서를 단어 빈도 벡터로 변환하는 단순 표현이고, TF–IDF는 단어의 문서 내 중요도를 빈도와 역문서빈도(idf)로 조정해 실무에서 강력한 특징(feature)으로 쓰입니다."
+    },
+    {
       "title": "Dropout & Regularization in Neural Networks",
       "date": "2026-09-07",
       "category": "cs-fundamentals",
