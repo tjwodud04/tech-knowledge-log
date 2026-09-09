@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>TF–IDF & Bag-of-Words (BoW)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bag-of-Words는 문서를 단어 빈도 벡터로 변환하는 단순 표현이고, TF–IDF는 단어의 문서 내 중요도를 빈도와 역문서빈도(idf)로 조정해 실무에서 강력한 특징(feature)으로 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>TF–IDF & Bag-of-Words (BoW)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-09</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Bag-of-Words는 문서를 단어 빈도 벡터로 변환하는 단순 표현이고, TF–IDF는 단어의 문서 내 중요도를 빈도와 역문서빈도(idf)로 조정해 실무에서 강력한 특징(feature)으로 쓰입니다.</p>
+        <p>작동 원리: BoW는 토큰화→어휘집 구축→단어 카운트(또는 n-그램) 순으로 진행합니다. TF–IDF는 각 단어 t에 대해 TF(t,d)=raw count 또는 sublinear scale(1+log tf) 형태를 쓰고, IDF(t)=log((N+1)/(df(t)+1))+1 같은 smooth 공식으로 자주 보정합니다. 최종 특징은 TF×IDF에 L2 정규화가 흔합니다. 실무적 고려사항으로는 불용어 제거, 어간 추출/표제어화, n-그램, 희소성 때문에 희소 행렬(scipy.sparse) 사용이 필수입니다.<br><br>시스템 적용: 검색엔진(Lucene/Elasticsearch의 "classic" similarity는 TF–IDF 기반이고, 최신 기본값은 BM25)과 문서 분류, 추천 및 피처 엔지니어링 파이프라인에서 널리 사용됩니다. 대용량 스트리밍 환경에서는 HashingVectorizer로 차원 고정 후 TfidfTransformer를 적용해 온라인 처리합니다. 학술적으로는 Sparck Jones의 IDF 개념과 Salton의 Vector Space Model이 근간입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드(파이썬, scikit-learn):<br><br>from sklearn.feature_extraction.text import TfidfVectorizer<br>corpus = ["buy cheap laptop", "discount on laptop", "laptop review"]<br>vec = TfidfVectorizer(ngram_range=(1,2), max_df=0.8, min_df=1, sublinear_tf=True)<br>X = vec.fit_transform(corpus)  # scipy.sparse matrix<br><br>대규모/스트리밍: HashingVectorizer + TfidfTransformer<br>from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer<br>hv = HashingVectorizer(n_features=2**20, alternate_sign=False)<br>X_stream = hv.transform(batch)<br>X_tfidf = TfidfTransformer(norm='l2', use_idf=True, smooth_idf=True).fit_transform(X_stream)<br><br>실무 적용 예: Lucene/Solr/Elasticsearch(검색 랭킹·피처); scikit-learn/gensim(분류·토픽 전처리); 연구 예로 BM25 vs TF–IDF 비교 논문들(정보검색 교재와 수많은 엔지니어링 블로그). 베스트 프랙티스: sublinear TF, idf smoothing, L2 정규화, 희소 행렬 사용, 온라인엔 해싱으로 메모리 고정.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Bag-of-Words (BoW) turns documents into count vectors; TF–IDF weights those counts by inverse document frequency to emphasize discriminative words—widely used as practical features in production search, classification, and recommendation systems.</p>
+        <p>How it works: BoW pipeline = tokenize → build vocabulary → count tokens (optionally n-grams). TF–IDF computes TF (raw count or sublinear: 1+log(tf)) and IDF (smoothed: log((N+1)/(df+1))+1) then multiplies and usually L2-normalizes. Implementation details matter: stopword lists, stemming/lemmatization, n-grams, and sparse matrix formats (scipy.sparse) to handle high dimensionality. TF–IDF is interpretable and fast, but static IDF can be stale in streaming; for that use hashing and approximate document-frequency strategies.<br><br>Where used: classic IR systems (Lucene historically used TF–IDF; Elasticsearch exposes a "classic" similarity), but modern search often prefers BM25. TF–IDF remains popular for ML pipelines (feature vectors for classifiers), e-mail/news deduplication, and as baseline features in recommendation systems. Academic roots trace to Sparck Jones (IDF) and Salton (vector space model).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Practical code (scikit-learn):<br><br>from sklearn.feature_extraction.text import TfidfVectorizer<br>corpus = ["buy cheap laptop", "discount on laptop", "laptop review"]<br>vec = TfidfVectorizer(ngram_range=(1,2), max_df=0.8, min_df=1, sublinear_tf=True)<br>X = vec.fit_transform(corpus)  # sparse matrix for ML models<br><br>Streaming/large-scale pattern (fixed memory):<br>from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer<br>hv = HashingVectorizer(n_features=2**20, alternate_sign=False)<br>X_batch = hv.transform(batch)<br>X_tfidf = TfidfTransformer(norm='l2', use_idf=True, smooth_idf=True).fit_transform(X_batch)<br><br>Real deployments: Apache Lucene/Solr and Elasticsearch (search ranking; Lucene switched default to BM25 but TF–IDF "classic" is available), gensim and scikit-learn (feature engineering in production ML), and many research comparisons (TF–IDF baseline vs neural embeddings). Best practices: use sublinear TF, idf smoothing, L2 normalization, sparse storage, and hashing for streaming ingestion.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
