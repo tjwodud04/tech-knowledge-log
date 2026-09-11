@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Mel-Frequency Cepstral Coefficients (MFCC)",
+      "date": "2026-09-11",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-11-mel-frequency-cepstral-coefficients-mfcc.html",
+      "excerpt": "MFCC는 인간 청각의 주파수 해상도를 모사한 멜 스케일 기반의 스펙트럼 특징으로, 음성인식·스피커인식·웨이크워드 등 실무 시스템에서 널리 사용됩니다."
+    },
+    {
       "title": "TF–IDF & Bag-of-Words (BoW)",
       "date": "2026-09-09",
       "category": "cs-fundamentals",
