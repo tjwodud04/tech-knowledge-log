@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Mel-Frequency Cepstral Coefficients (MFCC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MFCC는 인간 청각의 주파수 해상도를 모사한 멜 스케일 기반의 스펙트럼 특징으로, 음성인식·스피커인식·웨이크워드 등 실무 시스템에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Mel-Frequency Cepstral Coefficients (MFCC)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-11</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>MFCC는 인간 청각의 주파수 해상도를 모사한 멜 스케일 기반의 스펙트럼 특징으로, 음성인식·스피커인식·웨이크워드 등 실무 시스템에서 널리 사용됩니다.</p>
+        <p>작동 원리: MFCC는 짧은 프레임(보통 20–30 ms)으로 신호를 분할한 뒤 창(window) 적용, FFT로 파워 스펙트럼 계산, 멜 필터뱅크로 주파수 축을 재표현한 뒤 로그를 취하고 DCT를 적용해 저차원 계수를 얻습니다. 보통 12–13개의 계수(또는 20–40)와 에너지, Δ/ΔΔ(속도·가속도)를 함께 사용합니다. 후처리로서는 pre-emphasis, liftering, 프레임 정규화(CMVN)와 길이 일관성을 위한 패딩 또는 프레임 묶음이 필요합니다.<br><br>실무 고려사항: 표준 설정은 16 kHz 샘플링, 25 ms 프레임, 10 ms 홉, 40 멜 밴드, 13 MFCC. Kaldi 같은 ASR 툴킷과 TensorFlow의 Speech Commands 튜토리얼, 모바일 웨이크워드 파이프라인 등에서 이 조합이 기본입니다. 잡음에 민감하므로 데이터 증강(잡음 추가, 시간/주파수 마스킹), CMVN과 델타 계수 사용이 권장됩니다. 최근 연구와 제품에서는 학습 가능한 프론트엔드(log-mel 또는 learnable mel-filterbanks)를 MFCC 대신 사용하기도 합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제(코드·명령):<br><br>1) Python + librosa (빠른 프로토타입):<br>import librosa<br>y, sr = librosa.load('audio.wav', sr=16000)<br>mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13, n_mels=40, hop_length=int(0.01*sr), n_fft=int(0.025*sr))<br># add deltas, CMVN 등<br><br>2) PyTorch / torchaudio:<br>import torchaudio<br>waveform, sr = torchaudio.load('audio.wav')<br>mfcc_transform = torchaudio.transforms.MFCC(sample_rate=16000, n_mfcc=13, melkwargs={'n_mels':40,'n_fft':400,'hop_length':160})<br>mfcc = mfcc_transform(waveform)<br><br>3) Kaldi (배치 생산 파이프라인):<br># 일반적인 스크립트 호출<br>steps/make_mfcc.sh --nj 20 --cmd run.pl data/train exp/make_mfcc mfcc<br># 이후 feat_type=mfcc, apply-cmvn-fast, add-deltas 사용<br><br>참고: TensorFlow Speech Commands 튜토리얼은 tf.signal.mfccs_from_log_mel_spectrograms를 사용하여 모바일 웨이크워드/명령어 인식 파이프라인을 구성합니다. 실무 패턴: 표본율 고정, CMVN, 델타/델타델타 추가, 잡음/시간·주파수 변형을 통한 강건화, 특성 저장(ark/wav.scp/TFRecord)으로 I/O 최적화.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>MFCCs are compact spectral features based on the mel scale that approximate human auditory perception; they are a staple in production speech systems like ASR, speaker ID, and keyword spotting.</p>
+        <p>How it works: MFCC extraction frames audio (typically 20–30 ms frames with 10 ms hop), applies a window, computes the FFT magnitude/power, maps frequencies to the mel scale via a filterbank, takes the log, and applies a DCT to produce low-dimensional cepstral coefficients. Typical configs: 16 kHz sampling, 25 ms frame, 10 ms hop, 40 mel filters, 13 MFCCs + energy. Common augmentations are pre-emphasis, liftering, CMVN, and appending Δ/ΔΔ features for dynamics.<br><br>Practical notes: Kaldi, many research pipelines, and tutorials (e.g., TensorFlow Speech Commands) use MFCCs as input. MFCCs are computationally cheap and work well for classical models and constrained devices (wake-word on embedded hardware). They are, however, sensitive to noise; modern systems often combine MFCCs with augmentation (noise, SpecAugment) or replace them with learned front-ends or log-mel spectrograms for end-to-end DNNs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples and code:<br><br>1) librosa (fast prototyping):<br>import librosa<br>y, sr = librosa.load('audio.wav', sr=16000)<br>mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13, n_mels=40, n_fft=int(0.025*sr), hop_length=int(0.01*sr))<br># then compute deltas and CMVN<br><br>2) torchaudio (PyTorch pipelines):<br>import torchaudio<br>waveform, sr = torchaudio.load('audio.wav')<br>mfcc_transform = torchaudio.transforms.MFCC(sample_rate=16000, n_mfcc=13, melkwargs={'n_mels':40,'n_fft':400,'hop_length':160})<br>mfcc = mfcc_transform(waveform)<br><br>3) Kaldi (production ASR feature stage):<br># typical script for large-scale extraction<br>steps/make_mfcc.sh --nj 20 --cmd run.pl data/train exp/make_mfcc mfcc<br># follow with compute-cmvn-stats and apply-cmvn-fast, add-deltas<br><br>Citations & production notes: Kaldi is a de-facto open-source ASR stack using MFCCs; TensorFlow Speech Commands tutorial shows MFCC usage for keyword spotting (https://www.tensorflow.org/tutorials/audio). Best practices: fix sampling rate, apply CMVN, add Δ/ΔΔ, use augmentation for noise robustness, and store features in efficient shards (ark/TFRecord) for training/serving.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
