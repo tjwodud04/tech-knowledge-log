@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>SpecAugment (Spectrogram Augmentation)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SpecAugment는 스펙트로그램에 직접 적용하는 데이터 증강 기법으로, ASR 및 음성 태스크의 일반화와 견고성을 크게 향상시해 실제 시스템에서 널리 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>SpecAugment (Spectrogram Augmentation)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-14</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>SpecAugment는 스펙트로그램에 직접 적용하는 데이터 증강 기법으로, ASR 및 음성 태스크의 일반화와 견고성을 크게 향상시해 실제 시스템에서 널리 쓰입니다.</p>
+        <p>작동 원리: SpecAugment는 주로 세 가지 연산을 사용합니다 — time warping(선택적), frequency masking, time masking. 보통 입력은 STFT 또는 멜 스펙트로그램(로그 스케일)이며, 주파수 축의 연속 대역을 가리거나 시간 축의 구간을 가려 모델이 특정 주파수나 시간 의존성에 과적합하지 않게 만듭니다. 기술적 세부: frequency mask는 f부터 f+F-1까지의 주파수 밴드를 0으로 만들고, time mask는 t부터 t+T-1까지의 프레임을 0으로 만듭니다. time warping은 스펙트럼을 시간축으로 느리게/빠르게 이동시켜 alignment 불변성을 부여합니다. 하이퍼파라미터는 F, T, 마스크 개수, 그리고 입력 길이에 대한 비율 기반 설정이 일반적입니다.<br><br>실무 포인트: 증강은 학습 중에만 적용하고, log-mel 계산/정규화(예: CMVN) 이후에 적용합니다. 짧은 음성이나 매우 작은 배치에서는 마스크 크기를 줄이거나 skip하는 것이 좋습니다. SpecAugment는 속도 비용이 낮아 GPU 상에서 실시간으로 적용 가능하며, speed perturbation, noise augmentation과 병행해 쓰면 성능 향상이 큽니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드(간단한 PyTorch/torchaudio 예):<br>from torchaudio.transforms import TimeMasking, FrequencyMasking<br># spec: Tensor shape (batch, freq, time)<br>fm = FrequencyMasking(freq_mask_param=27)<br>tm = TimeMasking(time_mask_param=100)<br>spec = fm(spec)<br>spec = tm(spec)<br><br>TensorFlow 스타일(간단한 마스킹 함수):<br>def apply_masks(mels, F=27, T=100, num_f=2, num_t=2):<br>    # mels: [time, freq]<br>    for _ in range(num_f):<br>        f = np.random.randint(0, mels.shape[1]-F)<br>        mels[:, f:f+F] = 0<br>    for _ in range(num_t):<br>        t = np.random.randint(0, mels.shape[0]-T)<br>        mels[t:t+T, :] = 0<br>    return mels<br><br>채택된 시스템: Google Brain이 제안(ArXiv 2019)했고, ESPnet, SpeechBrain, NVIDIA NeMo, torchaudio, fairseq S2T 등 주요 오픈소스와 연구/프로덕션 파이프라인에서 표준으로 사용됩니다. 실무 베스트프랙티스: 훈련 전/후 정규화 순서를 고정하고(정규화 후 증강 권장), 마스크 크기를 입력 길이에 비례해 스케일링, 증강을 앙상블/후처리와 함께 튜닝하세요.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>SpecAugment augments spectrograms by masking time and frequency regions (plus optional time warping) to improve robustness in ASR and other speech tasks; it's cheap and widely adopted in production and research.</p>
+        <p>How it works: SpecAugment applies frequency masks and time masks to log-mel or STFT spectrograms so models learn invariance to missing bands or frames. A frequency mask zeros out a contiguous band of frequency bins (f..f+F-1); a time mask zeros contiguous time frames (t..t+T-1). Time warping shifts spectrogram slices along time to mimic alignment variation. Typical hyperparameters include F (freq mask width), T (time mask width), and the number of masks; practitioners often scale these relative to input length.<br><br>Technical notes: Apply augmentation after computing and optionally normalizing log-mel features (e.g., CMVN) and only during training. SpecAugment is GPU-friendly (elementwise masking), low-overhead, and complements other augmentations like speed perturbation or additive noise. Avoid over-masking short utterances; tune mask sizes based on model input size and downstream metrics.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>PyTorch/torchaudio (practical snippet used in many repos):<br>from torchaudio.transforms import TimeMasking, FrequencyMasking<br># spec shape: (batch, freq, time)<br>fm = FrequencyMasking(freq_mask_param=27)<br>tm = TimeMasking(time_mask_param=100)<br>spec = fm(spec)<br>spec = tm(spec)<br><br>Minimal TensorFlow example (numpy-style for clarity):<br>def spec_augment(mels, F=27, T=100, num_f=2, num_t=2):<br>    # mels: numpy array shape (time, freq)<br>    for _ in range(num_f):<br>        f = np.random.randint(0, mels.shape[1]-F+1)<br>        mels[:, f:f+F] = 0<br>    for _ in range(num_t):<br>        t = np.random.randint(0, mels.shape[0]-T+1)<br>        mels[t:t+T, :] = 0<br>    return mels<br><br>Where it's used: introduced by Park et al. (Google Brain, 2019) and widely integrated into ESPnet, SpeechBrain, NVIDIA NeMo, fairseq S2T and torchaudio examples. Production patterns: enable only during training, parameterize masks relative to sequence length, combine with speed perturbation/noise, and validate on short-utterance edge cases.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
