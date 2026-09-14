@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "SpecAugment (Spectrogram Augmentation)",
+      "date": "2026-09-14",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-14-specaugment.html",
+      "excerpt": "SpecAugment는 스펙트로그램에 직접 적용하는 데이터 증강 기법으로, ASR 및 음성 태스크의 일반화와 견고성을 크게 향상시해 실제 시스템에서 널리 쓰입니다."
+    },
+    {
       "title": "Mel-Frequency Cepstral Coefficients (MFCC)",
       "date": "2026-09-11",
       "category": "cs-fundamentals",
