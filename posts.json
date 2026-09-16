@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Back-Translation for Data Augmentation",
+      "date": "2026-09-16",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-16-back-translation-for-data-augmentation.html",
+      "excerpt": "백-트랜슬레이션은 타깃 언어의 단문을 소스→중간(피벗)→소스로 번역해 합성 학습 데이터를 만드는 기법으로, 실제 시스템에서 희소 레이블을 보완하고 도메인 적응에 자주 사용됩니다."
+    },
+    {
       "title": "SpecAugment (Spectrogram Augmentation)",
       "date": "2026-09-14",
       "category": "cs-fundamentals",
