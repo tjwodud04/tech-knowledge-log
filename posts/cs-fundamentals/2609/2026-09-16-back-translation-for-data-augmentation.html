@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Back-Translation for Data Augmentation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="백-트랜슬레이션은 타깃 언어의 단문을 소스→중간(피벗)→소스로 번역해 합성 학습 데이터를 만드는 기법으로, 실제 시스템에서 희소 레이블을 보완하고 도메인 적응에 자주 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Back-Translation for Data Augmentation</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-16</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>백-트랜슬레이션은 타깃 언어의 단문을 소스→중간(피벗)→소스로 번역해 합성 학습 데이터를 만드는 기법으로, 실제 시스템에서 희소 레이블을 보완하고 도메인 적응에 자주 사용됩니다.</p>
+        <p>작동 원리는 간단합니다. 타깃(예: 프랑스어) 단문을 소스(예: 영어)로 역번역해(프랑스어→영어) 합성 병렬쌍을 만들고, 이를 원본 병렬 데이터와 섞어 모델을 훈련합니다. 핵심은 다양성과 품질 균형으로, 샘플링이나 탐색적 디코딩(temperature, top-k/top-p)으로 번역 다양성을 높이면 모델이 과적합되지 않습니다. 반대로 무작정 많은 합성 데이터만 넣으면 노이즈가 증가하므로 진짜 병렬 데이터의 비중을 보정해 가중치를 주는 것이 중요합니다.<br><br>실무 세부사항: 대량의 단일언어 데이터, 강력한 역번역 모델(예: Marian/NMT), 그리고 품질 필터(언어 식별, 길이 비율, LM 점수, round-trip consistency)를 파이프라인에 둡니다. Fairseq/OpenNMT 같은 프로젝트는 백-트랜슬레이션 워크플로를 지원하며, Sennrich et al. 2016이 이 기법의 표준 참조입니다. 실전에서는 도메인별 단일언어 코퍼스를 선택하고, 합성 데이터 비율을 점진적으로 늘려 성능을 검증합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사례: Sennrich et al., 2016(ACL)에서 백-트랜슬레이션을 통해 NMT 성능을 크게 향상시킨 뒤 Google과 Meta의 내부 MT 파이프라인에서 합성 데이터가 상용 번역 품질 개선에 사용되었습니다. 오픈소스: Fairseq(백-트랜슬레이트 스크립트), OpenNMT, Hugging Face 예제.<br><br>간단한 코드(Transformers 사용, 파이프라인 방식):<br>from transformers import AutoTokenizer, AutoModelForSeq2SeqLM<br>src_tok = AutoTokenizer.from_pretrained('Helsinki-NLP/opus-mt-fr-en')<br>src_model = AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')<br>inputs = src_tok(['Ceci est une phrase.'], return_tensors='pt', padding=True)<br>outs = src_model.generate(**inputs, do_sample=True, top_k=50, temperature=0.9, max_length=64)<br>back = src_tok.batch_decode(outs, skip_special_tokens=True)<br># 생성된 back을 원본 병렬 데이터와 섞어 재학습<br><br>베스트 프랙티스: 도메인 일치 단일언어 코퍼스, 샘플링으로 다양성, 품질 필터링, 합성/실제 데이터 가중치 조정, 모델 재현성 추적.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Back-translation creates synthetic parallel training pairs by translating target-language monolingual text back into the source language; it's widely used to augment scarce parallel data and adapt models to domains.</p>
+        <p>How it works: pick monolingual data in the target language, run a strong target→source translation model to produce synthetic source sentences, then pair synthetic source with original target to form extra training examples. Key technical levers: decoding strategy (beam vs stochastic sampling), filtering heuristics (language ID, length ratio, model score), and the mixing schedule between synthetic and genuine parallel data. Diversity is desirable—stochastic decoding (do_sample, temperature, top-k/top-p) or noisy back-translation reduces copying and improves robustness.<br><br>In production, teams use scalable NMT models (Marian, Fairseq, Tensor2Tensor) and automation: large monolingual crawls, batch translation jobs, and post-filtering pipelines. Academic origins include Sennrich et al., 2016; followups (Edunov et al.) compare sampling/beam strategies. Open-source tools like Fairseq and OpenNMT have scripts to generate back-translated corpora and to mix them into training jobs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use: Sennrich et al., 2016 showed large BLEU gains; Google and Meta report using synthetic monolingual data in production MT. Practical code example (Hugging Face Transformers):<br>from transformers import AutoTokenizer, AutoModelForSeq2SeqLM<br>tok = AutoTokenizer.from_pretrained('Helsinki-NLP/opus-mt-fr-en')<br>model = AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')<br>inputs = tok(['Ceci est une phrase.'], return_tensors='pt', padding=True)<br>outs = model.generate(**inputs, do_sample=True, top_k=50, temperature=0.9, max_length=64)<br>src_sents = tok.batch_decode(outs, skip_special_tokens=True)<br># pair src_sents with original target and add to training dataset<br><br>Production patterns and best practices: use domain-matched monolingual corpora, filter low-quality synthetic pairs, upweight real parallel data during training, and log synthetic ratio for reproducibility. Tools: Fairseq/OpenNMT pipelines, Hugging Face demos, and cloud translation APIs for large-scale back-translation jobs.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
