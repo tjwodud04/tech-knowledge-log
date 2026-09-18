@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Singular Value Decomposition (SVD) & Latent Semantic Analysis (LSA)",
+      "date": "2026-09-18",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-18-singular-value-decomposition-and-latent-semantic-analysis.html",
+      "excerpt": "SVD는 행렬을 직교 성분과 특이값으로 분해해 저차원으로 잡음 제거·압축하고, LSA는 텍스트의 의미적 패턴을 이 저차원 표현에서 추출해 검색·추천에 활용합니다."
+    },
+    {
       "title": "Back-Translation for Data Augmentation",
       "date": "2026-09-16",
       "category": "cs-fundamentals",
