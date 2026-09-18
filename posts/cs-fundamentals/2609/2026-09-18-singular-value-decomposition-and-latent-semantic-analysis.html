@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Singular Value Decomposition (SVD) & Latent Semantic Analysis (LSA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SVD는 행렬을 직교 성분과 특이값으로 분해해 저차원으로 잡음 제거·압축하고, LSA는 텍스트의 의미적 패턴을 이 저차원 표현에서 추출해 검색·추천에 활용합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Singular Value Decomposition (SVD) & Latent Semantic Analysis (LSA)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-18</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>SVD는 행렬을 직교 성분과 특이값으로 분해해 저차원으로 잡음 제거·압축하고, LSA는 텍스트의 의미적 패턴을 이 저차원 표현에서 추출해 검색·추천에 활용합니다.</p>
+        <p>작동 원리: 행렬 A를 U Σ V^T로 분해하면 Σ의 큰 값들만 남겨 근사 A_k = U_k Σ_k V_k^T를 얻습니다. 문서-단어 행렬에 적용하면 동시 출현 패턴의 잠재적 주제가 추출되며 단어·문서 간 코사인 유사도 계산이 개선됩니다. 대형 희소행렬에는 Truncated/Randomized SVD(예: Halko et al.)나 ARPACK(scipy.sparse.linalg.svds)을 사용해 계산 비용·메모리를 줄입니다.<br>실무 포인트: 정규화(tf-idf), 희소 입력 유지, 잡음 특이값 절단, 정기적 재학습(로그적 변화 시) 등이 중요합니다. LSA는 단순하고 해석 가능해 검색 초기 랭킹, 오프라인 주제 탐지, cold-start 추천에 유용하지만, 문맥적 의미(순서·다중의미)는 단독으로 한계가 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 예<br>- Gensim LSI: 소규모 토픽 모델링/검색(https://radimrehurek.com/gensim/). 코드: <br>from gensim import corpora, models<br>texts = [['apple','fruit'], ...]<br>d = corpora.Dictionary(texts)<br>corpus = [d.doc2bow(t) for t in texts]<br>lsi = models.LsiModel(corpus, id2word=d, num_topics=100)<br>- Scikit-learn TruncatedSVD: 대규모 TF-IDF에 빠른 차원축소<br>from sklearn.feature_extraction.text import TfidfVectorizer<br>from sklearn.decomposition import TruncatedSVD<br>X = TfidfVectorizer(...).fit_transform(docs)<br>svd = TruncatedSVD(n_components=200).fit(X)<br>- Spark MLlib RowMatrix.computeSVD: 분산 환경에서 대용량 문서 행렬 분해(프로덕션 로그 분석). 권장: 입력 정규화, k 선택 실험, randomized 알고리즘 사용(Halko)으로 비용 절감.<br>참고: Deerwester et al. 1990(LSA), Netflix matrix factorization 사례(추천 시스템에서 SVD 기반 기법 활용).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>SVD decomposes a matrix into orthogonal factors and singular values for denoising and compression; LSA applies truncated SVD to term-document matrices to surface latent semantic structure for search and recommendation.</p>
+        <p>How it works: A = U Σ V^T; keeping the top-k singular values produces A_k = U_k Σ_k V_k^T, a rank-k approximation capturing dominant patterns. On a term-document tf-idf matrix, top components represent latent topics; projecting documents and queries into that low-dimensional space improves semantic similarity over raw bag-of-words. For large sparse matrices use truncated or randomized SVD (Halko et al.) or iterative solvers (ARPACK) to reduce memory and CPU.<br>Practical notes: pre-process with tf-idf or BM25-style weighting, preserve sparsity until decomposition, choose k by explained energy or downstream validation, and periodically recompute factors for streaming content. LSA is simple and interpretable but doesn't model word order or polysemy as well as modern contextual embeddings.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world snippets & systems<br>- scikit-learn TruncatedSVD (fast, single-node):<br>from sklearn.feature_extraction.text import TfidfVectorizer<br>from sklearn.decomposition import TruncatedSVD<br>X = TfidfVectorizer(...).fit_transform(docs)<br>svd = TruncatedSVD(n_components=200, random_state=0).fit(X)<br>Z = svd.transform(X)<br>- gensim LsiModel (topic/search):<br>from gensim import corpora, models<br>corpus = [d.doc2bow(t) for t in tokenized_docs]<br>dict = corpora.Dictionary(tokenized_docs)<br>lsi = models.LsiModel(corpus, id2word=dict, num_topics=100)<br>- Spark MLlib for production-scale SVD: RowMatrix.computeSVD for distributed factorization used in log analytics and recommender pipelines.<br>References: Deerwester et al. 1990 (LSA), Halko et al. 2011 (randomized SVD), Netflix matrix-factorization work (recommender systems). Best practice: tf-idf, sparse ops, randomized/truncated solvers, validate k by downstream metrics.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
