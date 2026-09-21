@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Unicode & UTF-8 Text Encoding</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Unicode는 전 세계 문자를 일관되게 표현하는 표준이고 UTF-8은 가변 길이 바이트 인코딩으로, 현대 웹·데이터 시스템에서 기본 텍스트 교환 방식입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Unicode & UTF-8 Text Encoding</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-21</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Unicode는 전 세계 문자를 일관되게 표현하는 표준이고 UTF-8은 가변 길이 바이트 인코딩으로, 현대 웹·데이터 시스템에서 기본 텍스트 교환 방식입니다.</p>
+        <p>UTF-8은 ASCII와 호환되는 1~4바이트 가변 길이 인코딩으로, 코드 포인트를 바이트 시퀀스로 변환해 저장·전송합니다. 중요한 실무 포인트는 정규화(NFC/NFD), 문자 집합 설정(예: PostgreSQL client_encoding), 그리고 3바이트 제한을 가진 MySQL의 legacy "utf8" vs 실제 4바이트 지원하는 "utf8mb4" 문제입니다. 산업계에서는 ICU(International Components for Unicode)를 사용해 로케일별 정렬, 대소문자 변환, 텍스트 분할을 합니다.<br><br>시스템은 바이트 시퀀스 유효성 검사(디코딩 중 에러 핸들링), 정규화로 시각적으로 동일하지만 내부적으로 다른 문자열 통일, 그리고 보안 관점에서 Bidirectional(U+202E) 공격(Trojan Source)이나 confusable 문자(UTS #39)를 탐지하는 처리가 필요합니다. 대형 서비스(예: Facebook, GitHub)는 소스·입력 처리에서 이러한 정규화/검증을 도입해 안전성과 검색 일관성을 유지합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제:<br>- Python: 바이트 ↔ 문자열, 정규화<br>  import unicodedata<br>  s = b"caf\xc3\xa9".decode('utf-8')<br>  s_norm = unicodedata.normalize('NFC', s)<br>- MySQL: emoji 저장을 위한 설정<br>  ALTER DATABASE db CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;<br>- PostgreSQL: 데이터베이스 생성<br>  CREATE DATABASE app WITH ENCODING='UTF8' LC_COLLATE='en_US.utf8' LC_CTYPE='en_US.utf8';<br>- Linux/CLI: iconv 변환<br>  iconv -f ISO-8859-1 -t UTF-8 input.txt -o out.txt<br>실무 팁: 로그·API는 항상 UTF-8로 고정, 외부 입력은 normalize+reject-invalid-bytes, DB 마이그레이션 전 인덱스·컬레이션 영향 검토. 참고: ICU(icu-project.org), Unicode UTS/CLDR, Trojan Source 대응(compiler patches in GCC/Clang).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Unicode is the universal character repertoire; UTF-8 is the dominant variable-length byte encoding. Together they are central to reliably exchanging text in real systems.</p>
+        <p>UTF-8 encodes Unicode code points into 1–4 bytes with ASCII compatibility; parsers map byte sequences to code points with validation and error handling. Practical concerns include normalization (NFC vs NFD) to make visually identical strings byte-identical, and database charset pitfalls—e.g. MySQL's historical "utf8" (max 3 bytes) versus real 4-byte-supporting "utf8mb4" needed for emoji. Libraries like ICU provide locale-aware collation, case mapping, and grapheme clustering for production systems.<br><br>Operationally you must validate incoming UTF-8, normalize user text for indexing/search, and mitigate security risks: confusable character homographs (UTS #39) and bidirectional control characters exploited by the Trojan Source class of attacks. Large platforms (GitHub, Google, Facebook) use normalization, confusable detection, and compiler warnings/patches to defend and to keep search/sorting consistent.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world snippets and patterns:<br>- Python: decode/encode + normalization<br>  import unicodedata<br>  s = b"caf\xc3\xa9".decode('utf-8')<br>  s_normal = unicodedata.normalize('NFC', s)<br>- Node.js: validating buffers<br>  if (!Buffer.isBuffer(buf)) throw new Error('expected buffer');<br>  const str = buf.toString('utf8');<br>- MySQL migration to support 4-byte chars:<br>  ALTER TABLE t CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;<br>- PostgreSQL create DB with UTF-8:<br>  CREATE DATABASE prod WITH ENCODING='UTF8' LC_COLLATE='en_US.utf8' LC_CTYPE='en_US.utf8';<br>- CLI conversion: iconv -f WINDOWS-1252 -t UTF-8 in > out<br>Best practices: canonicalize (NFC) before indexing, reject or sanitize invalid sequences early, use ICU for locale-sensitive ops, and prefer utf8mb4 for broad Unicode support. Sources: ICU project, Unicode Consortium UTS #39/CLDR, production notes from MySQL/Postgres docs, Trojan Source research and upstream compiler fixes.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
