@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States",
+      "date": "2026-09-22",
+      "category": "papers",
+      "url": "posts/papers/2609/2026-09-22-paper.html",
+      "excerpt": "Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States"
+    },
+    {
       "title": "Unicode & UTF-8 Text Encoding",
       "date": "2026-09-21",
       "category": "cs-fundamentals",
