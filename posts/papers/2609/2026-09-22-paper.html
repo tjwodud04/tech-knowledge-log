@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Yifan Wang, Dejing Dou</div>
+        <div><strong>발행일 / Published:</strong> 2026-09-20</div>
+        <div><strong>Arxiv ID:</strong> 2609.23371</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>긴 문맥을 다루는 언어 모델들은 원시 자연어를 통해 외부 지식과 상호작용한다. 검색 강화(retrieval-augmented) 시스템에서는 이로 인해 영속적인 인덱스-페이로드 분리가 발생한다: 밀집 벡터는 검색 가능한 라우팅을 가능하게 하지만, 모델은 추론을 위해 긴 텍스트 페이로드를 다시 섭취해야 하며 이로 인해 O(N^2) 어텐션 비용이 든다. 기존의 압축 방법들은 종종 특정 아키텍처에 종속된 비공개 상태를 생성하기도 한다. </p>
+        <p>우리는 Machine-Interpretable Information(MII)를 제안한다. 이는 최초의 에이전트 간(A2A) 문서→상태 프로토콜이다. 이중 시간규모의 상태공간 Writer는 문서를 정형화된 고정 대역폭 상태(56 토큰)로 컴파일하고, 경량 Translator는 이를 어떤 고정된 Reader의 임베딩 공간으로도 매핑하여 쿼리 시 비용을 O(K)로 줄인다. 결과물인 .mii 아티팩트는 검색(검색 가능한 기하), 추론(전역 메모리), 재구성(근거 있는 세부정보)을 단일 전송 가능 매체로 통합한다. </p>
+        <p>우리는 이질적인 대형 언어 모델들(Llama, Qwen, Mistral 등) 간에 강한 교차-모델 상호운용성을 시연한다 — Writer가 구식 GPT-2 어휘를 사용했음에도 불구하고 이는 토큰 수준의 암기가 아니라 진정한 의미 변환을 강제한다. 기계적 탐사를 통해 모듈식 잠재 구조가 드러나며, 엔터티 표현은 인과적으로 추적될 수 있고 서로 관련 없는 문서 상태들 사이에 제로샷으로 이식되면서도 여전히 디코딩 가능하다. </p>
+        <p>고정 대역폭 하에서의 어휘 재구성 문제를 해결하기 위해, 우리는 컴파일된 전역 메모리와 희소한 지역 증거를 결합한 캐시 계층인 Residual-MII를 제안한다. HotpotQA(7,405 질의)에서 Residual-MII는 어텐션 FLOPs의 약 7% 수준의 연산으로 전체 문맥 기반 Exact Match 성능을 능가하여, 컴파일된 전이 가능한 신경 문서 포맷으로의 패러다임 전환을 시사한다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Long-context language models interface with external knowledge through raw natural language. In retrieval-augmented systems, this creates a persistent index-payload schism: dense vectors enable searchable routing, but models must re-ingest lengthy text payloads for reasoning at O(N^2) attention cost. Existing compression methods further produce private states tied to specific architectures. We introduce Machine-Interpretable Information (MII), the first agent-to-agent (A2A) document-to-state protocol. A dual-timescale state-space Writer compiles documents into a canonical, fixed-bandwidth state (56 tokens), and a lightweight Translator maps it into any frozen Reader's embedding space, reducing query-time cost to O(K). The resulting .mii artifact unifies Retrieval (searchable geometry), Reasoning (global memory), and Reconstruction (grounded details) in a single transferable medium. We demonstrate strong cross-model interoperability across heterogeneous LLMs (e.g., Llama, Qwen, Mistral) -- despite the Writer using a legacy GPT-2 vocabulary, forcing genuine semantic translation rather than token-level memorization. Mechanistic probes reveal modular latent structure: entity representations can be causally traced and zero-shot transplanted between unrelated document states while remaining decodable. To address lexical reconstruction under fixed bandwidth, we propose Residual-MII, a cache hierarchy combining compiled global memory with sparse local evidence. On HotpotQA (7,405 queries), Residual-MII exceeds full-context Exact Match at approximately 7% of the attention FLOPs, suggesting a paradigm shift toward compiled, transferable neural document formats.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2609.23371" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2609.23371.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
