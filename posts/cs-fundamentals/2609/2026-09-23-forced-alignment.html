@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Forced Alignment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="강제정렬(forced alignment)은 음성 파일과 텍스트(전사)를 시간 축에 정확히 맞추는 기술로, TTS 학습, 자막 동기화, 코퍼스 구축에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Forced Alignment</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-23</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>강제정렬(forced alignment)은 음성 파일과 텍스트(전사)를 시간 축에 정확히 맞추는 기술로, TTS 학습, 자막 동기화, 코퍼스 구축에서 필수적입니다.</p>
+        <p>작동 원리는 보통 음향모델(예: GMM-HMM 또는 DNN-HMM, end-to-end CTC/CTC+attention 기반)과 Viterbi 정렬을 이용해 입력 전사의 각 토큰(음소, 음절, 단어)에 대한 시작/종료 시간을 찾는 것입니다. Kaldi 기반 파이프라인은 특성 추출(MFCC/FBank), 모델 적합, 강제정렬 절차(aligner)를 순차적으로 수행합니다. 현대 툴은 이미 학습된 acoustic model을 제공해 데이터 전처리(샘플레이트, 채널, 문장 일치)만 맞추면 빠르게 동작합니다. 멀티스피커 녹음은 먼저 화자 분리(speaker diarization) 후 각 화자별 정렬이 권장됩니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 도구와 사용법: Montreal Forced Aligner(MFA, McAuliffe et al.)은 연구·생산에서 널리 쓰입니다. 예: mfa 명령어로 간단 실행:<br>mfa align /data/wavs /data/texts english /data/output -j 4<br>Gentle(결정적, Kaldi 기반)은 웹 API로 대량 오디오에 사용됩니다(라이브 자막, 팟캐스트 기업). Docker로 실행 예:<br>docker run -p 1212:1212 lowerquality/gentle<br>Curl 업로드 예:<br>curl -F "audio=@book.wav" -F "transcript=@book.txt" http://localhost:1212/transcriptions?async=false<br>실무 팁: 샘플레이트 16k/16bit, 문장-오디오 정합성 검증, 도메인 유사 acoustic model 사용, 노이즈 제거와 발음 사전(pronunciation lexicon) 조정이 정확도를 크게 개선합니다. Kaldi 스크립트나 MFA 파이프라인은 TTS 데이터셋(LJSpeech, Libri) 전처리에 표준으로 쓰입니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Forced alignment aligns an audio recording to a transcript on a timeline (word/phone boundaries). It's essential for TTS training, subtitle timing, corpus annotation, and evaluation.</p>
+        <p>Core mechanics: using an acoustic model (GMM-HMM or DNN/TDNN, or end-to-end CTC models) and Viterbi or lattice-based alignment to find start/end times for tokens. Typical pipelines extract features (MFCC/FBank), run frame-level likelihoods, then Viterbi-align transcripts to frames. Modern toolchains provide pretrained models so practitioners only need clean audio, matching sample rates, and a good pronunciation lexicon. For multi-speaker audio, run speaker diarization first and align per segment to avoid cross-speaker errors.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Production examples and commands: Montreal Forced Aligner (MFA) is widely used in industry and research (https://montreal-forced-aligner.readthedocs.io). Quick run:<br>mfa align /data/wavs /data/texts english /data/output -j 4<br>Gentle (Kaldi-based) is used by media companies for podcast/audiobook alignment; run via Docker:<br>docker run -p 1212:1212 lowerquality/gentle<br>Then upload:<br>curl -F "audio=@book.wav" -F "transcript=@book.txt" http://localhost:1212/transcriptions?async=false<br>Kaldi recipes (steps/align_si.sh) are used when custom acoustic models are required. Best practices: use 16 kHz/16-bit, normalize transcripts, select or adapt acoustic models to domain, supply a pronunciation lexicon, and perform diarization for multi-speaker data. Common use cases: preparing LJSpeech/LibriSpeech subsets for Tacotron/TTS, aligning corpora in speech research, and automating subtitle timing in production.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
