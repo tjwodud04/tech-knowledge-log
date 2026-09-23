@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Forced Alignment",
+      "date": "2026-09-23",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-23-forced-alignment.html",
+      "excerpt": "강제정렬(forced alignment)은 음성 파일과 텍스트(전사)를 시간 축에 정확히 맞추는 기술로, TTS 학습, 자막 동기화, 코퍼스 구축에서 필수적입니다."
+    },
+    {
       "title": "Machine-Interpretable Information: Compiling Documents into Searchable and Readable Protocol States",
       "date": "2026-09-22",
       "category": "papers",
