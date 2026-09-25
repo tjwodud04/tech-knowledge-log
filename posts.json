@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Causal (Autoregressive) Language Models",
+      "date": "2026-09-25",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-25-causal-language-models.html",
+      "excerpt": "인과(오토리그레시브) 언어모델은 이전 토큰만을 조건으로 다음 토큰을 예측하는 생성 엔진으로, 실서비스에서 스트리밍, 비용제어, 응답 일관성에 핵심적입니다."
+    },
+    {
       "title": "Forced Alignment",
       "date": "2026-09-23",
       "category": "cs-fundamentals",
