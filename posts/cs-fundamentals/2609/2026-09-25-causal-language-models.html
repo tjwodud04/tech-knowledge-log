@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Causal (Autoregressive) Language Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="인과(오토리그레시브) 언어모델은 이전 토큰만을 조건으로 다음 토큰을 예측하는 생성 엔진으로, 실서비스에서 스트리밍, 비용제어, 응답 일관성에 핵심적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Causal (Autoregressive) Language Models</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-25</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>인과(오토리그레시브) 언어모델은 이전 토큰만을 조건으로 다음 토큰을 예측하는 생성 엔진으로, 실서비스에서 스트리밍, 비용제어, 응답 일관성에 핵심적입니다.</p>
+        <p>기술적으로는 디코더-온리 트랜스포머 구조를 사용하고, 입력 토큰들 위로 인과(upper-triangular) 마스킹을 적용해 미래 정보 유출을 막습니다. 학습은 교차엔트로피로 다음 토큰을 예측하도록 수행되며, 추론 시에는 그리디/빔/샘플링(top-k, top-p)/온도 제어 같은 디코딩 전략을 적용합니다. 실무에서는 KV 캐시로 과거 key/value를 재사용해 반복 토큰 생성의 비용을 크게 낮추며, FlashAttention, fused kernels, 양자화(bitsandbytes 8-bit/4-bit)로 메모리와 연산을 최적화합니다.<br><br>산업에서는 OpenAI GPT 계열, Meta LLaMA, Mistral, Anthropic 계열이 인과 모델을 핵심으로 사용합니다. 연구 논문과 오픈소스(예: Hugging Face Transformers, DeepSpeed-Inference, FlashAttention)는 대규모 모델의 분산·정밀도 절감·지연 최소화 기술을 제공합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드 예시(Hugging Face + bitsandbytes, 토큰 캐시 사용):<br><br>from transformers import AutoModelForCausalLM, AutoTokenizer<br>model = AutoModelForCausalLM.from_pretrained('meta/llama-2-7b', device_map='auto', load_in_8bit=True)<br>tok = AutoTokenizer.from_pretrained('meta/llama-2-7b')<br>ids = tok('Summarize the incident:', return_tensors='pt').input_ids.to('cuda')<br>outs = model.generate(ids, max_new_tokens=150, do_sample=True, top_p=0.9, temperature=0.8, use_cache=True)<br>print(tok.decode(outs[0], skip_special_tokens=True))<br><br>운영 팁: 배칭과 스트리밍, 프롬프트·결과 캐싱, 컨텍스트 윈도우 관리(슬라이딩 윈도우), 모니터링(지연·토큰 사용), 안전 필터링을 적용하세요. 모델 샤딩과 양자화는 실비용 절감에 결정적입니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Causal (autoregressive) LMs predict the next token conditioned only on previous tokens; they are the backbone of generation, streaming, and deterministic decoding in production systems.</p>
+        <p>Technically these are decoder-only Transformer models with a causal (upper-triangular) attention mask so no future token leaks into predictions. Training minimizes next-token cross-entropy; at inference you choose decoding strategies (greedy, beam, top-k/top-p sampling, temperature). Practical systems rely on KV cache to reuse past key/value tensors across steps, significantly cutting compute during multi-token generation. Performance engineering uses FlashAttention, fused kernels, sparse attention, and quantization (bitsandbytes 8/4-bit) to reduce latency and memory footprint.<br><br>Major deployments include OpenAI GPT, Meta LLaMA/Mistral, Anthropic models and many SaaS providers. Open-source stacks like Hugging Face Transformers, DeepSpeed-Inference, and FlashAttention implement production features (device_map, model parallelism, 8-bit loading, fast attention) used in research and real products.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Practical code (Hugging Face + bitsandbytes, enabling KV cache):<br><br>from transformers import AutoModelForCausalLM, AutoTokenizer<br>model = AutoModelForCausalLM.from_pretrained('meta/llama-2-7b', device_map='auto', load_in_8bit=True)<br>tok = AutoTokenizer.from_pretrained('meta/llama-2-7b')<br>input_ids = tok('Write a release note for v1.2:', return_tensors='pt').input_ids.to('cuda')<br>outputs = model.generate(input_ids, max_new_tokens=200, do_sample=True, top_p=0.95, temperature=0.7, use_cache=True)<br>print(tok.decode(outputs[0], skip_special_tokens=True))<br><br>Production practices: batch requests, stream tokens to clients, cache common prompts/responses, clip or slide context windows for long chats, monitor token usage/latency, and use fallback smaller models for high-throughput low-cost paths. Use LoRA/QLoRA for cost-effective fine-tuning and DeepSpeed/accelerate for distributed inference.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
