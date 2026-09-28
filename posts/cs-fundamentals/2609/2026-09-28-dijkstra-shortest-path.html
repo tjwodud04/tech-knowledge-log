@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Dijkstra's Shortest-Path Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dijkstra 알고리즘은 가중치가 비음수인 그래프에서 단일 출발점 최단 경로를 찾는 고전 알고리즘으로, 라우팅·맵핑·네트워크 제어 등 실무 시스템의 기초로 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Dijkstra's Shortest-Path Algorithm</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-28</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Dijkstra 알고리즘은 가중치가 비음수인 그래프에서 단일 출발점 최단 경로를 찾는 고전 알고리즘으로, 라우팅·맵핑·네트워크 제어 등 실무 시스템의 기초로 쓰입니다.</p>
+        <p>작동 원리: 시작 정점에서부터 각 정점까지의 현재 최단 거리 추정치를 유지하고, 우선순위 큐(보통 최소 힙)로 최단 추정치가 가장 작은 정점을 반복적으로 확정한다. 간단한 구현은 O((V+E) log V) 시간 복잡도를 가지며, 다익스트라 자체는 음수 간선을 허용하지 않는다. 실무에서는 기본 다익스트라를 그대로 쓰기보다 Contraction Hierarchies(Geisberger 등)나 ALT, PHAST 같은 가속 기법과 결합하여 대규모 도로망 또는 실시간 서비스에서 성능을 확보한다.<br><br>시스템 적용: OSPF(인터넷 라우팅 프로토콜)는 링크 상태 데이터베이스를 만들고 라우팅 테이블 계산에 Dijkstra를 사용한다. 지도/네비게이션 엔진(GraphHopper, OSRM, GraphHopper는 내부 전처리 후 쿼리에서 다익스트라 기반 탐색을 사용)과 연구(Contraction Hierarchies, Transit Node Routing)에서도 핵심으로 활용된다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 코드(파이썬, NetworkX와 간단 구현):<br><br># heapq 기반 최소 경로<br>import heapq<br>def dijkstra(adj, src):<br>    dist = {src:0}<br>    pq = [(0, src)]<br>    while pq:<br>        d,u = heapq.heappop(pq)<br>        if d>dist[u]: continue<br>        for v,w in adj.get(u,[]):<br>            nd = d + w<br>            if nd < dist.get(v, 10**18):<br>                dist[v]=nd<br>                heapq.heappush(pq,(nd,v))<br>    return dist<br><br># NetworkX 사용 예<br>import networkx as nx<br>G = nx.DiGraph()<br>G.add_weighted_edges_from([(1,2,7),(1,3,2),(3,2,1)])<br>print(nx.single_source_dijkstra_path_length(G,1))<br><br>실무 팁: 대규모 정적 도로망은 전처리(축소, 터널링)로 쿼리 속도를 수백 배 개선. 빈번한 업데이트(실시간 교통)는 동적 기법과 히트-캐시(지역 재탐색) 병행. 출처: OSPF RFC, GraphHopper(오픈소스), Geisberger et al. Contraction Hierarchies.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Dijkstra's algorithm finds shortest paths from a single source on non‑negative weighted graphs; it's a foundational building block in routing, mapping, and network control systems.</p>
+        <p>How it works: maintain tentative distances from the source and repeatedly settle the closest unsettled vertex using a min-priority queue (min-heap). Relax outgoing edges to update neighbors. Complexity with a binary heap is O((V+E) log V). Dijkstra forbids negative weights; in production you often combine it with acceleration techniques (Contraction Hierarchies, ALT, PHAST) to handle large road networks and low-latency queries.<br><br>Where used: OSPF uses Dijkstra to compute routing tables from link-state databases. Map services and routing engines (GraphHopper, OSRM) use Dijkstra-derived searches during queries or in preprocessing stages. Research on fast shortest-path queries (Geisberger et al., 2008) extends Dijkstra with contraction to achieve interactive latencies on continental graphs.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Practical code (Python heapq + NetworkX):<br><br># minimal heapq Dijkstra<br>import heapq<br>def dijkstra(adj, src):<br>    dist = {src:0}<br>    pq = [(0, src)]<br>    while pq:<br>        d,u = heapq.heappop(pq)<br>        if d>dist[u]: continue<br>        for v,w in adj.get(u,[]):<br>            nd = d + w<br>            if nd < dist.get(v, 10**18):<br>                dist[v]=nd<br>                heapq.heappush(pq,(nd,v))<br>    return dist<br><br># NetworkX example<br>import networkx as nx<br>G = nx.DiGraph()<br>G.add_weighted_edges_from([(1,2,7),(1,3,2),(3,2,1)])<br>print(nx.single_source_dijkstra_path_length(G,1))<br><br>Production patterns & best practices: for static large graphs use preprocessing (Contraction Hierarchies, Transit Nodes) to reduce query time; for frequently changing weights use localized re-search or incremental algorithms. Sources: OSPF RFCs, GraphHopper/OSRM codebases, Geisberger et al. (2008).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
