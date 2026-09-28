@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Dijkstra's Shortest-Path Algorithm",
+      "date": "2026-09-28",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-28-dijkstra-shortest-path.html",
+      "excerpt": "Dijkstra 알고리즘은 가중치가 비음수인 그래프에서 단일 출발점 최단 경로를 찾는 고전 알고리즘으로, 라우팅·맵핑·네트워크 제어 등 실무 시스템의 기초로 쓰입니다."
+    },
+    {
       "title": "Causal (Autoregressive) Language Models",
       "date": "2026-09-25",
       "category": "cs-fundamentals",
