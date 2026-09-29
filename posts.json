@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models",
+      "date": "2026-09-29",
+      "category": "papers",
+      "url": "posts/papers/2609/2026-09-29-paper.html",
+      "excerpt": "NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models"
+    },
+    {
       "title": "Dijkstra's Shortest-Path Algorithm",
       "date": "2026-09-28",
       "category": "cs-fundamentals",
