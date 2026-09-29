@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=10">
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    .arxiv-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .arxiv-link{display:inline-block;padding:0.5rem 1rem;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500}
+    .arxiv-link:hover{background:#2563eb}
+    .arxiv-link.pdf{background:#10b981}
+    .arxiv-link.pdf:hover{background:#059669}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models</h1>
+      <div class="topic-meta">
+        <div><strong>저자 / Authors:</strong> Ziwei Chen</div>
+        <div><strong>발행일 / Published:</strong> 2026-09-27</div>
+        <div><strong>Arxiv ID:</strong> 2609.33899</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>NSV-Shift는 음성-음성(speech-to-speech) 모델이 비언어적 발성(NSV, non-speech vocalizations)을 이해하고 그에 따라 응답을 조정할 수 있는지를 평가하기 위한 대조적 벤치마크입니다. 각 쌍은 동일한 어휘적 내용의 두 대화를 포함하며, 마지막 발화에 삽입된 NSV만 다릅니다. 파일럿에는 사람 검증을 거친 22개 쌍(44개의 오디오 조건)이 포함되어 있으며, 다섯 모델을 대상으로 NSV 인지, 감정 이해, 응답 적응 능력을 평가합니다. 결과는 모델들이 일반적으로 NSV를 탐지하는 데는 비교적 우수하지만, 그 미세한 감정적 의미를 해석하거나 적절하게 구분된 응답을 생성하는 데는 성능이 낮음을 보여줍니다. 데이터 구성 파이프라인, 데이터셋 및 평가 파이프라인은 https://github.com/ChenzwNina/nsv-construction에서 공개되어 있습니다.</p>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>We introduce NSV-Shift, a contrastive benchmark for evaluating whether speech-to-speech models can understand non-speech vocalizations (NSVs) and adapt their responses accordingly. Each pair contains two conversations with identical lexical content that differ only in the NSV embedded in the final turn. Our pilot contains 22 human-verified pairs (44 audio conditions) and evaluates five models on NSV perception, emotion understanding, and response adaptation. Results show that models generally perform better at detecting NSVs than at interpreting their fine-grained emotional meaning or producing appropriately differentiated responses. The data construction pipeline, dataset, and evaluation pipeline are publicly available at https://github.com/ChenzwNina/nsv-construction.</p>
+        <div class="arxiv-links">
+          <a href="https://arxiv.org/abs/2609.33899" class="arxiv-link" target="_blank" rel="noopener">View on Arxiv</a>
+          <a href="https://arxiv.org/pdf/2609.33899.pdf" class="arxiv-link pdf" target="_blank" rel="noopener">Download PDF</a>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=10"></script>
+</body>
+</html>
