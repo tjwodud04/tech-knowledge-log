@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Multimodal Fusion: Early vs Late Fusion and Shared-Latent Representations",
+      "date": "2026-09-30",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2609/2026-09-30-multimodal-fusion-early-late-shared-latent.html",
+      "excerpt": "멀티모달 퓨전은 서로 다른 센서·모달리티(예: 이미지, 라이다, 텍스트)를 결합해 더 강건한 예측을 만드는 방법입니다. 실무에서는 지연·초기 결합 전략과 공유 잠재공간 접근이 시스템 성능·지연·확장성에 직접적인 영향을 줍니다."
+    },
+    {
       "title": "NSV-Shift: A Contrastive Benchmark for Non-Speech Vocalization Understanding and Response Adaptation in Speech-to-Speech Models",
       "date": "2026-09-29",
       "category": "papers",
