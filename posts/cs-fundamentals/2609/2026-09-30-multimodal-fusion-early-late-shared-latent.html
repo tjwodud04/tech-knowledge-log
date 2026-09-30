@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Multimodal Fusion: Early vs Late Fusion and Shared-Latent Representations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="멀티모달 퓨전은 서로 다른 센서·모달리티(예: 이미지, 라이다, 텍스트)를 결합해 더 강건한 예측을 만드는 방법입니다. 실무에서는 지연·초기 결합 전략과 공유 잠재공간 접근이 시스템 성능·지연·확장성에 직접적인 영향을 줍니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Multimodal Fusion: Early vs Late Fusion and Shared-Latent Representations</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-09-30</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>멀티모달 퓨전은 서로 다른 센서·모달리티(예: 이미지, 라이다, 텍스트)를 결합해 더 강건한 예측을 만드는 방법입니다. 실무에서는 지연·초기 결합 전략과 공유 잠재공간 접근이 시스템 성능·지연·확장성에 직접적인 영향을 줍니다.</p>
+        <p>초기(early) 퓨전은 서로 다른 모달리티의 표현을 낮은 수준에서 합쳐 단일 네트워크로 학습합니다. 예: 자율주행 연구에서 2D 세그멘테이션 출력을 라이다 포인트에 'paint'해 포인트 클라우드와 함께 인코딩하는 PointPainting(early fusion) 패턴이 널리 사용됩니다. 기술적으로는 서로 다른 백본에서 나온 feature를 concat이나 projection으로 결합한 뒤 검출/분류 헤드를 학습합니다.<br>후기(late) 퓨전은 각 모달리티별로 독립 예측(로그잇/확률)을 만든 다음 의사결정 단계에서 합칩니다. 앙상블, 가중 평균, 메타 분류기를 쓰며 실시간 제한·모달리티 손실(예: 카메라 고장)에 강합니다. 샤드-라텐트(shared-latent)는 모든 모달리티를 공통 임베딩 공간으로 투영해 대조학습(예: CLIP)이나 cross-attention(Flamingo, Perceiver)으로 융합합니다. 이 방식은 검색, 제로샷, 파인튜닝에 유리합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사례와 코드<br>- PointPainting / MV3D 등 (자율주행 논문): 라이다 점에 2D 세그멘트 확률을 붙여 PointNet 계열에 입력(초기 퓨전). 간단한 PyTorch 예:<br><br>img_feat = img_backbone(img)<br>lidar_feat = lidar_backbone(pcd)<br>fused = torch.cat([img_proj(img_feat), lidar_proj(lidar_feat)], dim=1)<br>out = detector_head(fused)<br><br>- Late fusion (서비스 레벨 의사결정): 카메라 모델과 텍스트 모델 각각 logits를 만든 뒤 가중 합:<br><br>logits = w1*logits_img + w2*logits_text<br>pred = logits.softmax(dim=-1).argmax(-1)<br><br>- Shared-latent (OpenAI CLIP, Google ALIGN, DeepMind Perceiver/Flamingo): 이미지·텍스트를 L2 정규화 후 대조손실 사용:<br><br>I = normalize(img_encoder(img))<br>T = normalize(text_encoder(txt))<br>logits = I @ T.t() / temp<br>loss = CE(logits, torch.arange(N))<br><br>실무 패턴: 레이턴시·모달리티 신뢰도(health)·데이터 균형을 기준으로 early/late/shared 혼합 전략을 택하고, shared 공간은 배치 크기·negative 샘플링 설계가 성능을 좌우합니다. 출처: OpenAI CLIP, Google ALIGN, Perceiver (DeepMind), PointPainting / MV3D 논문, Waymo/nuScenes 오픈 데이터와 구현들.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Multimodal fusion combines heterogeneous modalities (image, lidar, text) to improve prediction robustness. Early vs. late fusion and shared-latent approaches trade off latency, fault tolerance, and generalization in real systems.</p>
+        <p>Early fusion merges low-level or mid-level features from multiple modalities into a single network (concatenate, project, then feed to a head). Common in autonomous driving: MV3D/PointPainting fuse 2D segmentation cues with LiDAR points so a single detector learns cross-modal cues. Technically you feed modality-specific backbones, align spatial/temporal frames, project to a common shape, then learn jointly.<br>Late fusion keeps modality-specific predictors and combines decisions (logits/probabilities) at the end—via weighted average, stacking, or gating. This is robust to missing modalities and simpler to scale when teams manage models independently. Shared-latent approaches (CLIP, ALIGN, Perceiver, Flamingo) map modalities into a joint embedding space via contrastive losses or cross-attention; that space enables retrieval, zero-shot transfer, and compact multimodal representations.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code + sources<br>- Early fusion (autonomous driving — MV3D/PointPainting): attach 2D segmentation scores to LiDAR points and train detector. PyTorch snippet:<br><br>img_feat = img_backbone(img)<br>lidar_feat = lidar_backbone(pcd)<br>fused = torch.cat([img_proj(img_feat), lidar_proj(lidar_feat)], dim=1)<br>out = detector_head(fused)<br><br>Sources: MV3D / PointPainting papers, Waymo/nuScenes ecosystems.<br>- Late fusion (service-level ensembles or AV stacks): combine logits from modal-specific models:<br><br>logits = w_img*logits_img + w_text*logits_text<br>pred = logits.softmax(dim=-1).argmax(-1)<br><br>Used where uptime and independent deployability matter.<br>- Shared-latent (CLIP / ALIGN / Perceiver): contrastive training to align image/text embeddings:<br><br>I = F.normalize(img_enc(img), dim=1)<br>T = F.normalize(txt_enc(txt), dim=1)<br>logits = I @ T.t() / temp<br>loss = F.cross_entropy(logits, torch.arange(N))<br><br>Sources: OpenAI CLIP, Google ALIGN, DeepMind Perceiver/Flamingo. Best practices: monitor modality health, tune fusion point for latency vs. shared learning, and ensure balanced negatives / batch size for contrastive shared-latent training.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
