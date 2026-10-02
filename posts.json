@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Word Sense Disambiguation (WSD)",
+      "date": "2026-10-02",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-02-word-sense-disambiguation.html",
+      "excerpt": "단어 의미 중복을 문맥 기반으로 식별하는 기술로, 검색·번역·대화시스템에서 올바른 의미 선택이 결과 품질을 좌우합니다."
+    },
+    {
       "title": "Multimodal Fusion: Early vs Late Fusion and Shared-Latent Representations",
       "date": "2026-09-30",
       "category": "cs-fundamentals",
