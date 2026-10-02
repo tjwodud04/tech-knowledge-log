@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Word Sense Disambiguation (WSD)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="단어 의미 중복을 문맥 기반으로 식별하는 기술로, 검색·번역·대화시스템에서 올바른 의미 선택이 결과 품질을 좌우합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Word Sense Disambiguation (WSD)</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-02</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>단어 의미 중복을 문맥 기반으로 식별하는 기술로, 검색·번역·대화시스템에서 올바른 의미 선택이 결과 품질을 좌우합니다.</p>
+        <p>WSD는 같은 형태의 단어가 가지는 여러 의미 중 문맥에 맞는 것을 고르는 문제입니다. 전통적 접근은 Lesk 알고리즘(문맥과 정의의 겹침을 계산)이나 지식 기반 그래프(WordNet/BabelNet, UKB)였고, 지도학습은 SemCor 같은 라벨 데이터로 SVM/CRF를 학습했습니다. 최근에는 문맥 표현을 제공하는 ELMo/BERT 계열의 임베딩으로 문장-의미(글로스) 간 유사도를 계산하거나, gloss-aware fine-tuning(GlossBERT)으로 높은 성능을 냅니다 (Raganato et al., 2017; Huang et al., GlossBERT).<br><br>실무에서는 사전(WordNet/BabelNet)으로 후보 sense를 얻고, 후보 글로스나 예문을 임베딩해 문맥 임베딩과 코사인 유사도로 점수화하는 패턴이 널리 쓰입니다. 대규모 시스템은 후보 임베딩 캐싱, 배치 점수화, 백오프(품사 고정/빈도 기반) 전략을 병행해 레이턴시와 정밀도 균형을 맞춥니다. 주요 적용처는 검색 쿼리 이해, 기계번역, 음성비서의 슬롯 해석 등입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 예: HuggingFace BERT와 NLTK WordNet을 이용한 간단한 WSD(문맥-글로스 유사도 방식).<br><br>코드(요약):<br>from transformers import AutoTokenizer, AutoModel<br>import torch<br>from nltk.corpus import wordnet as wn<br><br>tok=AutoTokenizer.from_pretrained('bert-base-uncased')<br>model=AutoModel.from_pretrained('bert-base-uncased')<br><br>def embed(text):<br>  i=tok(text,return_tensors='pt')<br>  o=model(**i).last_hidden_state.mean(1)<br>  return o.detach()<br><br>context='I deposited money at the bank.'<br>for s in wn.synsets('bank'):<br>  score=torch.cosine_similarity(embed(context), embed(s.definition()))<br>  print(s.name(), float(score))<br><br>생산 환경 팁: 후보 임베딩은 미리 계산·캐시하고(특히 BabelNet/WordNet 글로스), 배치 유사도 계산을 GPU에서 처리, 낮은 신뢰도 시 빈도 기반 후보로 백오프. 오픈소스/참고: UKB(Agirre), Babelfy(BabelNet), Raganato et al. (2017) 평가 프레임워크.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>WSD chooses the intended sense of an ambiguous word given context; it's critical for search, MT, and conversational agents to avoid incorrect interpretations.</p>
+        <p>Word Sense Disambiguation picks one sense among many for a surface form using its context. Classical methods include Lesk (overlap with dictionary glosses) and graph-based knowledge methods (WordNet/BabelNet with UKB). Supervised approaches used SVMs/CRFs with SemCor-labeled data. The recent dominant paradigm uses contextual embeddings (ELMo/BERT) to represent the sentence and either score glosses or fine-tune sense-aware classifiers (e.g., GlossBERT), which substantially improved benchmarks (Raganato et al., 2017).<br><br>In production, practitioners typically: 1) retrieve candidate senses from a lexical resource (WordNet/BabelNet), 2) compute embeddings for the context and for each candidate gloss or example, 3) pick the highest-similarity sense, with caching and batch GPU scoring to meet latency. Systems fall back to POS or frequency priors when confidence is low. Applications include query understanding in search, disambiguation for MT preprocessing, and slot interpretation in voice assistants.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real code example (context-gloss scoring with HuggingFace + NLTK WordNet):<br><br>from transformers import AutoTokenizer, AutoModel<br>import torch<br>from nltk.corpus import wordnet as wn<br><br>tok=AutoTokenizer.from_pretrained('bert-base-uncased')<br>model=AutoModel.from_pretrained('bert-base-uncased')<br><br>def embed(text):<br>  i=tok(text,return_tensors='pt')<br>  o=model(**i).last_hidden_state.mean(1)<br>  return o.detach()<br><br>context='I deposited money at the bank.'<br>for s in wn.synsets('bank'):<br>  score=torch.cosine_similarity(embed(context), embed(s.definition()))<br>  print(s.name(), float(score))<br><br>Production patterns/best practices: precompute and cache gloss embeddings (WordNet/BabelNet), batch GPU similarity computations, use priors/backoff for low-confidence cases, and evaluate with standardized datasets (Senseval/WSD benchmarks; see Raganato et al., 2017). Industry note: major tech stacks use contextual embeddings for disambiguation in query understanding and MT (Google, Microsoft, Amazon) and open-source tools like UKB/Babelfy and BabelNet are common resources.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
