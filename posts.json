@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Suffix Arrays & Suffix-Array-Based String Search",
+      "date": "2026-10-05",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-05-suffix-arrays-and-suffix-array-based-string-search.html",
+      "excerpt": "접미사 배열(suffix array)은 텍스트의 모든 접미사를 사전순으로 정렬한 정수 배열로, 메모리 효율적인 전역 부분문자열 검색과 압축 인덱스(FM-index)의 기반이 됩니다. 실무에서는 대용량 문자열 인덱싱(유전체 서열 정렬, 텍스트 검색 엔진의 압축 인덱스 등"
+    },
+    {
       "title": "Word Sense Disambiguation (WSD)",
       "date": "2026-10-02",
       "category": "cs-fundamentals",
