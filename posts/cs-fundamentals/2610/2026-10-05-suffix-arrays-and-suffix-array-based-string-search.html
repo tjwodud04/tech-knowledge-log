@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Suffix Arrays & Suffix-Array-Based String Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="접미사 배열(suffix array)은 텍스트의 모든 접미사를 사전순으로 정렬한 정수 배열로, 메모리 효율적인 전역 부분문자열 검색과 압축 인덱스(FM-index)의 기반이 됩니다. 실무에서는 대용량 문자열 인덱싱(유전체 서열 정렬, 텍스트 검색 엔진의 압축 인덱스 등)에 자주 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Suffix Arrays & Suffix-Array-Based String Search</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-05</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>접미사 배열(suffix array)은 텍스트의 모든 접미사를 사전순으로 정렬한 정수 배열로, 메모리 효율적인 전역 부분문자열 검색과 압축 인덱스(FM-index)의 기반이 됩니다. 실무에서는 대용량 문자열 인덱싱(유전체 서열 정렬, 텍스트 검색 엔진의 압축 인덱스 등)에 자주 쓰입니다.</p>
+        <p>작동 원리는 간단합니다: 길이 n 문자열 S에 대해 모든 접미사 S[i:]의 시작 인덱스들을 사전순으로 정렬하여 SA를 만듭니다. 패턴 P의 출현은 SA 위에서 이분 탐색(binary search)으로 O(m log n) 시간(여기서 m은 패턴 길이)으로 찾을 수 있고, LCP(Longest Common Prefix) 배열을 추가하면 이분 탐색 시 비교 비용을 줄여 실전 성능을 크게 개선합니다. 접미사 배열 구성 알고리즘으로는 SA-IS(O(n))나 divsufsort(실무에서 널리 쓰이는 고속 구현)가 널리 사용됩니다.<br><br>실제 대규모 텍스트(예: 게놈 서열, 로그 아카이브)에는 SA를 직접 저장하면 메모리 부담이 크므로 BWT(버로우스-웨일러 변환)와 샘플링 기반의 FM-index처럼 SA를 압축·샘플링한 구조를 씁니다. 예컨대 BWA와 Bowtie(유전체 정렬기)는 SA→BWT→FM-index 체인을 사용해 짧은 리드(시퀀스)를 고속으로 정렬합니다. 오픈소스 구현체로는 libdivsufsort(접미사 배열 빌더), SDSL(sdsl-lite)의 압축 색인, sais 등이 있습니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예제(출처: libdivsufsort, BWA 논문 등)<br>1) C에서 divsufsort 사용(간단화):<br>#include <stdint.h><br>#include "divsufsort.h"<br>int main(){<br>  const unsigned char *s = (unsigned char*)"banana$";<br>  int n = 7; int *SA = malloc(n*sizeof(int));<br>  divsufsort(s, SA, n);<br>  // SA에 접미사 시작 인덱스가 담김<br>}<br>컴파일: gcc -I/path/to/divsufsort/include your.c -L/path/to/divsufsort/lib -ldivsufsort<br><br>2) 연구/프로덕션: BWA (Li & Durbin 2009)는 SA로부터 BWT와 FM-index를 만들어 게놈 리드 매핑을 수행합니다. 코드: https://github.com/lh3/bwa<br><br>실무 패턴/베스트프랙티스:<br>- 큰 데이터는 압축 색인(FM-index, Wavelet Tree) 사용. sdsl-lite 추천.<br>- SA 빌드는 메모리/병렬화 고려: libdivsufsort는 빠르지만 대용량은 외부 메모리 알고리즘이나 샘플링 필요.<br>- LCP, RMQ를 함께 사용해 다중매칭과 빈도쿼리를 가속.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>A suffix array (SA) is an array of start positions of all suffixes of a string sorted lexicographically; it’s a compact foundation for fast substring queries and the FM-index used in production systems for compressed full-text search and bioinformatics.</p>
+        <p>How it works: for a text S of length n, SA stores indices i such that S[i:] are sorted. You can find occurrences of a pattern P by binary searching SA — naive cost is O(m log n) for a pattern of length m. Adding an LCP (Longest Common Prefix) array and using range minimum queries reduces character comparisons and speeds up repeated or batched queries. Construction algorithms include SA-IS (linear time) and practical high-speed implementations like divsufsort.<br><br>In production you rarely keep a full SA for large corpora because of memory. Instead SA → BWT → FM-index (sampled SA + rank/select structures like wavelet trees) yields a compressed index that supports fast locate/count operations with low RAM. This pipeline is central to read aligners (BWA, Bowtie) and appears in compression/search libraries (sdsl-lite, libdivsufsort).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world code & sources:<br>1) Build SA with libdivsufsort (Yuta Mori):<br>#include <stdlib.h><br>#include <stdio.h><br>#include "divsufsort.h"<br>int main(){<br>  const unsigned char *s = (unsigned char*)"banana$";<br>  int n = 7; int *SA = malloc(n*sizeof(int));<br>  divsufsort(s, SA, n);<br>  for(int i=0;i<n;i++) printf("%d\n", SA[i]);<br>}<br>Compile: gcc your.c -I/path/to/divsufsort/include -L/path/to/divsufsort/lib -ldivsufsort<br><br>2) Production usage: BWA (Li & Durbin, 2009) builds an FM-index from a suffix array/BWT for fast short-read mapping. Code: https://github.com/lh3/bwa. For compressed indexes and succinct structures see sdsl-lite: https://github.com/simongog/sdsl-lite.<br><br>Best practices:<br>- For large texts use sampled SA + FM-index to trade time for RAM.<br>- Use LCP+RMQ to speed many queries.<br>- Use well-tested libraries (libdivsufsort, sdsl) rather than ad-hoc SA builders in production.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
