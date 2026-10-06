@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents",
+      "date": "2026-10-06",
+      "category": "papers",
+      "url": "posts/papers/2610/2026-10-06-paper.html",
+      "excerpt": "MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents"
+    },
+    {
       "title": "Suffix Arrays & Suffix-Array-Based String Search",
       "date": "2026-10-05",
       "category": "cs-fundamentals",
