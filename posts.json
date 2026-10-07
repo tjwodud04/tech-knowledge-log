@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Reservoir Sampling for Streaming Data",
+      "date": "2026-10-07",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-07-reservoir-sampling-for-streaming-data.html",
+      "excerpt": "Reservoir 샘플링은 무한히 도착하는 스트림에서 고정 크기(k)의 균일 샘플을 유지하는 알고리즘으로, 로그/메트릭/트레이스의 저장·분석 비용을 낮추면서 전체 분포를 보존합니다."
+    },
+    {
       "title": "MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents",
       "date": "2026-10-06",
       "category": "papers",
