@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Reservoir Sampling for Streaming Data</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Reservoir 샘플링은 무한히 도착하는 스트림에서 고정 크기(k)의 균일 샘플을 유지하는 알고리즘으로, 로그/메트릭/트레이스의 저장·분석 비용을 낮추면서 전체 분포를 보존합니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Reservoir Sampling for Streaming Data</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-07</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Reservoir 샘플링은 무한히 도착하는 스트림에서 고정 크기(k)의 균일 샘플을 유지하는 알고리즘으로, 로그/메트릭/트레이스의 저장·분석 비용을 낮추면서 전체 분포를 보존합니다.</p>
+        <p>핵심 아이디어는 단일 패스(single-pass)와 O(k) 메모리만으로 첫 k개는 그대로 저장하고 이후 i번째 아이템은 확률 k/i로 대체 여부를 결정하는 Vitter의 Algorithm R(1985)입니다. 가중치 샘플링(예: 이벤트 우선순위가 다를 때)은 Efraimidis-Spirakis(2006) 방식처럼 각 항목에 무작위 키를 부여하고 상위 k개를 유지하는 방법으로 구현합니다.<br>실무 관점에서는 스트림 처리 프레임워크(예: Kafka consumer, Flink operator, Beam DoFn) 안에서 상태(stateful)로 유지하거나, 경량 에이전트에서 텔레메트리 샘플을 선행 필터링할 때 사용합니다. 복잡도는 항목당 O(1) 확률 검사(균등 샘플) 또는 O(log k) 힙 조작(가중 샘플)이며, 분산 환경에서는 각 파티션별로 샘플을 유지한 뒤 합치는 패턴을 씁니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례 및 코드(파이썬):<br>- 이론/참고: Vitter, 1985; Efraimidis & Spirakis, 2006<br>- 오픈소스: AddThis stream-lib의 ReservoirSampler(java)<br>- Kafka 소비자 통합 예:<br><br>python 코드 스니펫:<br><br>import random<br>k=100<br>reservoir=[]<br>count=0<br>for item in kafka_consumer():<br>    count+=1<br>    if count<=k: reservoir.append(item)<br>    else:<br>        j = random.randint(1,count)<br>        if j<=k: reservoir[j-1]=item<br># reservoir는 균일 샘플<br><br>가중치 샘플(스트림, 상위-k 유지):<br><br>import heapq, random, math<br>k=50<br>heap=[]<br>for item, w in stream():<br>    key = -math.log(random.random())/w<br>    if len(heap)<k: heapq.heappush(heap,(key,item))<br>    elif key>heap[0][0]: heapq.heapreplace(heap,(key,item))<br><br>베스트 프랙티스: 파티셔닝 별 샘플 유지 후 합치기, 체크포인트 가능한 상태 저장, 타임윈도우별 샘플링으로 장기 편향 회피.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Reservoir sampling maintains a fixed-size (k) uniform sample from an unbounded stream in a single pass using O(k) memory — ideal for telemetry/log sampling and online analytics.</p>
+        <p>The core is Vitter’s Algorithm R (1985): keep the first k items, then for the i-th item (i>k) pick it with probability k/i and replace a random existing element if selected. For weighted priorities, use Efraimidis-Spirakis (2006): assign each item a random key derived from its weight and keep the top-k keys (can be implemented with a min-heap).<br>In production this runs inside stream processors (Kafka consumer loops, Flink stateful operators, Beam DoFns) or on-edge agents to reduce ingestion costs while preserving distributional properties. Complexity is O(1) per item for uniform sampling and O(log k) for weighted sampling (heap ops). In distributed setups, keep per-partition reservoirs and merge (e.g., sample union with proportional down-sampling) to avoid coordination bottlenecks.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world sources: Vitter (1985), Efraimidis & Spirakis (2006), open-source AddThis stream-lib (Java) ReservoirSampler. Example integrations:<br><br>Python uniform reservoir (Kafka-like loop):<br><br>import random<br>k=100<br>reservoir=[]<br>count=0<br>for item in kafka_consumer():<br>    count+=1<br>    if count<=k: reservoir.append(item)<br>    else:<br>        j = random.randint(1,count)<br>        if j<=k: reservoir[j-1]=item<br><br>Weighted streaming top-k (heap):<br><br>import heapq, random, math<br>k=50<br>heap=[]<br>for item, weight in stream():<br>    key = -math.log(random.random())/weight<br>    if len(heap)<k: heapq.heappush(heap,(key,item))<br>    elif key>heap[0][0]: heapq.heapreplace(heap,(key,item))<br><br>Production tips: checkpoint reservoir state for recovery, maintain per-partition reservoirs and merge offline, use time-windowed reservoirs to keep samples fresh for concept-drift-sensitive applications.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
