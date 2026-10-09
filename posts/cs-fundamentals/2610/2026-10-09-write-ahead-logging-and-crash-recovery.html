@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Write-Ahead Logging (WAL) and Crash Recovery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write-Ahead Logging(WAL)은 데이터 페이지보다 먼저 변경 로그를 안전한 저장소에 기록하여 시스템 충돌 시 일관성을 복구하는 기법으로, 데이터베이스와 분산저장소에서 필수적입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Write-Ahead Logging (WAL) and Crash Recovery</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-09</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>Write-Ahead Logging(WAL)은 데이터 페이지보다 먼저 변경 로그를 안전한 저장소에 기록하여 시스템 충돌 시 일관성을 복구하는 기법으로, 데이터베이스와 분산저장소에서 필수적입니다.</p>
+        <p>원리: WAL 규칙은 디스크에 데이터 페이지를 덮어쓰기 전에 관련 로그(트랜잭션의 before/after 이미지 또는 redo 정보)를 먼저 기록·영구화(fsync)해야 한다는 것입니다. 충돌 복구는 보통 ARIES 스타일(analysis → redo → undo)을 따릅니다: 로그를 스캔해 체크포인트 이후의 활동을 분석하고, redo로 커밋된 변경을 재적용한 뒤, 비완료 트랜잭션을 undo합니다.<br><br>구현 세부: 트랜잭션 커밋 시 로그 레코드를 append-only 방식의 WAL 파일에 기록하고, fsync 또는 디스크 동기 옵션을 사용해 영구화를 보장합니다. 성능 최적화로 group commit(다수 커밋의 WAL을 묶어 한 번에 fsync), 로그 세그먼트 교체, 체크포인트로 불필요한 redo 범위 축소를 사용합니다. 또한 doublewrite(예: InnoDB)로 partial page 쓰기 문제를 완화합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 예시 및 코드<br>- PostgreSQL: WAL 기반 복구와 pg_switch_wal(), CHECKPOINT 명령 사용. (참조: https://www.postgresql.org/docs/current/wal.html)<br>  SQL 예: SELECT pg_switch_wal(); CHECKPOINT;<br>- RocksDB/LevelDB(페이스북/구글): WriteBatch + WAL 사용. C++ 예:<br>  rocksdb::WriteOptions wo; wo.sync = true; rocksdb::WriteBatch batch; batch.Put("k","v"); db->Write(wo, &batch);<br>  (참조: https://github.com/facebook/rocksdb)<br>- MySQL InnoDB: redo log + doublewrite로 크래시 시 페이지 무결성 보장.<br><br>운영 팁: 낮은 레이턴시용은 group-commit과 비동기 fsync 조합, 데이터 무결성 중요 시 fsync=true; 주기적 체크포인트/로그 아카이브 설정으로 복구 시간을 단축. 장애 시 fsync/디스크 동작을 가정한 장애 테스트(power-fail, kill -9)를 권장합니다.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Write-Ahead Logging (WAL) records changes to durable log before applying them to data files so systems can recover to a consistent state after crashes—critical for databases and storage engines.</p>
+        <p>Core mechanics: the WAL rule requires that before any data page is overwritten on disk, the corresponding log record (redo/before-after image) must be durably stored. Recovery typically follows ARIES-like phases: analysis (identify in-flight transactions), redo (reapply logged changes to reach a state including committed updates), and undo (roll back uncommitted transactions using before-images).<br><br>Implementation details: at commit, systems append log records to an append-only WAL and sync to stable storage (fsync/fdatasync or platform-specific options). Performance techniques include group commit (batching flushes for multiple commits), log segmentation and recycling, periodic checkpoints to truncate redo history, and mechanisms like InnoDB's doublewrite to avoid torn-page artifacts. Tuning is a trade-off between durability/latency/throughput.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world usages with code and sources<br>- PostgreSQL: WAL + checkpointing. Commands: SELECT pg_switch_wal(); CHECKPOINT; (docs: https://www.postgresql.org/docs/current/wal.html)<br>- RocksDB (Facebook): Use WriteBatch + WAL sync option in production C++ servers:<br>  rocksdb::WriteOptions wo; wo.sync = true; rocksdb::WriteBatch batch; batch.Put("key","value"); db->Write(wo, &batch);<br>  (repo: https://github.com/facebook/rocksdb)<br>- ARIES algorithm (Mohan et al., 1992) underlies many DBMS recovery designs.<br><br>Best practices: use group commit to improve throughput, enable syncs for strong durability, configure checkpoint frequency to bound recovery time, and run simulated crash tests (power failure, kill -9) to validate behavior under target storage. Monitor WAL growth and archive for backups/replication.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
