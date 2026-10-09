@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Write-Ahead Logging (WAL) and Crash Recovery",
+      "date": "2026-10-09",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-09-write-ahead-logging-and-crash-recovery.html",
+      "excerpt": "Write-Ahead Logging(WAL)은 데이터 페이지보다 먼저 변경 로그를 안전한 저장소에 기록하여 시스템 충돌 시 일관성을 복구하는 기법으로, 데이터베이스와 분산저장소에서 필수적입니다."
+    },
+    {
       "title": "Reservoir Sampling for Streaming Data",
       "date": "2026-10-07",
       "category": "cs-fundamentals",
