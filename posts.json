@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Precision, Recall, F1 and Confusion Matrix — Practical Guide",
+      "date": "2026-10-12",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-12-precision-recall-f1-and-confusion-matrix.html",
+      "excerpt": "정밀도(Precision), 재현율(Recall), F1, 그리고 혼동행렬은 이진/다중 분류의 성능을 비즈니스 관점에서 해석하고 운영 기준을 세우는 핵심 지표입니다."
+    },
+    {
       "title": "Write-Ahead Logging (WAL) and Crash Recovery",
       "date": "2026-10-09",
       "category": "cs-fundamentals",
