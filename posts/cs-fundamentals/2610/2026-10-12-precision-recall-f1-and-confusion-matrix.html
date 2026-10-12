@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Precision, Recall, F1 and Confusion Matrix — Practical Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="정밀도(Precision), 재현율(Recall), F1, 그리고 혼동행렬은 이진/다중 분류의 성능을 비즈니스 관점에서 해석하고 운영 기준을 세우는 핵심 지표입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Precision, Recall, F1 and Confusion Matrix — Practical Guide</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-12</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>정밀도(Precision), 재현율(Recall), F1, 그리고 혼동행렬은 이진/다중 분류의 성능을 비즈니스 관점에서 해석하고 운영 기준을 세우는 핵심 지표입니다.</p>
+        <p>작동 원리: 혼동행렬은 TP/FP/TN/FN을 집계해 오탐과 미탐의 구분을 제공합니다. 정밀도 = TP/(TP+FP), 재현율 = TP/(TP+FN), F1은 이 둘의 조화평균으로 클래스 불균형 상황에서 단일 성능 척도를 제공합니다. 실무에서는 확률 출력에 임계값(threshold)을 조정해 정밀도와 재현율의 트레이드오프를 관리합니다.<br><br>기술적 세부: 모델은 소프트 출력(로그 확률, score)을 내고, 운영팀은 PR-curve, PR-AUC, 그리고 임계값별 혼동행렬을 계산해 비용(예: FP 비용 vs FN 비용)에 맞춘 운영 임계값을 선택합니다. 클래스 불균형이 심한 경우 스케일링/샘플링, 가중치 조정, 또는 focal loss(논문: Lin et al., 2017)를 적용해 재현율 개선을 시도합니다. 또한 혼동행렬을 시계열으로 모니터링해 데이터 드리프트나 라벨 품질 문제를 탐지합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례:<br>- scikit-learn + 프로덕션(예): 이메일 스팸 분류의 임계값 튜닝<br>코드:<br>from sklearn.metrics import confusion_matrix, precision_recall_fscore_support<br>probs = model.predict_proba(X)[:,1]<br>for thresh in [0.3,0.5,0.7]:<br>    preds = (probs>=thresh).astype(int)<br>    cm = confusion_matrix(y, preds)<br>    p,r,f,_ = precision_recall_fscore_support(y, preds, average='binary')<br>    print(thresh, cm.tolist(), p,r,f)<br><br>- 대규모 배치: Spark MLlib의 BinaryClassificationEvaluator로 PR-AUC 계산, 또는 TensorFlow Model Analysis(TFMA)를 사용해 버전별 PR 커브와 임계값을 리포트(https://www.tensorflow.org/tfx/guide/tfma). <br>- 연구/산업: 불균형 탐지에 focal loss 적용(논문: https://arxiv.org/abs/1708.02002), 구글/페이스북 등 대형 시스템은 PR-AUC와 임계값 기반 경보로 FP/FN 비용을 절감합니다. Best practice: 운영 임계값을 비즈니스 비용 함수와 함께 자동으로 재최적화하고, 혼동행렬을 라벨 드리프트 감지용으로 주기적 저장 및 시각화하세요.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Precision, recall, F1 and the confusion matrix are the practical primitives for interpreting classifier errors and choosing thresholds in production systems.</p>
+        <p>How it works: The confusion matrix counts TP/FP/TN/FN; precision = TP/(TP+FP), recall = TP/(TP+FN), and F1 is the harmonic mean of precision and recall. In production you rarely use raw accuracy: thresholding model scores changes the precision/recall trade-off; PR curves and PR-AUC summarize performance under class imbalance.<br><br>Technical details: Systems emit soft scores (probabilities or logits). Teams compute thresholded predictions for candidate thresholds, evaluate confusion matrices per threshold, and pick the threshold that minimizes business cost (false positive vs false negative cost). For severe class imbalance, apply class weights, resampling, or focal loss (Lin et al., 2017). Also monitor confusion matrices over time to detect label drift or input distribution shift; embed these metrics into telemetry and alerts.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world use cases:<br>- Quick scikit-learn example (threshold tuning):<br>from sklearn.metrics import confusion_matrix, precision_recall_fscore_support<br>probs = model.predict_proba(X)[:,1]<br>for thresh in [0.3,0.5,0.7]:<br>    preds = (probs >= thresh).astype(int)<br>    cm = confusion_matrix(y, preds)<br>    p,r,f,_ = precision_recall_fscore_support(y, preds, average='binary')<br>    print(thresh, cm.tolist(), p,r,f)<br><br>- Production scale: Spark MLlib BinaryClassificationEvaluator supports areaUnderPR for big-data pipelines; TensorFlow Model Analysis (TFMA) produces per-slice PR curves and threshold analysis (https://www.tensorflow.org/tfx/guide/tfma). Companies: Google uses TFMA-like tooling for model validation; Facebook introduced focal loss to address imbalance in object detection (https://arxiv.org/abs/1708.02002). Best practices: store confusion matrices by model version, choose thresholds with business-cost simulation, and trigger retraining/alerting on drift detected via rising FN/FN ratios.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
