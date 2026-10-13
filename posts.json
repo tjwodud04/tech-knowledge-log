@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "A Baseline Assessment for the Agentic Web Technology Stack",
+      "date": "2026-10-13",
+      "category": "papers",
+      "url": "posts/papers/2610/2026-10-13-paper.html",
+      "excerpt": "A Baseline Assessment for the Agentic Web Technology Stack"
+    },
+    {
       "title": "Precision, Recall, F1 and Confusion Matrix — Practical Guide",
       "date": "2026-10-12",
       "category": "cs-fundamentals",
