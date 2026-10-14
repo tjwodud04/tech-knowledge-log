@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Model Ensembles: Bagging, Boosting, Stacking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="앙상블은 여러 모델의 출력을 결합해 예측의 안정성과 성능을 향상시키는 방법론으로, 대규모 서비스의 신뢰성·성능 최적화에 자주 쓰입니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Model Ensembles: Bagging, Boosting, Stacking</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-14</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>앙상블은 여러 모델의 출력을 결합해 예측의 안정성과 성능을 향상시키는 방법론으로, 대규모 서비스의 신뢰성·성능 최적화에 자주 쓰입니다.</p>
+        <p>Bagging(부트스트랩 집계): 데이터의 부트스트랩 샘플을 여러 개 만들고 각 샘플에 독립 모델(예: 결정트리)을 병렬로 학습시킨 뒤 평균/다수결로 결합합니다. 분산을 줄이고 과적합을 억제하는 데 유리하며 RandomForest가 대표적입니다.<br>Boosting(부스팅): 약한 학습기를 순차적으로 학습시키며 이전 모델이 틀린 샘플에 더 큰 가중치를 부여하거나, 그래디언트 관점에서 잔차를 점진적으로 보정합니다. XGBoost/LightGBM/CatBoost가 산업적 표준이며 학습률, 정규화, 샘플링으로 과적합을 제어합니다.<br>Stacking(스태킹): 서로 다른 모델들의 예측(보통 OOF: out-of-fold 예측)을 메타학습기(로지스틱 회귀, GBM 등)에 입력으로 사용하여 최종 예측을 만듭니다. 중요 포인트는 메타모델 학습 시 데이터 누수 방지를 위해 반드시 OOF 예측을 사용해야 한다는 것과, 실서비스에서 지연·메모리 제약을 고려해 경량화/프루닝을 하는 것입니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실무 코드(파이썬, sklearn/xgboost 예):<br><br>from sklearn.ensemble import RandomForestClassifier, StackingClassifier<br>from xgboost import XGBClassifier<br>from sklearn.model_selection import cross_val_predict<br>from joblib import dump, load<br><br># Bagging / RF<br>rf = RandomForestClassifier(n_estimators=100, n_jobs=8, random_state=42)<br>rf.fit(X_train, y_train)<br>dump(rf, 'rf.joblib')<br><br># Boosting<br>xgb = XGBClassifier(n_estimators=200, learning_rate=0.05, subsample=0.8, random_state=42)<br>xgb.fit(X_train, y_train)<br>dump(xgb, 'xgb.joblib')<br><br># Stacking (OOF 내부처리 주의)<br>stack = StackingClassifier(estimators=[('rf', rf), ('xgb', xgb)], final_estimator=XGBClassifier(n_estimators=50))<br>stack.fit(X_train, y_train)<br>dump(stack, 'stack.joblib')<br><br>실제 적용사례: Netflix Prize(스태킹/앙상블으로 우승), 많은 검색·추천 시스템에서 GBDT(XGBoost/LightGBM)를 랭킹·피쳐 중요도 산출에 사용(예: Microsoft 연구/생산), Yandex는 CatBoost를 검색·광고에 적용. 실무 팁: 스태킹은 OOF로 학습, 서빙 시 레이턴시/메모리 고려해 모델 압축·프루닝·경량화 적용, 데이터 드리프트 감지로 재학습 스케줄 관리.</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Ensembles combine multiple models to improve accuracy and robustness; they are ubiquitous in production for ranking, fraud detection, and recommendation systems.</p>
+        <p>Bagging: create bootstrap samples, train independent base learners in parallel, and aggregate predictions (mean/majority). This reduces variance—Random Forest is the canonical example used in many pipelines for stable baselines.<br>Boosting: train learners sequentially so each new model focuses on previous errors. Modern implementations (XGBoost/LightGBM/CatBoost) frame boosting as gradient-based optimization with regularization, shrinkage (learning_rate), and subsampling to control overfitting; widely used for tabular data in production.<br>Stacking: combine heterogeneous models by training a meta-learner on base models' out-of-fold (OOF) predictions. The critical detail is using OOF predictions to avoid label leakage. In production you must also consider inference latency—often ensembles are pruned or distilled to single models for serving.</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Practical code (Python):<br><br>from sklearn.ensemble import RandomForestClassifier, StackingClassifier<br>from xgboost import XGBClassifier<br>from joblib import dump<br><br># Bagging / RandomForest<br>rf = RandomForestClassifier(n_estimators=100, n_jobs=8, random_state=42)<br>rf.fit(X_train, y_train)<br>dump(rf, 'rf.joblib')<br><br># Boosting (XGBoost)<br>xgb = XGBClassifier(n_estimators=200, learning_rate=0.05, subsample=0.8, random_state=42)<br>xgb.fit(X_train, y_train)<br>dump(xgb, 'xgb.joblib')<br><br># Stacking (use OOF in larger pipelines; sklearn's StackingClassifier handles CV internally)<br>stack = StackingClassifier(estimators=[('rf', rf), ('xgb', xgb)], final_estimator=XGBClassifier(n_estimators=50))<br>stack.fit(X_train, y_train)<br>dump(stack, 'stack.joblib')<br><br>Where used: Netflix Prize demonstrated stacking’s power; XGBoost and LightGBM are standard in search/ranking and fraud models at major firms (many whitepapers & production blogs from Microsoft, Amazon, and Google discuss GBDT use). Best practices: always use OOF for meta-training, monitor inference cost, compress or distill ensembles for low-latency serving, and set deterministic seeds for reproducibility.</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
