@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Huffman & Arithmetic (Entropy) Coding — Practical Overview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="허프만과 산술(범위/ANS) 코딩은 통계적 모델링 결과를 비트열로 효율적으로 표현하는 핵심 엔트로피 부호화 기법으로, 압축률·지연·복잡도 균형을 맞춰 실제 시스템에서 널리 사용됩니다.">
+  <link rel="stylesheet" href="/tech-knowledge-log/style.css?v=8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    .topic-meta{color:#6b7280;margin-bottom:1.5rem;line-height:1.8}
+    .topic-meta strong{color:#1a1a1a;font-weight:600}
+    .topic-section{background:#f9fafb;border:1px solid #e5e7eb;padding:1.5rem;border-radius:12px;margin:1.5rem 0}
+    .topic-section h2{margin-top:0;color:#1a1a1a;font-size:1.25rem;font-weight:600;margin-bottom:1rem}
+    .topic-section p{margin:0.75rem 0;color:#374151;line-height:1.7}
+    pre{background:#282c34;color:#abb2bf;padding:1.5rem;border-radius:8px;overflow-x:auto;margin:1rem 0;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9rem;line-height:1.6}
+    code{background:#f4f4f4;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Consolas','Monaco','Courier New',monospace;font-size:0.9em;color:#e06c75}
+    pre code{background:transparent;padding:0;color:inherit;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/tech-knowledge-log/index.html" class="site-title">Tech Knowledge Log</a>
+      <nav><a href="/tech-knowledge-log/archive.html">Archive</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <article class="post-content">
+      <h1>Huffman & Arithmetic (Entropy) Coding — Practical Overview</h1>
+      <div class="topic-meta">
+        <div><strong>난이도 / Difficulty:</strong> Intermediate</div>
+        <div><strong>날짜 / Date:</strong> 2026-10-16</div>
+      </div>
+      <section class="topic-section">
+        <h2>내용</h2>
+        <p>허프만과 산술(범위/ANS) 코딩은 통계적 모델링 결과를 비트열로 효율적으로 표현하는 핵심 엔트로피 부호화 기법으로, 압축률·지연·복잡도 균형을 맞춰 실제 시스템에서 널리 사용됩니다.</p>
+        <p>허프만 코딩은 심볼 빈도에 따라 가변 길이 이진 코드(트리)를 만들고, 정적/동적(적응형) 버전과 표준화된 '정렬된(캐노니컬)' 표현이 있어 디코더를 단순화합니다. DEFLATE(zlib/gzip), PNG, 기본 JPEG이 주로 허프만을 사용합니다. 산술 코딩(및 그것의 빠른 변형인 range coding, ANS/FSE)은 전체 메시지 확률 분포를 연속 구간으로 축약해 허프만보다 이론적으로 더 근접한 엔트로피에 도달합니다. JPEG2000, H.264/H.265의 CABAC, 고성능 압축기(PAQ 계열)와 Zstandard의 FSE/ANS 계열은 산술 계열 기법 또는 그 파생물을 사용합니다.<br><br>실무 포인트: 허프만은 구현이 단순하고 블록 단위로 빠르며 메모리/라이선스 제약이 적습니다. 산술/ANS는 더 높은 압축률과 컨텍스트 모델링 지원이 가능하지만 특허 및 계산 복잡도/정밀도(정수 범위/렌지 관리)를 고려해야 합니다.</p>
+        <h2 style="margin-top:1.5rem;">활용</h2>
+        <div>실제 사용 사례와 코드(간단 샘플):<br>1) DEFLATE/zlib (허프만): 프로덕션에서 가장 흔함. 리눅스의 gzip, 웹 전송의 Content-Encoding:gzip.<br>   Python(간단 허프만 트리 생성):<br>   import heapq<br>   def build_codes(freq):<br>       heap=[(w,[sym]) for sym,w in freq.items()]<br>       heapq.heapify(heap)<br>       while len(heap)>1:<br>           w1,s1=heapq.heappop(heap); w2,s2=heapq.heappop(heap)<br>           heapq.heappush(heap,(w1+w2,s1+[s2]))<br>       # 재귀로 코드 생성(생략)<br><br>2) 산술/범위 코딩: JPEG2000, CABAC(비트스트림 엔트로피) 및 고압축 연구에서 사용.<br>   간단한 range encoder 골격(Python):<br>   low=0; high=(1<<32)-1<br>   for sym in data:<br>       range=high-low+1<br>       high = low + (range * cum_high[sym])//tot -1<br>       low = low + (range * cum_low[sym])//tot<br>       # underflow/renormalize 처리 필요<br><br>베스트 프랙티스: 블록 크기·컨텍스트 모델 설계, 캐노니컬 허프만 사용(메타데이터 감소), ANS 사용 시 테이블 초기화 비용과 SIMD 최적화 고려. 사용 라이브러리: zlib, libpng, OpenJPEG, x264/x265(CABAC), Facebook/zstd(FSE/ANS).</div>
+      </section>
+      <section class="topic-section">
+        <h2>Content</h2>
+        <p>Huffman and arithmetic (range/ANS) coding are entropy coding techniques that turn statistical symbol models into compact bitstreams; they trade simplicity vs. compression efficiency and are ubiquitous in production codecs.</p>
+        <p>Huffman coding builds a variable-length prefix code (tree) from symbol frequencies; canonical Huffman yields portable, compact code tables. It’s simple, fast, and used in DEFLATE (zlib/gzip), PNG, and baseline JPEG. Arithmetic coding (and fast variants like range coding or ANS/FSE) maps an entire message to a fractional interval based on cumulative probabilities, achieving compression closer to the theoretical entropy. These methods support fine-grained context models and are used where extra compression justifies added complexity: JPEG2000, CABAC in H.264/H.265, advanced compressors and research systems.<br><br>Practical trade-offs: Huffman is low-latency and low-overhead per block; arithmetic/ANS gives better compression with more CPU and careful integer-range handling. Patents historically affected choice (less so now), and modern systems prefer ANS/FSE for throughput (e.g., Zstandard).</p>
+        <h2 style="margin-top:1.5rem;">Applications</h2>
+        <div>Real-world examples + snippets:<br>1) DEFLATE (zlib/gzip) — canonical Huffman used in HTTP and archive tools. Source: zlib (https://zlib.net).<br>   Minimal Huffman build (Python sketch):<br>   import heapq<br>   def build_codes(freq):<br>       heap=[(w,[sym]) for sym,w in freq.items()]<br>       heapq.heapify(heap)<br>       while len(heap)>1:<br>           w1,s1=heapq.heappop(heap); w2,s2=heapq.heappop(heap)<br>           heapq.heappush(heap,(w1+w2,s1+[s2]))<br>       # then assign binary codes by tree traversal<br><br>2) Arithmetic / range coding — used in JPEG2000, CABAC (H.264/H.265) and research compressors. Skeleton of range encode loop:<br>   low=0; high=(1<<32)-1<br>   for sym in data:<br>       r=high-low+1<br>       high = low + (r*cum_high[sym])//tot -1<br>       low  = low + (r*cum_low[sym])//tot<br>       # handle renormalization/underflow<br><br>Production tips: choose canonical Huffman for metadata savings; use block/adaptive modeling for streaming; favor ANS/FSE for high-throughput compressors (see Facebook/zstd), and prefer well-tested libraries: zlib, libpng, OpenJPEG, x264/x265, zstd (FSE/ANS).</div>
+      </section>
+    </article>
+  </main>
+  <footer><p>&copy; 2025 Tech Knowledge Log. All rights reserved.</p></footer>
+  <script src="/tech-knowledge-log/script.js?v=8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
