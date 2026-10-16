@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Huffman & Arithmetic (Entropy) Coding — Practical Overview",
+      "date": "2026-10-16",
+      "category": "cs-fundamentals",
+      "url": "posts/cs-fundamentals/2610/2026-10-16-huffman-and-arithmetic-entropy-coding.html",
+      "excerpt": "허프만과 산술(범위/ANS) 코딩은 통계적 모델링 결과를 비트열로 효율적으로 표현하는 핵심 엔트로피 부호화 기법으로, 압축률·지연·복잡도 균형을 맞춰 실제 시스템에서 널리 사용됩니다."
+    },
+    {
       "title": "Model Ensembles: Bagging, Boosting, Stacking",
       "date": "2026-10-14",
       "category": "cs-fundamentals",
